@@ -6,6 +6,9 @@
  * mblajek_mbn(at)mailplus.pl
  */
 class MbnErr extends Exception {
+   function __construct($f='', $m='', $v = null){
+      parent::__construct('Mbn' . $f . ' error: ' . $m . (($v !== null) ? (": " . $v) : ""));
+   }
 
 }
 
@@ -15,13 +18,16 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   const MbnV = '1.5';
+   const MbnV = '1.6';
 
    //default precision
    protected static $MbnP = 2;
    //default separator
    protected static $MbnS = '.';
-   //actual precision for Mbn class
+   //default truncate
+   protected static $MbnT = false;
+
+   protected static $MbnCN;
 
    private $d = array();
    private $s = 1;
@@ -33,7 +39,6 @@ class Mbn {
    private static function mbnCarry($a) {
       $r = &$a->d;
       $i = count($r) - 1;
-      //var di, dd, ci;
       while ($i >= 0) {
          $di = $r[$i];
          while ($di < 0) {
@@ -85,16 +90,6 @@ class Mbn {
    }
 
    /**
-    * Private function, copies b to a
-    * @param {Mbn} a
-    * @param {Mbn} b
-    */
-   private static function mbnSetCopy($a, $b) {
-      $a->d = $b->d;
-      $a->s = $b->s;
-   }
-
-   /**
     * Private function, removes last digit and rounds next-to-last depending on it
     * @param {Mbn} a
     */
@@ -110,23 +105,21 @@ class Mbn {
     * @param {string} n
     */
    private function fromString($n) {
+      $nn = $n;
       if ($n[0] === '-' || $n[0] === '+') {
          $this->s = ($n[0] === '-') ? -1 : 1;
          $n = substr($n, 1);
       }
-      $ln = strpos($n, static::$MbnS);
+      $ln = strpos($n, '.');
       if ($ln === false) {
-         $ln = strpos($n, '.');
-         if ($ln === false) {
-            $ln = strpos($n, ',');
-         }
+         $ln = strpos($n, ',');
       }
       if ($ln === false) {
          $ln = strlen($n);
       } else {
          $n = substr($n, 0, $ln) . substr($n, $ln + 1);
          if ($ln === strlen($n)) {
-            throw new MbnErr();
+            throw new MbnErr('', 'invalid format', $nn);
          }
       }
       if ($ln === 0) {
@@ -140,7 +133,7 @@ class Mbn {
          if ($c >= 0 && $c <= 9) {
             $this->d[] = $c;
          } else {
-            throw new MbnErr();
+            throw new MbnErr('', 'invalid format', $nn);
          }
       }
       static::mbnRoundLast($this);
@@ -152,7 +145,7 @@ class Mbn {
     */
    private function mbnFromNumber($x) {
       if (!is_finite($x)) {
-         throw new MbnErr();
+         throw new MbnErr("", "invalid value", x);
       }
       $this->s = 1;
       $this->d = array();
@@ -178,16 +171,33 @@ class Mbn {
       static::mbnRoundLast($this);
    }
 
-   public function __construct($n = 0) {
+   /**
+    * Returns if object is not Mbn
+    */
+   private static function isNotMbn($a) {
+      if(empty(static::$MbnCN)){
+         static::$MbnCN = get_class(new static());
+      }
+      return (!is_object($a) || (get_class($a) !== static::$MbnCN));
+   }
+
+  /**
+   * Constructor of Mbn object
+   * @export
+   * @constructor
+   * @param {*=} n
+   * @param {*=} v
+   */
+  public function __construct($n = 0) {
       if (is_float($n) || is_int($n)) {
          $this->mbnFromNumber($n);
       } elseif (is_string($n)) {
          $this->fromString($n);
       } elseif (is_object($n)) {
-         if (get_class($this) === get_class($n)) {
-            static::mbnSetCopy($this, $n);
-         } else {
+         if (static::isNotMbn($n)) {
             $this->fromString($n->toString(static::$MbnS));
+         } else {
+            $this->set($n);
          }
       } else {
          throw new MbnErr();
@@ -201,39 +211,62 @@ class Mbn {
       return array(
           'MbnV' => static::MbnV,
           'MbnP' => static::$MbnP,
-          'MbnS' => static::$MbnS
+          'MbnS' => static::$MbnS,
+          'MbnT' => static::$MbnT
       );
    }
 
    /**
-    * Returns if object is Mbn
+    * sets value to b
+    * @param {*} b
     */
-   private static function isNotMbn($a) {
-      return (!is_object($a) || (get_class($a) !== get_class()));
+   public function set($b) {
+      /*var_dump($this);
+      var_dump($b);
+      die;*/
+      if (static::isNotMbn($b)) {
+         $this->set(new static($b));
+      } else {
+         $this->d = $b->d;
+         $this->s = $b->s;
+      }
+      return $this;
    }
 
    /**
     * Returns string value of Mbn number, with seprator MbnS or s if is set
     * @param {string=} s
     */
-   protected function toString($s) {
+   protected function toString() {
       $l = count($this->d) - static::$MbnP;
+      if (static::$MbnT) {
+         $l0 = $l - 1;
+         $cd = count($this->d);
+         for ($i = $l; $i < $cd; $i++) {
+            if ($this->d[$i] !== 0) {
+               $l0 = $i;
+            }
+         }
+      } else {
+         $l0 = $l + static::$MbnP;
+      }
       $r = (($this->s < 0) ? '-' : '') . implode(array_slice($this->d, 0, $l), '');
-      if (static::$MbnP !== 0) {
-         $r .= $s . implode(array_slice($this->d, $l), '');
+      if (static::$MbnP !== 0 && $l0 >= $l) {
+         $r .= static::$MbnS . implode(array_slice($this->d, $l, $l0 + 1 - $l), '');
       }
       return $r;
    }
 
    public function __toString() {
-      return $this->toString(static::$MbnS);
+      return $this->toString();
    }
 
    /**
     * Returns number value of Mbn number
     */
    public function toNumber() {
-      return floatval($this->toString("."));
+      $v = str_replace(',', '.', $this->toString());
+      return ($this->isInt()) ? intval($v) : floatval($v);
    }
 
    /**
@@ -287,7 +320,7 @@ class Mbn {
       if ($this->s === 0) {
          //r.set(b);
       } else if ($b->s === 0) {
-         static::mbnSetCopy($r, $this);
+         $r->set($this);
       } else if ($b->s === $this->s) {
          $ld = count($this->d) - count($b->d);
          if ($ld < 0) {
@@ -295,7 +328,7 @@ class Mbn {
             $b = $this;
             $ld = -$ld;
          } else {
-            static::mbnSetCopy($r, $this);
+            $r->set($this);
          }
          $rl = count($r->d);
          for ($i = 0; $i < $rl; $i++) {
@@ -326,7 +359,7 @@ class Mbn {
          //r.set(b);
          $r->s = -$r->s;
       } else if ($b->s === 0) {
-         static::mbnSetCopy($r, $this);
+         $r->set($this);
       } else if ($b->s === $this->s) {
          $ld = count($this->d) - count($b->d);
          $cmp = $this->cmp($b) * $this->s;
@@ -338,7 +371,7 @@ class Mbn {
                $b = $this;
                $ld = -$ld;
             } else {
-               static::mbnSetCopy($r, $this);
+               $r->set($this);
             }
             $rl = count($r->d);
             for ($i = 0; $i < $rl; $i++) {
@@ -463,13 +496,17 @@ class Mbn {
    }
 
    /**
-    * Modulo from Devide value by b
+    * Modulo from divide value by b
     * @param {*} b
     * @param {boolean=} m
     */
    function mod($b, $m = false) {
       $ba = static::isNotMbn($b) ? (new static($b))->abs() : $b->abs();
-      $r = $this->sub($this->div($ba)->toInt()->mul($ba));
+      $r = $this->sub($this->div($ba)->int()->mul($ba));
+      if (($r->s + $this->s) === 0) {
+         $r = $ba->sub($r->abs());
+         $r->s = $this->s;
+      }
       return static::mbnSetReturn($this, $r, $m);
    }
 
@@ -619,7 +656,7 @@ class Mbn {
     * Returns integer part of number
     * @param {boolean=} m
     */
-   function toInt($m = false) {
+   function int($m = false) {
       $r = ($m === true) ? $this : new static($this);
       return ($r->s >= 0) ? $r->floor(true) : $r->ceil(true);
    }
@@ -631,6 +668,24 @@ class Mbn {
     */
    function eq($b, $d = 0) {
       return $this->cmp($b, $d) === 0;
+   }
+
+   /**
+    * returns minimum from value and b
+    * @param {*} b
+    * @param {boolean=} m
+    */
+   function min($b, $m = false) {
+      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
+   }
+
+   /**
+    * returns maximum from value and b
+    * @param {*} b
+    * @param {boolean=} m
+    */
+   function max($b, $m = false) {
+      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
    }
 
    /**
@@ -648,12 +703,20 @@ class Mbn {
          throw new MbnErr();
       } else if ($r->s === 1) {
          do {
-            static::mbnSetCopy($rb, $r);
+            $rb->set($r);
             $r->add($t->div($r), true)->div($mbn2, true);
          } while (!$rb->eq($r));
       }
       static::mbnRoundLast($r);
       return static::mbnSetReturn($this, $r, $m);
+   }
+
+   /**
+    * returns sign from value
+    * @param {boolean=} m
+    */
+   function sgn($m = false) {
+      return static::mbnSetReturn($this, new Mbn($this->s), $m);
    }
 
 }

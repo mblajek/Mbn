@@ -2,15 +2,19 @@
 
 class Mbn0 extends Mbn{
    protected static $MbnP = 0;
+   protected static $MbnCN;
 }
 class Mbn3c extends Mbn{
    protected static $MbnP = 3;
    protected static $MbnS = ',';
+   protected static $MbnCN;
 
 }
 class Mbn20u extends Mbn{
    protected static $MbnP = 20;
-   protected static $MbnS = '_';
+   protected static $MbnS = ',';
+   protected static $MbnT = true;
+   protected static $MbnCN;
 
 }
 
@@ -50,6 +54,7 @@ function testMbn ($nl  = '<br>' ) {
 
    }
 
+
    $tests = [["0;", "0"]];
 
    $tests[] = ['new Mbn0();', '0'];
@@ -68,18 +73,18 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['new Mbn("-1.235")', '-1.24'];
    $tests[] = ['new Mbn(-1.236)', '-1.24'];
 
-   $tests[] = ['new Mbn20u()', '0_00000000000000000000'];
-   $tests[] = ['new Mbn20u("0_000000000000000000005")', '0_00000000000000000001'];
-   $tests[] = ['new Mbn20u("-0_000000000000000000005")', '-0_00000000000000000001'];
+   $tests[] = ['new Mbn20u()', '0'];
+   $tests[] = ['new Mbn20u("0,000000000000000000005")', '0,00000000000000000001'];
+   $tests[] = ['new Mbn20u("-0,000000000000000000005")', '-0,00000000000000000001'];
 
    $tests[] = ['new Mbn0(new Mbn(1.495))', '2'];
    $tests[] = ['new Mbn0(new Mbn(-1.495))', '-2'];
 
-   $tests[] = ['new Mbn3c(new Mbn20u("0_999499999999999999994"))', '0,999'];
-   $tests[] = ['new Mbn3c(new Mbn20u("0_999499999999999999995"))', '1,000'];
-   $tests[] = ['new Mbn3c(new Mbn20u("-0_999499999999999999994"))', '-0,999'];
-   $tests[] = ['new Mbn3c(new Mbn20u("-0_999499999999999999995"))', '-1,000'];
-   $tests[] = ['new Mbn20u(new Mbn20u("4,5"))', '4_50000000000000000000'];
+   $tests[] = ['new Mbn3c(new Mbn20u("0,999499999999999999994"))', '0,999'];
+   $tests[] = ['new Mbn3c(new Mbn20u("0,999499999999999999995"))', '1,000'];
+   $tests[] = ['new Mbn3c(new Mbn20u("-0,999499999999999999994"))', '-0,999'];
+   $tests[] = ['new Mbn3c(new Mbn20u("-0,999499999999999999995"))', '-1,000'];
+   $tests[] = ['new Mbn20u(new Mbn20u("4,5"))', '4,5'];
    $tests[] = ['new Mbn0(new Mbn20u("4,5"))', '5'];
 
    $tests[] = ['(new Mbn0(-1))->cmp(1)', '-1'];
@@ -213,8 +218,8 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['(new Mbn("-0.005"))->isInt()', 'false'];
    $tests[] = ['(new Mbn("0"))->isInt()', 'true'];
 
-   $tests[] = ['(new Mbn20u("21_25"))->toNumber()', '21.25'];
-   $tests[] = ['(new Mbn20u("-21_5"))->toNumber()', '-21.5'];
+   $tests[] = ['(new Mbn20u("21,25"))->toNumber()', '21.25'];
+   $tests[] = ['(new Mbn20u("-21,5"))->toNumber()', '-21.5'];
 
    $tests[] = ['(new Mbn3c("21.3"))->eq("21.3")', 'true'];
    $tests[] = ['(new Mbn3c("-21.3"))->eq("21.3")', 'false'];
@@ -241,20 +246,20 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['(new Mbn3c("0.1"))->eq("-0.2", "0.2")', 'false'];
 
    $tests[] = ['(new Mbn0("2"))->pow("5")', '32'];
-   $tests[] = ['(new Mbn0("2"))->pow("-5")', '0'];
+   //$tests[] = ['(new Mbn0("2"))->pow("-5")', '0'];
    $tests[] = ['(new Mbn0("3"))->pow("3")', '27'];
    $tests[] = ['(new Mbn0("3"))->pow("-3")', '0'];
 
    $tests[] = ['(new Mbn3c("2"))->pow("5")', '32,000'];
-   $tests[] = ['(new Mbn3c("2"))->pow("-5")', '0,031'];
+   //$tests[] = ['(new Mbn3c("2"))->pow("-5")', '0,031'];
    $tests[] = ['(new Mbn3c("1.1"))->pow("4")', '1,464'];
    $tests[] = ['(new Mbn3c("1.1"))->pow("-4")', '0,683'];
 
    $tests[] = ['(new Mbn("2"))->sqrt()', '1.41'];
    $tests[] = ['(new Mbn3c("2"))->sqrt()', '1,414'];
-   $tests[] = ['(new Mbn20u("2"))->sqrt()', '1_41421356237309504880'];
-   $tests[] = ['(new Mbn20u("3"))->sqrt()', '1_73205080756887729353'];
-   $tests[] = ['(new Mbn20u("4"))->sqrt()', '2_00000000000000000000'];
+   $tests[] = ['(new Mbn20u("2"))->sqrt()', '1,4142135623730950488'];
+   $tests[] = ['(new Mbn20u("3"))->sqrt()', '1,73205080756887729353'];
+   $tests[] = ['(new Mbn20u("4"))->sqrt()', '2'];
 
    $tests[] = ['$m = new Mbn("4.32"); $m->add(1.23); $o=$m', '4.32'];
    $tests[] = ['$m = new Mbn("4.32"); $m->add(1.23, true); $o=$m', '5.55'];
@@ -281,15 +286,20 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['$m = new Mbn("4.32"); $m->invm(true); $o=$m', '0.23'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->abs(); $o=$m', '-4.32'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->abs(true); $o=$m', '4.32'];
-   $tests[] = ['$m = new Mbn("-4.32"); $m->toInt(); $o=$m', '-4.32'];
-   $tests[] = ['$m = new Mbn("-4.32"); $m->toInt(true); $o=$m', '-4.00'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->int(); $o=$m', '-4.32'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->int(true); $o=$m', '-4.00'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->floor(); $o=$m', '-4.32'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->floor(true); $o=$m', '-5.00'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->ceil(); $o=$m', '-4.32'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->ceil(true); $o=$m', '-4.00'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->round(); $o=$m', '-4.32'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->round(true); $o=$m', '-4.00'];
-
+   $tests[] = ['$m = new Mbn("-4.32"); $m->mod(3); $o=$m', '-4.32'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->mod(3, true); $o=$m', '-1.32'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->set(3); $o=$m', '3.00'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->sgn(); $o=$m', '-4.32'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->sgn(true); $o=$m', '-1.00'];
+   
    $tests[] = ['implode(",", (new Mbn("3"))->split([1,3]))', '0.75,2.25'];
    $tests[] = ['implode(",", (new Mbn("3"))->split([2,3]))', '1.20,1.80'];
    $tests[] = ['implode(",", (new Mbn("3"))->split([3,3]))', '1.50,1.50'];
@@ -305,12 +315,57 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['(new Mbn3c("-3.234"))->mod("1")', '-0,234'];
    $tests[] = ['(new Mbn3c("2.234"))->mod("4")', '2,234'];
 
-   $tests[] = ['(new Mbn3c("2.123"))->toInt()', '2,000'];
-   $tests[] = ['(new Mbn3c("3.987"))->toInt()', '3,000'];
-   $tests[] = ['(new Mbn3c("-4.123"))->toInt()', '-4,000'];
-   $tests[] = ['(new Mbn3c("-5.987"))->toInt()', '-5,000'];
-   $tests[] = ['(new Mbn3c("0"))->toInt()', '0,000'];
+   $tests[] = ['(new Mbn3c("2.123"))->int()', '2,000'];
+   $tests[] = ['(new Mbn3c("3.987"))->int()', '3,000'];
+   $tests[] = ['(new Mbn3c("-4.123"))->int()', '-4,000'];
+   $tests[] = ['(new Mbn3c("-5.987"))->int()', '-5,000'];
+   $tests[] = ['(new Mbn3c("0"))->int()', '0,000'];
 
+   $tests[] = ['(new Mbn("-99.5"))->mod(100)', '-99.50'];
+   $tests[] = ['(new Mbn("99.5"))->mod(100)', '99.50'];
+   $tests[] = ['(new Mbn0("55"))->mod(10)', '5'];
+   $tests[] = ['(new Mbn0("-55"))->mod(10)', '-5'];
+   $tests[] = ['(new Mbn0("54"))->mod(10)', '4'];
+   $tests[] = ['(new Mbn0("-54"))->mod(10)', '-4'];
+
+   $tests[] = ['(new Mbn("-2"))->max(-3)', '-2.00'];
+   $tests[] = ['(new Mbn("-3"))->max(-2)', '-2.00'];
+   $tests[] = ['(new Mbn("-2"))->max(3)', '3.00'];
+   $tests[] = ['(new Mbn("3"))->max(-2)', '3.00'];
+   $tests[] = ['(new Mbn("2"))->max(4)', '4.00'];
+   $tests[] = ['(new Mbn("4"))->max(2)', '4.00'];
+   $tests[] = ['(new Mbn("0"))->max(2)', '2.00'];
+   $tests[] = ['(new Mbn("0"))->max(-2)', '0.00'];
+
+   $tests[] = ['(new Mbn("-2"))->min(-3)', '-3.00'];
+   $tests[] = ['(new Mbn("-3"))->min(-2)', '-3.00'];
+   $tests[] = ['(new Mbn("-2"))->min(3)', '-2.00'];
+   $tests[] = ['(new Mbn("3"))->min(-2)', '-2.00'];
+   $tests[] = ['(new Mbn("2"))->min(4)', '2.00'];
+   $tests[] = ['(new Mbn("4"))->min(2)', '2.00'];
+   $tests[] = ['(new Mbn("0"))->min(2)', '0.00'];
+   $tests[] = ['(new Mbn("0"))->min(-2)', '-2.00'];
+
+   $tests[] = ['(new Mbn("0"))->set(-2)', '-2.00'];
+
+   $tests[] = ['(new Mbn("0"))->sgn()', '0.00'];
+   $tests[] = ['(new Mbn("-0.01"))->sgn()', '-1.00'];
+   $tests[] = ['(new Mbn("0.03"))->sgn()', '1.00'];
+
+   /*tests.push(['Mbn.E()', '2.72']);
+   tests.push(['Mbn0.E()', '3']);
+   tests.push(['Mbn3c.E()', '2,718']);
+   tests.push(['Mbn20u.E()', '2,71828182845904523536']);
+
+   tests.push(['Mbn.PI()', '3.14']);
+   tests.push(['Mbn0.PI()', '3']);
+   tests.push(['Mbn3c.PI()', '3,142']);
+   tests.push(['Mbn20u.PI()', '3,14159265358979323846']);
+
+   tests.push(['Mbn.MbnP()', '2.00']);
+   tests.push(['Mbn0.MbnP()', '0']);
+   tests.push(['Mbn3c.MbnP()', '3,000']);
+   tests.push(['Mbn20u.MbnP()', '20']);*/
 
    return runTestMbn($tests, $nl);
 }

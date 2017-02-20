@@ -15,7 +15,7 @@
  */
 var MbnErr = function (f, m, v) {
    this.toString = function () {
-      return "Mbn" + f + " error: " + m + (v !== undefined ? (": " + v) : "");
+      return "Mbn" + f + " error: " + m + ((v !== undefined) ? (": " + v) : "");
    };
 };
 
@@ -245,6 +245,20 @@ var MbnCr = function (opt) {
     */
    Mbn.prop = function () {
       return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT};
+   };
+
+   /**
+    * sets value to b
+    * @param {*} b
+    */
+   Mbn.prototype.set = function (b) {
+      if (!(b instanceof Mbn)) {
+         this.set(new Mbn(b));
+      } else {
+         this._d = b._d.slice();
+         this._s = b._s;
+      }
+      return this;
    };
 
    /**
@@ -501,7 +515,7 @@ var MbnCr = function (opt) {
    };
 
    /**
-    * Modulo from Devide value by b
+    * Modulo from divide value by b
     * @param {*} b
     * @param {boolean=} m
     */
@@ -717,7 +731,7 @@ var MbnCr = function (opt) {
     * @param {boolean=} m
     */
    Mbn.prototype.min = function (b, m) {
-      return mbnSetReturn(this, new Mbn((this.cmp(b)) <= 0 ? this : b), m);
+      return mbnSetReturn(this, new Mbn(((this.cmp(b)) <= 0) ? this : b), m);
    };
 
    /**
@@ -726,7 +740,7 @@ var MbnCr = function (opt) {
     * @param {boolean=} m
     */
    Mbn.prototype.max = function (b, m) {
-      return mbnSetReturn(this, new Mbn((this.cmp(b)) >= 0 ? this : b), m);
+      return mbnSetReturn(this, new Mbn(((this.cmp(b)) >= 0 )? this : b), m);
    };
 
    /**
@@ -758,20 +772,6 @@ var MbnCr = function (opt) {
     */
    Mbn.prototype.sgn = function (m) {
       return mbnSetReturn(this, new Mbn(this._s), m);
-   };
-
-   /**
-    * sets value to b
-    * @param {*} b
-    */
-   Mbn.prototype.set = function (b) {
-      if (!(b instanceof Mbn)) {
-         this.set(new Mbn(b));
-      } else {
-         this._d = b._d.slice();
-         this._s = b._s;
-      }
-      return this;
    };
 
    /**
