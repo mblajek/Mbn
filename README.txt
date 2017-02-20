@@ -21,6 +21,5 @@ JS & PHP
    - More tests
    ?- Reduce
 PHP
-   - split() with numeric argument
    - fast and accurate pow()
    ?- add eval()
