@@ -3,7 +3,7 @@
 /**
  * MultiByteNumber
  * Mikołaj Błajek
- * primesoft.pl
+ * mblajek_mbn(at)mailplus.pl
  */
 class MbnErr extends Exception {
 

@@ -13,3 +13,14 @@ Library for PHP and JS to do calculations with any precission, with correct appr
 	Eval/* - Calculator based on library, with copied mbn.min.js and own index.php
 
 Now versions of PHP and JS are not the same, PHP does not have some functions and some arguments, and has worse pow() function, will be synchronised soon.
+
+TO DO:
+JS & PHP
+   - Optimize div()
+   - Refactoring
+   - More tests
+   ?- Reduce
+PHP
+   - split() with numeric argument
+   - fast and accurate pow()
+   ?- add eval()
