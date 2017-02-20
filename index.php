@@ -16,12 +16,11 @@ $worktime = round((microtime(true) - $starttime) * 1000);
 <script src="mbn_test.js"></script>
 <pre><script>
 
-var Mbn = MbnCr();
 var Mbn3 = MbnCr(3);
 
 function w(a){
 	document.write(a);
-	document.write("<br>");
+	document.write("\n");
 }
 
 function we(a){

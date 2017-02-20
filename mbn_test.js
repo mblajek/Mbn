@@ -31,9 +31,9 @@ var testMbn = function (nl) {
       return (ret === "") ? tests.length : ret;
 
    };
-   var Mbn0 = new MbnCr(0);
-   var Mbn3c = new MbnCr({MbnP: 3, MbnS: ','});
-   var Mbn20u = new MbnCr({MbnP: 20, MbnS: ',', MbnT: true});
+   var Mbn0 = MbnCr(0);
+   var Mbn3c = MbnCr({MbnP: 3, MbnS: ','});
+   var Mbn20u = MbnCr({MbnP: 20, MbnS: ',', MbnT: true});
 
    var tests = [["0", "0"]];
 
@@ -303,6 +303,8 @@ var testMbn = function (nl) {
    tests.push(['new Mbn("3").split([1,2,3])', '0.50,1.00,1.50']);
    tests.push(['new Mbn("2").split([1,1,1])', '0.67,0.67,0.66']);
    tests.push(['new Mbn("100").split([100,23])', '81.30,18.70']);
+   tests.push(['new Mbn("42").split()', '21.00,21.00']);
+   tests.push(['new Mbn("42").split(5)', '8.40,8.40,8.40,8.40,8.40']);
 
    tests.push(['new Mbn3c("1.234").mod("0.401")', '0,031']);
    tests.push(['new Mbn3c("3.234").mod("1")', '0,234']);

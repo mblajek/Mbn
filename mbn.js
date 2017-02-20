@@ -321,7 +321,7 @@ var MbnCr = function (opt) {
          return 0;
       } else {
          if (dm._s === -1) {
-            throw new MbnErr(".cmp", "negative maximal difference");
+            throw new MbnErr(".cmp", "negative maximal difference", dm);
          }
          if (this.sub(b).abs().cmp(dm) <= 0) {
             return 0;
@@ -535,26 +535,26 @@ var MbnCr = function (opt) {
     * @param {*=} ar
     */
    Mbn.prototype.split = function (ar) {
-      var arr;
+      var arr = [];
       var asum;
+      var n;
       if (ar === undefined) {
          ar = 2;
       }
       if (!(ar instanceof Array)) {
          var mbn1 = new Mbn(1);
-         arr = [];
          asum = new Mbn(ar);
          if (!asum.isInt() || asum._s < 0) {
             throw new MbnErr(".split", "only natural number of parts supported");
          }
-         var n = asum.toNumber();
+         n = asum.toNumber();
          for (var i = 0; i < n; i++) {
             arr.push(mbn1);
          }
       } else {
-         arr = [];
          asum = new Mbn(0);
-         for (var i = 0; i < ar.length; i++) {
+         n = ar.length;
+         for (var i = 0; i < n; i++) {
             arr.push(new Mbn(ar[i]));
             asum.add(arr[i], true);
          }
@@ -564,7 +564,8 @@ var MbnCr = function (opt) {
       }
       var a = new Mbn(this);
       var brr = [];
-      for (var i = 0; i < arr.length - 1; i++) {
+      n--;
+      for (var i = 0; i < n; i++) {
          var b = a.mul(arr[i]).div(asum);
          asum.sub(arr[i], true);
          a.sub(b, true);

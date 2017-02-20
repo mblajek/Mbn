@@ -5,6 +5,16 @@
  * Mikołaj Błajek
  * mblajek_mbn(at)mailplus.pl
  */
+
+
+/**
+ * Common error message object
+ * @export
+ * @constructor
+ * @param {string} f
+ * @param {string} m
+ * @param {*=} v
+ */
 class MbnErr extends Exception {
    function __construct($f='', $m='', $v = null){
       parent::__construct('Mbn' . $f . ' error: ' . $m . (($v !== null) ? (": " . $v) : ""));
@@ -18,7 +28,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   const MbnV = '1.7';
+   const MbnV = '1.8';
 
    //default precision
    protected static $MbnP = 2;
@@ -145,7 +155,7 @@ class Mbn {
     */
    private function mbnFromNumber($x) {
       if (!is_finite($x)) {
-         throw new MbnErr("", "invalid value", x);
+         throw new MbnErr('', 'invalid value', $x);
       }
       $this->s = 1;
       $this->d = array();
@@ -200,7 +210,7 @@ class Mbn {
             $this->set($n);
          }
       } else {
-         throw new MbnErr();
+         throw new MbnErr('', 'invalid argument', $n);
       }
    }
 
@@ -221,9 +231,6 @@ class Mbn {
     * @param {*} b
     */
    public function set($b) {
-      /*var_dump($this);
-      var_dump($b);
-      die;*/
       if (static::isNotMbn($b)) {
          $this->set(new static($b));
       } else {
@@ -299,6 +306,9 @@ class Mbn {
          }
          return 0;
       } else {
+         if ($dm->s === -1) {
+            throw new MbnErr('.cmp', 'negative maximal difference', $dm);
+         }
          if ($this->sub($b)->abs()->cmp($dm) <= 0) {
             return 0;
          } else {
@@ -429,7 +439,7 @@ class Mbn {
          $b = new static($b);
       }
       if ($b->s === 0) {
-         throw new MbnErr();
+         throw new MbnErr('.div', 'division by zero');
       }
       if ($this->s === 0) {
          return static::mbnSetReturn($this, new static($this), $m);
@@ -514,25 +524,33 @@ class Mbn {
     * Split value to array of values, with same ratios as in given array
     * @param {array} ar
     */
-   function split($ar) {
+   function split($ar = 2) {
+      $arr = array();
       if (!is_array($ar)) {
-         throw new MbnErr();
+         $mbn1 = new static(1);
+         $asum = new static($ar);
+         if (!$asum->isInt() || $asum->s < 0) {
+            throw new MbnErr('.split', 'only natural number of parts supported');
+         }
+         $n = $asum->toNumber();
+         for($i = 0; $i< $n; $i++) {
+            $arr[] = $mbn1;
+         }
+      } else {
+         $asum = new static(0);
+         $n = count($ar);
+         for ($i = 0; $i < $n; $i++) {
+            $arr[] = new static($ar[$i]);
+            $asum->add($arr[$i], true);
+         }
       }
-      $a = new static($this);
       if (count($ar) === 0) {
          return array();
       }
-      $arr = $ar;
+      $a = new static($this);
       $brr = array();
-      $arrl = count($arr);
-      for ($i = 0; $i < $arrl; $i++) {
-         $arr[$i] = new static($arr[$i]);
-      }
-      $asum = new static($arr[0]);
-      for ($i = 1; $i < $arrl; $i++) {
-         $asum->add($arr[$i], true);
-      }
-      for ($i = 0; $i < $arrl - 1; $i++) {
+      $n--;
+      for ($i = 0; $i < $n; $i++) {
          $b = $a->mul($arr[$i])->div($asum);
          $asum->sub($arr[$i], true);
          $a->sub($b, true);
