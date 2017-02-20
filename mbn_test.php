@@ -249,6 +249,7 @@ function testMbn ($nl  = '<br>' ) {
    //$tests[] = ['(new Mbn0("2"))->pow("-5")', '0'];
    $tests[] = ['(new Mbn0("3"))->pow("3")', '27'];
    $tests[] = ['(new Mbn0("3"))->pow("-3")', '0'];
+   $tests[] = ['(new Mbn(.5))->pow(7)', '0.01'];
 
    $tests[] = ['(new Mbn3c("2"))->pow("5")', '32,000'];
    //$tests[] = ['(new Mbn3c("2"))->pow("-5")', '0,031'];

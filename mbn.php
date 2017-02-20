@@ -95,6 +95,9 @@ class Mbn {
     */
    private static function mbnRoundLast($a) {
       $r = &$a->d;
+      if(count($r) < 2){
+         array_unshift($r, 0);
+      }
       $r[count($r) - 2] += (array_pop($r) >= 5) ? 1 : 0;
       static::mbnCarry($a);
    }
@@ -118,9 +121,6 @@ class Mbn {
          $ln = strlen($n);
       } else {
          $n = substr($n, 0, $ln) . substr($n, $ln + 1);
-         if ($ln === strlen($n)) {
-            throw new MbnErr('', 'invalid format', $nn);
-         }
       }
       if ($ln === 0) {
          $ln = 1;

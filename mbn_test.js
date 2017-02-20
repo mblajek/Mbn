@@ -229,6 +229,7 @@ var testMbn = function (nl) {
    tests.push(['new Mbn0("2").pow("-5")', '0']);
    tests.push(['new Mbn0("3").pow("3")', '27']);
    tests.push(['new Mbn0("3").pow("-3")', '0']);
+   tests.push(['new Mbn(.5).pow(7)', '0.01']);
 
    tests.push(['new Mbn3c("2").pow("5")', '32,000']);
    tests.push(['new Mbn3c("2").pow("-5")', '0,031']);

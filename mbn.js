@@ -32,7 +32,7 @@ var MbnCr = function (opt) {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.9";
+   var MbnV = "1.10";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -127,6 +127,9 @@ var MbnCr = function (opt) {
     */
    var mbnRoundLast = function (a) {
       r = a._d;
+      if(r.length < 2){
+         r.unshift(0);
+      }
       r[r.length - 2] += (r.pop() >= 5) ? 1 : 0;
       mbnCarry(a);
    };
@@ -138,10 +141,11 @@ var MbnCr = function (opt) {
     * @param {*=} v
     */
    var mbnFromString = function (a, n, v) {
+      n = n.replace(/^\s*([+=-])\s*/, "$1").replace(/\s+$/, "");
       var nn = n;
       a._s = 1;
       a._d = [];
-      n0 = n.charAt(0);
+      var n0 = n.charAt(0);
       if (n0 === "-" || n0 === "+" || n0 === "=") {
          a._s = (n0 === "-") ? -1 : 1;
          n = n.slice(1);
@@ -150,14 +154,11 @@ var MbnCr = function (opt) {
             return;
          }
       }
-      ln = ((n.indexOf(".") + 1) || (n.indexOf(",") + 1)) - 1;
+      var ln = ((n.indexOf(".") + 1) || (n.indexOf(",") + 1)) - 1;
       if (ln === -1) {
          ln = n.length;
       } else {
          n = n.slice(0, ln) + n.slice(ln + 1);
-         if (ln === n.length) {
-            throw new MbnErr("", "invalid format", nn);
-         }
       }
       if (ln === 0) {
          ln = 1;
@@ -809,7 +810,7 @@ var MbnCr = function (opt) {
       "^": [5, false, 'pow']};
    var funPrx = 4;
    var rxs = {
-      num: {rx: /^([0-9]*[\.,]?[0-9]+)\s*/, next: endBop.concat("pr"), end: true},
+      num: {rx: /^([0-9\.,]+)\s*/, next: endBop.concat("pr"), end: true},
       name: {rx: /^([A-za-z_]\w*)\s*/},
       fn: {next: ["po"], end: false},
       vr: {next: endBop, end: true},
