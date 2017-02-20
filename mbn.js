@@ -137,11 +137,11 @@ var MbnCr = function (opt) {
    /**
     * Private function, sets value of a to string value n
     * @param {Mbn} a
-    * @param {string} n
+    * @param {string} nd
     * @param {*=} v
     */
-   var mbnFromString = function (a, n, v) {
-      n = n.replace(/^\s*([+=-])\s*/, "$1").replace(/\s+$/, "");
+   var mbnFromString = function (a, nd, v) {
+      n = nd.replace(/^\s*([+=-]?)\s*/, "$1").replace(/\s+$/, "");
       var nn = n;
       a._s = 1;
       a._d = [];
@@ -171,7 +171,7 @@ var MbnCr = function (opt) {
          if (c >= 0 && c <= 9) {
             a._d.push(c);
          } else {
-            throw new MbnErr("", "invalid format", nn);
+            throw new MbnErr("", "invalid format", nd);
          }
       }
       mbnRoundLast(a);
@@ -849,14 +849,13 @@ var MbnCr = function (opt) {
       var invaUop = [funPrx, true, 'inva'];
 
       while (expr.length > 0) {
-         tl = t;
          mtch = null;
          for (var i = 0; i < larl && mtch === null; i++) {
             t = larr[i];
             mtch = expr.match(rxs[t].rx);
          }
          if (mtch === null) {
-            if (larr[0] === "bop" && (tl !== "num" || !rxs.num.rx.test(expr))) {
+            if (larr[0] === "bop") {
                tok = "*";
                t = "bop";
             } else {

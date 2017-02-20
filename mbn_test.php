@@ -65,6 +65,14 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['new Mbn0("-1.5")', '-2'];
    $tests[] = ['new Mbn0(-1.6)', '-2'];
 
+   $tests[] = ['new Mbn0("-  1.6")', '-2'];
+   $tests[] = ['new Mbn0(" - 1.6")', '-2'];
+   $tests[] = ['new Mbn0("  -1.6")', '-2'];
+   $tests[] = ['new Mbn0(" - 1.6 ")', '-2'];
+   $tests[] = ['new Mbn0(" - 1. ")', '-1'];
+   $tests[] = ['new Mbn0(" - .6 ")', '-1'];
+   $tests[] = ['new Mbn0(" + .6 ")', '1'];
+
    $tests[] = ['new Mbn()', '0.00'];
    $tests[] = ['new Mbn("1.234")', '1.23'];
    $tests[] = ['new Mbn("1.235")', '1.24'];
@@ -72,6 +80,14 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['new Mbn("-1.234")', '-1.23'];
    $tests[] = ['new Mbn("-1.235")', '-1.24'];
    $tests[] = ['new Mbn(-1.236)', '-1.24'];
+
+   $tests[] = ['new Mbn("-  1.6")', '-1.60'];
+   $tests[] = ['new Mbn(" - 1.6")', '-1.60'];
+   $tests[] = ['new Mbn("  -1.6")', '-1.60'];
+   $tests[] = ['new Mbn(" - 1.6 ")', '-1.60'];
+   $tests[] = ['new Mbn(" - 1. ")', '-1.00'];
+   $tests[] = ['new Mbn(" - .6 ")', '-0.60'];
+   $tests[] = ['new Mbn(" + .6 ")', '0.60'];
 
    $tests[] = ['new Mbn20u()', '0'];
    $tests[] = ['new Mbn20u("0,000000000000000000005")', '0,00000000000000000001'];

@@ -18,7 +18,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   const MbnV = '1.6';
+   const MbnV = '1.7';
 
    //default precision
    protected static $MbnP = 2;
@@ -105,10 +105,10 @@ class Mbn {
    /**
     * Private function, sets value of a to string value n
     * @param {Mbn} a
-    * @param {string} n
+    * @param {string} nd
     */
-   private function fromString($n) {
-      $nn = $n;
+   private function fromString($nd) {
+      $n = preg_replace('/\\s+$/', '', preg_replace('/^\\s*([+=-]?)\\s*/', '$1', $nd));
       if ($n[0] === '-' || $n[0] === '+') {
          $this->s = ($n[0] === '-') ? -1 : 1;
          $n = substr($n, 1);
@@ -133,7 +133,7 @@ class Mbn {
          if ($c >= 0 && $c <= 9) {
             $this->d[] = $c;
          } else {
-            throw new MbnErr('', 'invalid format', $nn);
+            throw new MbnErr('', 'invalid format', $nd);
          }
       }
       static::mbnRoundLast($this);

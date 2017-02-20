@@ -45,6 +45,14 @@ var testMbn = function (nl) {
    tests.push(['new Mbn0("-1.5")', '-2']);
    tests.push(['new Mbn0(-1.6)', '-2']);
 
+   tests.push(['new Mbn0("-  1.6")', '-2']);
+   tests.push(['new Mbn0(" - 1.6")', '-2']);
+   tests.push(['new Mbn0("  -1.6")', '-2']);
+   tests.push(['new Mbn0(" - 1.6 ")', '-2']);
+   tests.push(['new Mbn0(" - 1. ")', '-1']);
+   tests.push(['new Mbn0(" - .6 ")', '-1']);
+   tests.push(['new Mbn0(" + .6 ")', '1']);
+
    tests.push(['new Mbn()', '0.00']);
    tests.push(['new Mbn("1.234")', '1.23']);
    tests.push(['new Mbn("1.235")', '1.24']);
@@ -52,6 +60,14 @@ var testMbn = function (nl) {
    tests.push(['new Mbn("-1.234")', '-1.23']);
    tests.push(['new Mbn("-1.235")', '-1.24']);
    tests.push(['new Mbn(-1.236)', '-1.24']);
+
+   tests.push(['new Mbn("-  1.6")', '-1.60']);
+   tests.push(['new Mbn(" - 1.6")', '-1.60']);
+   tests.push(['new Mbn("  -1.6")', '-1.60']);
+   tests.push(['new Mbn(" - 1.6 ")', '-1.60']);
+   tests.push(['new Mbn(" - 1. ")', '-1.00']);
+   tests.push(['new Mbn(" - .6 ")', '-0.60']);
+   tests.push(['new Mbn(" + .6 ")', '0.60']);
 
    tests.push(['new Mbn20u()', '0']);
    tests.push(['new Mbn20u("0,000000000000000000005")', '0,00000000000000000001']);
