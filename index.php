@@ -1,66 +1,133 @@
 <!DOCTYPE html>
 <head>
-<title>Mbn examples</title>
-<meta charset="UTF-8">
+   <title>Mbn examples</title>
+   <meta charset="UTF-8">
 </head><body>
-
 <?php
 include 'mbn.php';
 include 'mbn_test.php';
-$starttime = microtime(true);
-$testPhp = testMbn();
-$worktime = round((microtime(true) - $starttime) * 1000);
+$starttimePHP = microtime(true);
+$testPHP = testMbn();
+$worktimePHP = round((microtime(true) - $starttimePHP) * 1000);
+$versionPHP = Mbn::prop()['MbnV'];
 ?>
-
 <script src="mbn.js"></script>
 <script src="mbn_test.js"></script>
-<pre><script>
+<script>
+var testPHP = <?php echo is_int($testPHP) ? $testPHP : '"' . (addslashes($testPHP) . '"') ?>;
+var worktimePHP = <?php echo $worktimePHP ?>;
+var versionPHP = <?php echo $versionPHP ?>;
+var starttimeJS = new Date();
+var testJS = testMbn();
+var worktimeJS = new Date() - starttimeJS;
+</script>
 
-var Mbn3 = MbnCr(3);
+<style>
+div{
+   min-height: 1em;
+   margin: 0px 4px 0px 4px;
+   border-radius: 2px;
+   padding: 2px 6px 2px 6px
+   
+}
+.title1{
+   font-size: 2em;
+   font-weight: bold;
+}
+.title2{
+   margin-top: 20px;
+   margin-bottom: 2px;
+   font-size: 1.5em;
+   font-weight: bold;
+   border-left: 2px solid gray;
+}
+.mono{
+   margin-bottom: 2px;
+   font-family: "Consolas", monospace;
+   background-color: lightgray;
+   border: 1px solid gray;
+}
+.result{
+   margin-bottom: 8px;
+   font-family: "Consolas", monospace;
+   border: 1px solid gray;
+   display: inline-block;
+   font-weight: bold;
+   margin-right: 0px;
+   border-radius: 2px 0px 0px 2px;
+}
+.label{
+   margin-bottom: 8px;
+   font-family: "Consolas", monospace;
+   border: 1px solid gray;
+   display: inline-block;
+   margin-left: 0px;
+   border-radius: 0px 2px 2px 0px;
+   border-left: 0px;
+}
+</style>
 
-function w(a){
-	document.write(a);
-	document.write("\n");
+<script>
+
+function w(a, c){
+	document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + ">" + a + "</div>");
 }
 
 function we(a){
-	w(a);
+	w(a, "mono");
 	var e = eval(a);
-	w("=> " + e);
-	w("(" + (typeof e) + ")");
-	w("");
+	w(e, "result");
+	w(typeof e, "label");
 }
 
-var testPhp = <?php echo is_int($testPhp) ? $testPhp : '"' . (addslashes($testPhp) . '"') ?>;
-var worktimePhp = <?php echo $worktime ?>;
-w("<strong>PHP<br>" + ((typeof testPhp === "number") ? ("OK: " + testPhp + " tests") : testPhp) + "</strong>");
-w(worktimePhp + " ms");
-w("");
-var starttime = new Date();
-var testJs = testMbn();
-var worktimeJs = new Date() - starttime;
-w("<strong>JS<br>" + ((typeof testJs === "number") ? ("OK: " + testJs + " tests") : testJs) + "</strong>");
-w(worktimeJs + " ms");
-w("");
-w("");
+//var Mbn3 = MbnCr(3);
 
-w("MultiByteNumber v" + Mbn.prop().MbnV);
-w("Cyfry po przecinku: " + Mbn.prop().MbnP);
-w("Separator dla wyników: " + Mbn.prop().MbnS);
-w("");
 
-w('// Możliwe wywołania konstruktora');
-w("");
+w("Mbn examples (JS v" + Mbn.prop().MbnV + " / PHP v" + versionPHP + ")", "title1");
+w("Tests", "title2");
+w("<strong>PHP<br>" + ((typeof testPHP === "number") ? ("OK: " + testPHP + " tests") : testPHP) +
+   "</strong><br>" + worktimePHP + " ms", "mono");
+w("<strong>JS<br>" + ((typeof testJS === "number") ? ("OK: " + testJS + " tests") : testJS) +
+   "</strong><br>" + worktimeJS + " ms", "mono");
 
-we('new Mbn();');
+w("Class declarations", "title2");
 
-we('new Mbn(1.2);');
+var Mbn0 = MbnCr(0);
+w("var Mbn0 = MbnCr(0); //precission 0", "mono");
+we('new Mbn0("12.12");');
 
-we('new Mbn("1.2");');
+var Mbn3 = MbnCr(3);
+w('var Mbn3 = MbnCr(3); //precission 3', "mono");
+we('new Mbn3("12.12");');
 
-we('new Mbn("1,2");');
+var Mbn4c = MbnCr({MbnP: 4, MbnS: ","});
+w("var Mbn4c = MbnCr({MbnP: 4, MbnS: \",\"}); //precission 4, coma separator", "mono");
+we('new Mbn4c("12.12");');
 
-we('new Mbn(new Mbn("1,2"));');
+var Mbn5t = MbnCr({MbnP: 5, MbnT: true});
+w("var Mbn5t = MbnCr({MbnP: 5, MbnT: true}); //precission 5, trim zeros", "mono");
+we('new Mbn5t("12.12");');
+
+w("Constructor calls", "title2");
+
+we('new Mbn(); //empty');
+
+we('new Mbn(1.2); //number');
+
+we('new Mbn("1.2"); //string with dot');
+
+we('new Mbn("1,2"); //string with coma');
+
+we('new Mbn("1."); //string without fractional part');
+
+we('new Mbn(".2"); //string without integer part');
+
+we('new Mbn(new Mbn("1,2")); //another Mbn object');
+
+we('new Mbn4c(new Mbn("1,2")); //another Mbn class object (convertible to string)');
+
+we("Mbn(4); //called as funcion, calls itself as constructor");
+
 
 w('// Przy działaniach identyczne zachowanie jak string "1.20", również dla $("#id").val(new Mbn(1.2));');
 w("");
@@ -151,4 +218,4 @@ we('(new Mbn("0,1")).eq(0.1);');
 
 we('(new Mbn("0.1")).eq("0.2");');
 
-</script></pre></body>
+</script></body>
