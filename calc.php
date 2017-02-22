@@ -25,14 +25,19 @@ var MbnP = new (MbnCr(0))(2);
 var MbnSTs = [".0", ",0", "._", ",_"];
 var MbnST = MbnSTs[0];
 var Mbnx;
+var lastIn = null;
 var vars = {
 };
 var inchange = function(el){
+   if(lastIn === el.value){
+      return;
+   }
    var n = el.nextElementSibling;
    if(el.value !== "") {
       n.value = '...';
       try{
          n.value = Mbnx.eval(el.value, vars);
+         lastIn = el.value;
       }catch(e){
          n.value = e;
       }
