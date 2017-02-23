@@ -141,8 +141,7 @@ var MbnCr = function (opt) {
     * @param {*=} v
     */
    var mbnFromString = function (a, nd, v) {
-      n = nd.replace(/^\s*([+=-]?)\s*/, "$1").replace(/\s+$/, "");
-      var nn = n;
+      var n = nd.replace(/^\s*([+=-]?)\s*/, "$1").replace(/\s+$/, "");
       a._s = 1;
       a._d = [];
       var n0 = n.charAt(0);
@@ -223,7 +222,9 @@ var MbnCr = function (opt) {
       }
       switch (typeof n) {
          case "undefined":
-            n = 0;
+            n = false;
+         case "boolean":
+            n = Number(n);
          case "number":
             mbnFromNumber(this, n);
             return;
@@ -232,7 +233,7 @@ var MbnCr = function (opt) {
                this.set(n);
                return;
             }
-            n = n.toString(MbnS);
+            n = (n !== null) ? n.toString() : "0";
          case "string":
             mbnFromString(this, n, v);
             break;

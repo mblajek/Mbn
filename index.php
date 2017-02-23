@@ -25,7 +25,7 @@ var worktimeJS = new Date() - starttimeJS;
 <style>
 div{
    min-height: 1em;
-   margin: 0px 4px 0px 4px;
+   margin: 0px 4px 2px 4px;
    border-radius: 2px;
    padding: 2px 6px 2px 6px
    
@@ -36,13 +36,11 @@ div{
 }
 .title2{
    margin-top: 20px;
-   margin-bottom: 2px;
    font-size: 1.5em;
    font-weight: bold;
    border-left: 2px solid gray;
 }
 .mono{
-   margin-bottom: 2px;
    font-family: "Consolas", monospace;
    background-color: lightgray;
    border: 1px solid gray;
@@ -65,19 +63,36 @@ div{
    border-radius: 0px 2px 2px 0px;
    border-left: 0px;
 }
+.title3{
+   font-size: 1.2em;
+   /*font-weight: bold;*/
+   border-left: 20px solid gray;
+   border-radius: 0px;
+   xborder-right: 2px solid gray;
+}
 </style>
 
 <script>
 
 function w(a, c){
+	if(a instanceof Array){	
+		a = a.join("<br>");
+	}
 	document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + ">" + a + "</div>");
 }
 
 function we(a){
+	var acode = (a instanceof Array) ?  a.join("\n") : a;
 	w(a, "mono");
-	var e = eval(a);
-	w(e, "result");
-	w(typeof e, "label");
+	try {
+		var e = eval(acode);
+		w(e, "result");
+		w(typeof e, "label");
+	} catch (er) {
+		w(er, "result");
+		w("error", "label");
+	}
+		
 }
 
 //var Mbn3 = MbnCr(3);
@@ -92,41 +107,44 @@ w("<strong>JS<br>" + ((typeof testJS === "number") ? ("OK: " + testJS + " tests"
 
 w("Class declarations", "title2");
 
+w(["//default: precission 2, dot separator, without trimming zeros", "//class allready defined in library", "//var Mbn = MbnCr();"], "mono");
+we('new Mbn("12.1");');
+
 var Mbn0 = MbnCr(0);
-w("var Mbn0 = MbnCr(0); //precission 0", "mono");
-we('new Mbn0("12.12");');
+w(["//precission 0", "var Mbn0 = MbnCr(0);"], "mono");
+we('new Mbn0("12.2");');
 
 var Mbn3 = MbnCr(3);
-w('var Mbn3 = MbnCr(3); //precission 3', "mono");
-we('new Mbn3("12.12");');
+w(['//precission 3', 'var Mbn3 = MbnCr(3);'], "mono");
+we('new Mbn3("12.1");');
 
 var Mbn4c = MbnCr({MbnP: 4, MbnS: ","});
-w("var Mbn4c = MbnCr({MbnP: 4, MbnS: \",\"}); //precission 4, coma separator", "mono");
-we('new Mbn4c("12.12");');
+w(['//precission 4, coma separator', 'var Mbn4c = MbnCr({MbnP: 4, MbnS: ","});'], "mono");
+we('new Mbn4c("12.1");');
 
 var Mbn5t = MbnCr({MbnP: 5, MbnT: true});
-w("var Mbn5t = MbnCr({MbnP: 5, MbnT: true}); //precission 5, trim zeros", "mono");
-we('new Mbn5t("12.12");');
+w(['//precission 5, trim zeros', 'var Mbn5t = MbnCr({MbnP: 5, MbnT: true});'], "mono");
+we('new Mbn5t("12.1");');
 
 w("Constructor calls", "title2");
 
-we('new Mbn(); //empty');
+we(["//empty", 'new Mbn();']);
 
-we('new Mbn(1.2); //number');
+we(["//number", 'new Mbn(1.2);']);
 
-we('new Mbn("1.2"); //string with dot');
+we(["//string with dot", 'new Mbn("1.2");']);
 
-we('new Mbn("1,2"); //string with coma');
+we(['//string with coma', 'new Mbn("1,2");']);
 
-we('new Mbn("1."); //string without fractional part');
+we(['//string without fractional part', 'new Mbn("1.");']);
 
-we('new Mbn(".2"); //string without integer part');
+we(['//string without integer part', 'new Mbn(".2");']);
 
-we('new Mbn(new Mbn("1,2")); //another Mbn object');
+we(['//another Mbn object', 'new Mbn(new Mbn("1,2"));']);
 
-we('new Mbn4c(new Mbn("1,2")); //another Mbn class object (convertible to string)');
+we(['//another Mbn class object (any object convertible to string)', 'new Mbn4c(new Mbn("1,2"));']);
 
-we("Mbn(4); //called as funcion, calls itself as constructor");
+we(['//called as funcion, calls itself as constructor', 'Mbn(4);']);
 
 
 w('// Przy działaniach identyczne zachowanie jak string "1.20", również dla $("#id").val(new Mbn(1.2));');
@@ -190,9 +208,9 @@ we('(new Mbn("315,5")).add( (new Mbn("315,5")).mul(23).mul("0.01") );');
 
 we('new Mbn("23").mul("0.01").add("1").mul("315,5");');
 
-we("(3509 * (3.845 * 1000) / 1000).toFixed(2)");
+we("(13492105 / 1000).toFixed(2)");
 
-we('new Mbn(new Mbn3("3509").mul("3.845"))');
+we('new Mbn(new Mbn3("13492105").div("1000"))');
 
 w("// ostatni parametr - zmiana zmiennej");w("");
 

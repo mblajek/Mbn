@@ -57,6 +57,10 @@ function testMbn ($nl  = '<br>' ) {
 
    $tests = [["0;", "0"]];
 
+   $tests[] = ['new Mbn(null);', '0.00'];
+   $tests[] = ['new Mbn(true);', '1.00'];
+   $tests[] = ['new Mbn(false);', '0.00'];
+
    $tests[] = ['new Mbn0();', '0'];
    $tests[] = ['new Mbn0("1.4");', '1'];
    $tests[] = ['new Mbn0("1.5");', '2'];

@@ -6,7 +6,6 @@
  * mblajek_mbn(at)mailplus.pl
  */
 
-
 /**
  * Common error message object
  * @export
@@ -16,7 +15,8 @@
  * @param {*=} v
  */
 class MbnErr extends Exception {
-   function __construct($f='', $m='', $v = null){
+
+   function __construct($f = '', $m = '', $v = null) {
       parent::__construct('Mbn' . $f . ' error: ' . $m . (($v !== null) ? (": " . $v) : ""));
    }
 
@@ -36,9 +36,7 @@ class Mbn {
    protected static $MbnS = '.';
    //default truncate
    protected static $MbnT = false;
-
    protected static $MbnCN;
-
    private $d = array();
    private $s = 1;
 
@@ -105,7 +103,7 @@ class Mbn {
     */
    private static function mbnRoundLast($a) {
       $r = &$a->d;
-      if(count($r) < 2){
+      if (count($r) < 2) {
          array_unshift($r, 0);
       }
       $r[count($r) - 2] += (array_pop($r) >= 5) ? 1 : 0;
@@ -185,20 +183,20 @@ class Mbn {
     * Returns if object is not Mbn
     */
    private static function isNotMbn($a) {
-      if(empty(static::$MbnCN)){
+      if (empty(static::$MbnCN)) {
          static::$MbnCN = get_class(new static());
       }
       return (!is_object($a) || (get_class($a) !== static::$MbnCN));
    }
 
-  /**
-   * Constructor of Mbn object
-   * @export
-   * @constructor
-   * @param {*=} n
-   * @param {*=} v
-   */
-  public function __construct($n = 0) {
+   /**
+    * Constructor of Mbn object
+    * @export
+    * @constructor
+    * @param {*=} n
+    * @param {*=} v
+    */
+   public function __construct($n = 0) {
       if (is_float($n) || is_int($n)) {
          $this->mbnFromNumber($n);
       } elseif (is_string($n)) {
@@ -209,6 +207,8 @@ class Mbn {
          } else {
             $this->set($n);
          }
+      } elseif (is_bool($n) || is_null($n)) {
+         $n = $this->mbnFromNumber(intval($n));
       } else {
          throw new MbnErr('', 'invalid argument', $n);
       }
@@ -461,7 +461,7 @@ class Mbn {
          $mp++;
       }
       do {
-         while ($x[($xl=count($x)) - 1] + $y[($yl = count($y)) - 1] === 0) {
+         while ($x[($xl = count($x)) - 1] + $y[($yl = count($y)) - 1] === 0) {
             array_pop($x);
             array_pop($y);
          }
@@ -533,7 +533,7 @@ class Mbn {
             throw new MbnErr('.split', 'only natural number of parts supported');
          }
          $n = $asum->toNumber();
-         for($i = 0; $i< $n; $i++) {
+         for ($i = 0; $i < $n; $i++) {
             $arr[] = $mbn1;
          }
       } else {
@@ -652,6 +652,7 @@ class Mbn {
       $r->s = -$r->s;
       return $r;
    }
+
    /**
     * returns multiplication inverse of number
     * @param {boolean=} m
@@ -675,66 +676,68 @@ class Mbn {
     * @param {boolean=} m
     */
    function int($m = false) {
-      $r = ($m === true) ? $this : new static($this);
-      return ($r->s >= 0) ? $r->floor(true) : $r->ceil(true);
+   $r =($m === true) ? $this: new static($this);
+   return($r->s >= 0) ?  $r->floor(true) :  $r->ceil(true);
+
+
    }
 
-   /**
-    * returns if number equals to b, or if d is set, difference is lower or equals d
-    * @param {*} b
-    * @param {*} d
-    */
-   function eq($b, $d = 0) {
-      return $this->cmp($b, $d) === 0;
-   }
+/**
+ * returns if number equals to b, or if d is set, difference is lower or equals d
+ * @param {*} b
+ * @param {*} d
+ */
+function eq($b, $d = 0) {
+   return $this->cmp($b, $d) === 0;
+}
 
-   /**
-    * returns minimum from value and b
-    * @param {*} b
-    * @param {boolean=} m
-    */
-   function min($b, $m = false) {
-      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
-   }
+/**
+ * returns minimum from value and b
+ * @param {*} b
+ * @param {boolean=} m
+ */
+function min($b, $m = false) {
+   return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
+}
 
-   /**
-    * returns maximum from value and b
-    * @param {*} b
-    * @param {boolean=} m
-    */
-   function max($b, $m = false) {
-      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
-   }
+/**
+ * returns maximum from value and b
+ * @param {*} b
+ * @param {boolean=} m
+ */
+function max($b, $m = false) {
+   return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
+}
 
-   /**
-    * calculates square root of number
-    * @param {boolean=} m
-    */
-   function sqrt($m = false) {
-      $t = new static($this);
-      $t->d[] = 0;
-      $t->d[] = 0;
-      $rb = new static($t);
-      $r = new static($t);
-      $mbn2 = new static('2');
-      if ($r->s === -1) {
-         throw new MbnErr();
-      } else if ($r->s === 1) {
-         do {
-            $rb->set($r);
-            $r->add($t->div($r), true)->div($mbn2, true);
-         } while (!$rb->eq($r));
-      }
-      static::mbnRoundLast($r);
-      return static::mbnSetReturn($this, $r, $m);
+/**
+ * calculates square root of number
+ * @param {boolean=} m
+ */
+function sqrt($m = false) {
+   $t = new static($this);
+   $t->d[] = 0;
+   $t->d[] = 0;
+   $rb = new static($t);
+   $r = new static($t);
+   $mbn2 = new static('2');
+   if ($r->s === -1) {
+      throw new MbnErr();
+   } else if ($r->s === 1) {
+      do {
+         $rb->set($r);
+         $r->add($t->div($r), true)->div($mbn2, true);
+      } while (!$rb->eq($r));
    }
+   static::mbnRoundLast($r);
+   return static::mbnSetReturn($this, $r, $m);
+}
 
-   /**
-    * returns sign from value
-    * @param {boolean=} m
-    */
-   function sgn($m = false) {
-      return static::mbnSetReturn($this, new Mbn($this->s), $m);
-   }
+/**
+ * returns sign from value
+ * @param {boolean=} m
+ */
+function sgn($m = false) {
+   return static::mbnSetReturn($this, new Mbn($this->s), $m);
+}
 
 }

@@ -37,6 +37,10 @@ var testMbn = function (nl) {
 
    var tests = [["0", "0"]];
 
+   tests.push(['new Mbn(null);', '0.00']);
+   tests.push(['new Mbn(true);', '1.00']);
+   tests.push(['new Mbn(false);', '0.00']);
+
    tests.push(['new Mbn0()', '0']);
    tests.push(['new Mbn0("1.4")', '1']);
    tests.push(['new Mbn0("1.5")', '2']);
