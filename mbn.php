@@ -36,7 +36,7 @@ class Mbn {
    protected static $MbnS = '.';
    //default truncate
    protected static $MbnT = false;
-   protected static $MbnCN;
+   protected static $MbnX;
    private $d = array();
    private $s = 1;
 
@@ -183,10 +183,10 @@ class Mbn {
     * Returns if object is not Mbn
     */
    private static function isNotMbn($a) {
-      if (empty(static::$MbnCN)) {
-         static::$MbnCN = get_class(new static());
+      if (!isset(static::$MbnX)) {
+         static::$MbnX = get_class(new static());
       }
-      return (!is_object($a) || (get_class($a) !== static::$MbnCN));
+      return (!is_object($a) || (get_class($a) !== static::$MbnX));
    }
 
    /**

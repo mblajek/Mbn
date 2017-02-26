@@ -24,7 +24,8 @@ var worktimeJS = new Date() - starttimeJS;
 
 <style>
 div{
-   min-height: 1em;
+   font-family: "Arial";
+   xmin-height: 1em;
    margin: 0px 4px 2px 4px;
    border-radius: 2px;
    padding: 2px 6px 2px 6px
@@ -44,9 +45,9 @@ div{
    font-family: "Consolas", monospace;
    background-color: lightgray;
    border: 1px solid gray;
+   whitespace:pre;
 }
 .result{
-   margin-bottom: 8px;
    font-family: "Consolas", monospace;
    border: 1px solid gray;
    display: inline-block;
@@ -55,7 +56,6 @@ div{
    border-radius: 2px 0px 0px 2px;
 }
 .label{
-   margin-bottom: 8px;
    font-family: "Consolas", monospace;
    border: 1px solid gray;
    display: inline-block;
@@ -75,7 +75,13 @@ div{
 <script>
 
 function w(a, c){
-	if(a instanceof Array){	
+   if(a === undefined) {
+      a = ""
+   } else if(a instanceof Array){
+      var al = a.length;
+      for(var i=0; i < al; i++){
+         a[i] = a[i].replace(/^ +/g, "&nbsp;&nbsp;");
+      }
 		a = a.join("<br>");
 	}
 	document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + ">" + a + "</div>");
@@ -86,7 +92,7 @@ function we(a){
 	w(a, "mono");
 	try {
 		var e = eval(acode);
-		w(e, "result");
+		w(String(e), "result");
 		w(typeof e, "label");
 	} catch (er) {
 		w(er, "result");
@@ -95,145 +101,247 @@ function we(a){
 		
 }
 
-//var Mbn3 = MbnCr(3);
-
+var modify = false;
 
 w("Mbn examples (JS v" + Mbn.prop().MbnV + " / PHP v" + versionPHP + ")", "title1");
-w("Tests", "title2");
+w("Tests and benchmark", "title2");
 w("<strong>PHP<br>" + ((typeof testPHP === "number") ? ("OK: " + testPHP + " tests") : testPHP) +
    "</strong><br>" + worktimePHP + " ms", "mono");
 w("<strong>JS<br>" + ((typeof testJS === "number") ? ("OK: " + testJS + " tests") : testJS) +
    "</strong><br>" + worktimeJS + " ms", "mono");
 
-w("Class declarations", "title2");
+w("Class declarations in JS", "title2");
 
 w(["//default: precission 2, dot separator, without trimming zeros", "//class allready defined in library", "//var Mbn = MbnCr();"], "mono");
 we('new Mbn("12.1");');
 
+w();
 var Mbn0 = MbnCr(0);
 w(["//precission 0", "var Mbn0 = MbnCr(0);"], "mono");
 we('new Mbn0("12.2");');
 
+w();
 var Mbn3 = MbnCr(3);
 w(['//precission 3', 'var Mbn3 = MbnCr(3);'], "mono");
 we('new Mbn3("12.1");');
 
+w();
 var Mbn4c = MbnCr({MbnP: 4, MbnS: ","});
 w(['//precission 4, coma separator', 'var Mbn4c = MbnCr({MbnP: 4, MbnS: ","});'], "mono");
 we('new Mbn4c("12.1");');
 
+w();
 var Mbn5t = MbnCr({MbnP: 5, MbnT: true});
 w(['//precission 5, trim zeros', 'var Mbn5t = MbnCr({MbnP: 5, MbnT: true});'], "mono");
 we('new Mbn5t("12.1");');
+
+w("Class declarations in PHP", "title2");
+
+w(['class Mbn0 extends Mbn{', ' //needed in each declaration', ' protected static $MbnX;', ' protected static $MbnP = 0;', '}'], "mono");
+
+w();
+w(['class Mbn4c extends Mbn{', ' protected static $MbnX;', ' protected static $MbnP = 4;', " protected static $MbnS = ',';", '}'], "mono");
+
+w();
+w(['class Mbn5t extends Mbn{', ' protected static $MbnX;', ' protected static $MbnP = 5;', " protected static $MbnT = true;", '}'], "mono");
 
 w("Constructor calls", "title2");
 
 we(["//empty", 'new Mbn();']);
 
+w();
 we(["//number", 'new Mbn(1.2);']);
 
+w();
+we(["//boolean", 'new Mbn(true);']);
+
+w();
 we(["//string with dot", 'new Mbn("1.2");']);
 
+w();
 we(['//string with coma', 'new Mbn("1,2");']);
 
+w();
 we(['//string without fractional part', 'new Mbn("1.");']);
 
+w();
 we(['//string without integer part', 'new Mbn(".2");']);
 
+w();
 we(['//another Mbn object', 'new Mbn(new Mbn("1,2"));']);
 
+w();
 we(['//another Mbn class object (any object convertible to string)', 'new Mbn4c(new Mbn("1,2"));']);
 
+w();
 we(['//called as funcion, calls itself as constructor', 'Mbn(4);']);
 
+w('Mbn behaviour is similar to string', "title2");
 
-w('// Przy działaniach identyczne zachowanie jak string "1.20", również dla $("#id").val(new Mbn(1.2));');
-w("");
+we('new Mbn("1,2") + "txt";');
 
-we('(new Mbn("1,2")) + "txt";');
+w();
+we('new Mbn("1,2") + new Mbn("1,2");');
 
-we('(new Mbn("1,2")) + 2;');
+w();
+we('new Mbn("1,2") + 2;');
 
-we('(new Mbn("1,2")) * 2;');
+w('Conversion to string and number', "title2");
 
-we('Number(new Mbn("1,2")) + 2;');
+we(['//correct, same as (new Mbn4c("1,2")).toString()', 'String(new Mbn4c("1,2"));']);
 
-we('(new Mbn("1,2")).toNumber() + 2;');
+w();
+we(['//incorrect for coma separator, same as Number("1,2000")', 'Number(new Mbn4c("1,2"));']);
 
-we('new Mbn("1.125");');
+w();
+we(['//correct', '(new Mbn4c("1,2")).toNumber();']);
 
-we('new Mbn("-1.125");');
+w('Operator precedence difference between JS and PHP', "title2");
 
-w("var Mbn3 = MbnCr(3);");
-w("");
+w(['//correct in JS', 'new Mbn("1.12").toNumber();'], "mono");
 
-we('new Mbn3("1.1255");');
+w();
+w(['//incorrect in PHP', 'new Mbn("1.12")->toNumber();'], "mono");
 
-we('(new Mbn("1,2")).inva();');
+w();
+w(['//correct in PHP', '(new Mbn("1.12"))->toNumber();'], "mono");
 
-we('(new Mbn("1,2")).add("1.3");');
+w('Standard rules for operations', "title2");
 
-we('(new Mbn("1,2")).sub("1.3");');
+w();
+we(['//all numbers are rounded with half-up rule', 'new Mbn("1.125");']);
 
-we('(new Mbn("1,2")).mul("1.3");');
+w();
+we('new Mbn0("-1.5");');
 
-we('(new Mbn("1,2")).mul("1.3").inva();');
+w();
+we(['//all numeric arguments converted to Mbn', 'new Mbn("1.125").add("1.125");']);
 
-we('(new Mbn("1,2")).mul("1.3").mul("0,01");');
+w();
+we(['//because', 'new Mbn("1.125").add(1.125);', '//means', 'new Mbn("1.125").add(new Mbn("1.125"));', '//means', 'new Mbn("1.13").add(new Mbn("1.13"));'], "mono");
 
-we('(new Mbn("1,2")).mul("1.3").mul("0,01").mul("100");');
+w();
+we(['//by default original value remains unchanged', 'var a = new Mbn("1.12");', 'a.add("1.12");', 'a;']);
 
-we('(new Mbn("1,2")).mul("1.3").mul("100").mul("0,01");');
+w();
+we(['//last argument (=== true) triggers modification of original variable', 'var a = new Mbn("1.12");', 'a.add("1.12", true);', 'a;']);
 
-we('(new Mbn("1,2")).mul("1.3").div("0,01").div("100");');
+w();
+we(['//returned values are Mbn objects, which allows method chaining', 'new Mbn("1.12").add("1.12").add("9");']);
 
-we('(new Mbn("1,2")).mul("1.3").div("100").div("0,01");');
+w();
+we(['var a = new Mbn("1.12");', 'a.add("1.12", true).add("9", true);', 'a;']);
 
-we('(new Mbn("1,2")).mul("1.3").div("1,2");');
+w();
+we(['//this code does not make sense', 'var a = new Mbn("1.12");', 'var b = a.add("1.12").add("9", true);', 'a + " " + b;']);
 
-we('(new Mbn("1,2")).mul("1.3").div("1,3");');
+w();
+we(['//this code may be usefull, but is somewhat messy', 'var a = new Mbn("1.12");', 'var b = a.add("1.12", true).add("9");', 'a + " " + b;']);
 
-we('(new Mbn("1,2")).mul("1.3").div("1.56");');
+w();
+we(['//exceptions like wrong formats, division by zero and other are thrown', 'new Mbn("1.x12");', 'new Mbn("1.12");']);
 
-we('(new Mbn("1,2")).mul("1.3").div("0.156");');
 
-we('(new Mbn("1,2")).mul("1.3").div("0.16");');
+w('Basic methods, returning number as Mbn object', "title2");
 
-w("przyklądy dające złe wyniki w standardowym JS (poza IE)");
-w("");
+w();
+we(['//add', 'new Mbn(5, modify).add(2);']);
 
-we("(315.5 + (315.5 * 0.23)).toFixed(2)");
+w();
+we(['//substract', 'new Mbn(5).sub(2, modify);']);
 
-we('(new Mbn("315,5")).add( (new Mbn("315,5")).mul(23).mul("0.01") );');
+w();
+we(['//multiply', 'new Mbn(5).mul(2, modify);']);
 
-we('new Mbn("23").mul("0.01").add("1").mul("315,5");');
+w();
+we(['//divide', 'new Mbn(5).div(2, modify);']);
 
-we("(13492105 / 1000).toFixed(2)");
+w();
+we(['//modulo (result has same sign as the original number)', 'new Mbn(5).mod(-2.1, modify);']);
 
-we('new Mbn(new Mbn3("13492105").div("1000"))');
+w();
+we(['//power (integer exponent)', 'new Mbn(5).pow(2, modify);']);
 
-w("// ostatni parametr - zmiana zmiennej");w("");
+w();
+we(['//square root', 'new Mbn(2).sqrt(modify);']);
 
-we('var a = new Mbn("0,2"); a.add("0,9");');
+w();
+we(['//minimum', 'new Mbn(5).min(2, modify);']);
 
-we('var a = new Mbn("0,2"); a.add("0,9"); a;');
+w();
+we(['//maximum', 'new Mbn(5).max(2, modify);']);
 
-we('var a = new Mbn("0,2"); a.add("0,9", true);');
+w();
+we(['//round', 'new Mbn(5.5).round(modify);']);
 
-we('var a = new Mbn("0,2"); a.add("0,9", true); a;');
+w();
+we(['//ceiling', 'new Mbn(-5.6).ceil(modify);']);
 
-we('var a = new Mbn("0,2"); a.add("0,9", true); a.inva(true); a.sub("-1.2", true); a;');
+w();
+we(['//floor', 'new Mbn(-5.4).floor(modify);']);
 
-w("// porównania");w("");
+w();
+we(['//integer part of number', 'new Mbn(-5.6).int(modify);']);
 
-we('(new Mbn("0.1")).cmp("0");');
+w();
+we(['//absolute value', 'new Mbn(-5.4).abs(modify);']);
 
-we('(new Mbn("0.1")).cmp("0.1");');
+w();
+we(['//additional inverse of number', 'new Mbn(5).inva(modify);']);
 
-we('(new Mbn("0.1")).cmp("0.2");');
+w();
+we(['//multiplicative inverse', 'new Mbn(5).invm(modify);']);
 
-we('(new Mbn("0,1")).eq(0.1);');
+w();
+we(['//sign of number (-1, 0, 1)', 'new Mbn(0.5).sgn(modify);']);
 
-we('(new Mbn("0.1")).eq("0.2");');
+w("Other methods", "title2"); 
+
+we(['//set value', 'new Mbn(0.5).set(4);']);
+
+we(['//standard set, using =, sets reference to existing object', 'var a = new Mbn(2);', 'var b = new Mbn();', 'var c = new Mbn();', 'b = a;', 'c.set(a);', 'a.add(3, true);', 'b + " " + c;']);
+
+w();
+we(['//compare with other number, returns number', '//1 if number is greater than other value, 0 if equals, -1 if is lower', 'new Mbn(0.5).cmp(4);']);
+
+w();
+we(['//second argumend defines maximum difference still treated as equality', 'new Mbn(0.5).cmp(0.7, 0.2);']);
+
+w();
+we(['//check if numbers are equal, also maximum difference can be passed', 'new Mbn(0.9).eq(0.7, 0.2);']);
+
+w();
+we(['//split value to numbers, which sum correctly to it, returns array', '//number of parts (default 2) or array with ratios can be given', 'new Mbn(3).split();']);
+
+we('new Mbn(3).split().join(" ");');
+
+we('new Mbn(5).split([1, 1, 2]).join(" ");');
+
+we('new Mbn(2.02).split([1, 1, 2]).join(" ");');
+
+//split
+
+
+
+
+
+
+
+
+w("Examples of calculations, that give wrong results, and can be easily corrected with Mbn", "title2");
+
+we("(1.4 - 0.4) === 1;");
+
+we("new Mbn(1.4).sub(0.4).eq(1);");
+
+w();
+we(["//orrect in IE", "(315.5 * 1.23).toFixed(2);"]);
+
+we('new Mbn(315.5).mul(1.23);');
+
+w();
+we(["//correct in IE", "(13492105 / 1000).toFixed(2);"]);
+
+we('new Mbn(13492105).div(1000);');
 
 </script></body>

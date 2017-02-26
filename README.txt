@@ -3,14 +3,14 @@ Library for PHP and JS to do calculations with any precission, with correct appr
 	mbn.js - Library in JS
 	mbn.php - Library in PHP
 
-	mbn_test.js - Tests for JS version
-	mbn_test.php - Tests for PHP version
+	mbn_test.js - Unit tests for JS version
+	mbn_test.php - Unit tests for PHP version
 
 	mbn.min.js - Minified library in JS
 
-	index.php - Runs tests for booth versions and displays some examples (in Polish)
+	index.php - Destription of library with examples, also runs unit tests
 
-	Eval/* - Calculator based on library, with copied mbn.min.js and own index.php
+	eval.php - Calculator based on library
 
 Now versions of PHP and JS are not the same, PHP does not have some functions and some arguments, and has worse pow() function, will be synchronised soon.
 
