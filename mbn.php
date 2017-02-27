@@ -28,7 +28,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   const MbnV = '1.8';
+   const MbnV = '1.9';
 
    //default precision
    protected static $MbnP = 2;
@@ -578,18 +578,53 @@ class Mbn {
     * @param {number} n
     * @param {boolean=} m
     */
-   function pow($n, $m = false) {
-      $nm = new static($n);
-      if (!$nm->isInt()) {
-         throw new MbnErr();
+   function pow($nd, $m = false) {
+      $n = new static($nd);
+      if (!$n->isInt()) {
+         throw new MbnErr('.pow', 'only integer exponents supported', $n);
       }
-      $nn = $nm->toNumber();
-      $r = new static(1);
-      for ($i = 0; $i < $nn; $i++) {
-         $r->mul($this, true);
+      $ns = $n->s;
+      $n->s *= $n->s;
+
+      $mbn1 = new static(1);
+      $mbn2 = new static(2);
+
+      if ($ns === -1 && $this->abs()->cmp($mbn1) === -1) {
+         if ($this->eq($this->invm()->invm())) {
+            $this . invm(true);
+            $ns = -$ns;
+         }
       }
-      for ($i = 0; $i > $nn; $i--) {
-         $r->div($this, true);
+      $rx = new static($this);
+      $dd = 0;
+      $cdd = 0;
+      $r = new static($mbn1);
+      while (!$rx->isInt()) {
+         $rx->d[] = 0;
+         static::mbnCarry($rx);
+         $dd++;
+      }
+      while ($n->s === 1) {
+         if ($n->d[count($n->d) - static::$MbnP - 1] % 2) {
+            $r->mul($rx, true);
+            $n->sub($mbn1, true);
+            $cdd += $dd;
+         }
+         $n->div($mbn2, true)->int(true);
+         if ($n->s !== 1) {
+            break;
+         }
+         $rx->mul($rx, true);
+         $dd *= 2;
+      }
+      if ($cdd >= 1) {
+         if ($cdd > 1) {
+            $r->d = array_slice($r->d, 0, 1 - $cdd);
+         }
+         static::mbnRoundLast($r);
+      }
+      if ($ns === -1) {
+         $r->invm(true);
       }
       return static::mbnSetReturn($this, $r, $m);
    }
@@ -680,6 +715,7 @@ class Mbn {
    return($r->s >= 0) ?  $r->floor(true) :  $r->ceil(true);
 
 
+
    }
 
 /**
@@ -721,7 +757,7 @@ function sqrt($m = false) {
    $r = new static($t);
    $mbn2 = new static('2');
    if ($r->s === -1) {
-      throw new MbnErr();
+      throw new MbnErr('.sqrt', 'square root of negative number', $this);
    } else if ($r->s === 1) {
       do {
          $rb->set($r);

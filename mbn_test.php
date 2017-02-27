@@ -266,13 +266,13 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['(new Mbn3c("0.1"))->eq("-0.2", "0.2")', 'false'];
 
    $tests[] = ['(new Mbn0("2"))->pow("5")', '32'];
-   //$tests[] = ['(new Mbn0("2"))->pow("-5")', '0'];
+   $tests[] = ['(new Mbn0("2"))->pow("-5")', '0'];
    $tests[] = ['(new Mbn0("3"))->pow("3")', '27'];
    $tests[] = ['(new Mbn0("3"))->pow("-3")', '0'];
    $tests[] = ['(new Mbn(.5))->pow(7)', '0.01'];
 
    $tests[] = ['(new Mbn3c("2"))->pow("5")', '32,000'];
-   //$tests[] = ['(new Mbn3c("2"))->pow("-5")', '0,031'];
+   $tests[] = ['(new Mbn3c("2"))->pow("-5")', '0,031'];
    $tests[] = ['(new Mbn3c("1.1"))->pow("4")', '1,464'];
    $tests[] = ['(new Mbn3c("1.1"))->pow("-4")', '0,683'];
 

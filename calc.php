@@ -29,7 +29,7 @@ var lastIn = null;
 var vars = {
 };
 var inchange = function(el){
-   if(lastIn === el.value){
+   if(lastIn === el.value + "_" + MbnP){
       return;
    }
    var n = el.nextElementSibling;
@@ -37,9 +37,10 @@ var inchange = function(el){
       n.value = '...';
       try{
          n.value = Mbnx.eval(el.value, vars);
-         lastIn = el.value;
+         lastIn = el.value + "_" + MbnP;
       }catch(e){
          n.value = e;
+         lastIn = null;
       }
    } else {
       n.value = "";

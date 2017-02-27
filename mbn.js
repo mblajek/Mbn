@@ -127,7 +127,7 @@ var MbnCr = function (opt) {
     */
    var mbnRoundLast = function (a) {
       r = a._d;
-      if(r.length < 2){
+      if (r.length < 2) {
          r.unshift(0);
       }
       r[r.length - 2] += (r.pop() >= 5) ? 1 : 0;
@@ -593,18 +593,24 @@ var MbnCr = function (opt) {
     * @param {*} n
     * @param {boolean=} m
     */
-   Mbn.prototype.pow = function (n, m) {
-      n = new Mbn(n);
+   Mbn.prototype.pow = function (nd, m) {
+      var n = new Mbn(nd);
       if (!n.isInt()) {
-         throw new MbnErr(".pow", "only integer exponents supported");
+         throw new MbnErr(".pow", "only integer exponents supported", n);
       }
       var ns = n._s;
       n._s *= n._s;
+      var mbn1 = new Mbn(1);
+      var mbn2 = new Mbn(2);
+      if (ns === -1 && this.abs().cmp(mbn1) === -1) {
+         if (this.eq(this.invm().invm())) {
+            this.invm(true);
+            ns = -ns;
+         }
+      }
       var rx = new Mbn(this);
       var dd = 0;
       var cdd = 0;
-      var mbn1 = new Mbn(1);
-      var mbn2 = new Mbn(2);
       var r = new Mbn(mbn1);
       while (!rx.isInt()) {
          rx._d.push(0);
@@ -743,7 +749,7 @@ var MbnCr = function (opt) {
     * @param {boolean=} m
     */
    Mbn.prototype.max = function (b, m) {
-      return mbnSetReturn(this, new Mbn(((this.cmp(b)) >= 0 )? this : b), m);
+      return mbnSetReturn(this, new Mbn(((this.cmp(b)) >= 0) ? this : b), m);
    };
 
    /**
@@ -845,7 +851,6 @@ var MbnCr = function (opt) {
       var rpno = [];
       var neg = false;
       var t = null;
-      var tl;
       var tok;
       var mtch;
       var invaUop = [funPrx, true, 'inva'];

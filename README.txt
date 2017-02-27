@@ -21,5 +21,4 @@ JS & PHP
    - More tests
    ?- Reduce
 PHP
-   - fast and accurate pow()
    ?- add eval()
