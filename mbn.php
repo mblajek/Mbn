@@ -575,7 +575,7 @@ class Mbn {
 
    /**
     * Calculates n-th power of number, n must be integer
-    * @param {number} n
+    * @param {number} nd
     * @param {boolean=} m
     */
    function pow($nd, $m = false) {
@@ -590,10 +590,8 @@ class Mbn {
       $mbn2 = new static(2);
 
       if ($ns === -1 && $this->abs()->cmp($mbn1) === -1) {
-         if ($this->eq($this->invm()->invm())) {
-            $this . invm(true);
-            $ns = -$ns;
-         }
+         $this->invm(true);
+         $ns = -$ns;
       }
       $rx = new static($this);
       $dd = 0;
@@ -713,6 +711,8 @@ class Mbn {
    function int($m = false) {
    $r =($m === true) ? $this: new static($this);
    return($r->s >= 0) ?  $r->floor(true) :  $r->ceil(true);
+
+
 
 
 

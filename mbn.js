@@ -590,7 +590,7 @@ var MbnCr = function (opt) {
 
    /**
     * Calculates n-th power of number, n must be integer
-    * @param {*} n
+    * @param {*} nd
     * @param {boolean=} m
     */
    Mbn.prototype.pow = function (nd, m) {
@@ -603,10 +603,8 @@ var MbnCr = function (opt) {
       var mbn1 = new Mbn(1);
       var mbn2 = new Mbn(2);
       if (ns === -1 && this.abs().cmp(mbn1) === -1) {
-         if (this.eq(this.invm().invm())) {
-            this.invm(true);
-            ns = -ns;
-         }
+         this.invm(true);
+         ns = -ns;
       }
       var rx = new Mbn(this);
       var dd = 0;

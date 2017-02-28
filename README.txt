@@ -12,7 +12,7 @@ Library for PHP and JS to do calculations with any precission, with correct appr
 
 	eval.php - Calculator based on library
 
-Now versions of PHP and JS are not the same, PHP does not have some functions and some arguments, and has worse pow() function, will be synchronised soon.
+Now versions of PHP and JS are not the same, PHP does not have some functions and some arguments will be synchronised soon.
 
 TO DO:
 JS & PHP
@@ -20,5 +20,6 @@ JS & PHP
    - Refactoring
    - More tests
    ?- Reduce
+   ?- version without pow(), eval() and constants
 PHP
-   ?- add eval()
+   ?- add eval() and constants
