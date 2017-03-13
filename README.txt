@@ -7,6 +7,7 @@ Library for PHP and JS to do calculations with any precission, with correct appr
 	mbn_test.php - Unit tests for PHP version
 
 	mbn.min.js - Minified library in JS
+	mbn.slim.min.js - Minified library in JS without pow(). eval() and constants
 
 	index.php - Destription of library with examples, also runs unit tests
 

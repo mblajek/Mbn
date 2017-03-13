@@ -307,8 +307,8 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['$m = new Mbn("4.32"); $m->invm(true); $o=$m', '0.23'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->abs(); $o=$m', '-4.32'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->abs(true); $o=$m', '4.32'];
-   $tests[] = ['$m = new Mbn("-4.32"); $m->int(); $o=$m', '-4.32'];
-   $tests[] = ['$m = new Mbn("-4.32"); $m->int(true); $o=$m', '-4.00'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->intp(); $o=$m', '-4.32'];
+   $tests[] = ['$m = new Mbn("-4.32"); $m->intp(true); $o=$m', '-4.00'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->floor(); $o=$m', '-4.32'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->floor(true); $o=$m', '-5.00'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->ceil(); $o=$m', '-4.32'];
@@ -338,11 +338,11 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['(new Mbn3c("-3.234"))->mod("1")', '-0,234'];
    $tests[] = ['(new Mbn3c("2.234"))->mod("4")', '2,234'];
 
-   $tests[] = ['(new Mbn3c("2.123"))->int()', '2,000'];
-   $tests[] = ['(new Mbn3c("3.987"))->int()', '3,000'];
-   $tests[] = ['(new Mbn3c("-4.123"))->int()', '-4,000'];
-   $tests[] = ['(new Mbn3c("-5.987"))->int()', '-5,000'];
-   $tests[] = ['(new Mbn3c("0"))->int()', '0,000'];
+   $tests[] = ['(new Mbn3c("2.123"))->intp()', '2,000'];
+   $tests[] = ['(new Mbn3c("3.987"))->intp()', '3,000'];
+   $tests[] = ['(new Mbn3c("-4.123"))->intp()', '-4,000'];
+   $tests[] = ['(new Mbn3c("-5.987"))->intp()', '-5,000'];
+   $tests[] = ['(new Mbn3c("0"))->intp()', '0,000'];
 
    $tests[] = ['(new Mbn("-99.5"))->mod(100)', '-99.50'];
    $tests[] = ['(new Mbn("99.5"))->mod(100)', '99.50'];

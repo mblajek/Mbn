@@ -27,8 +27,10 @@ class MbnErr extends Exception {
  */
 class Mbn {
 
+   protected static $MbnE = false;
+
    //version of MultiByteNumber library
-   const MbnV = '1.9';
+   const MbnV = '1.10';
 
    //default precision
    protected static $MbnP = 2;
@@ -222,7 +224,8 @@ class Mbn {
           'MbnV' => static::MbnV,
           'MbnP' => static::$MbnP,
           'MbnS' => static::$MbnS,
-          'MbnT' => static::$MbnT
+          'MbnT' => static::$MbnT,
+          'MbnE' => static::$MbnE
       );
    }
 
@@ -512,7 +515,7 @@ class Mbn {
     */
    function mod($b, $m = false) {
       $ba = static::isNotMbn($b) ? (new static($b))->abs() : $b->abs();
-      $r = $this->sub($this->div($ba)->int()->mul($ba));
+      $r = $this->sub($this->div($ba)->intp()->mul($ba));
       if (($r->s + $this->s) === 0) {
          $r = $ba->sub($r->abs());
          $r->s = $this->s;
@@ -571,60 +574,6 @@ class Mbn {
          }
       }
       return true;
-   }
-
-   /**
-    * Calculates n-th power of number, n must be integer
-    * @param {number} nd
-    * @param {boolean=} m
-    */
-   function pow($nd, $m = false) {
-      $n = new static($nd);
-      if (!$n->isInt()) {
-         throw new MbnErr('.pow', 'only integer exponents supported', $n);
-      }
-      $ns = $n->s;
-      $n->s *= $n->s;
-
-      $mbn1 = new static(1);
-      $mbn2 = new static(2);
-
-      if ($ns === -1 && $this->abs()->cmp($mbn1) === -1) {
-         $this->invm(true);
-         $ns = -$ns;
-      }
-      $rx = new static($this);
-      $dd = 0;
-      $cdd = 0;
-      $r = new static($mbn1);
-      while (!$rx->isInt()) {
-         $rx->d[] = 0;
-         static::mbnCarry($rx);
-         $dd++;
-      }
-      while ($n->s === 1) {
-         if ($n->d[count($n->d) - static::$MbnP - 1] % 2) {
-            $r->mul($rx, true);
-            $n->sub($mbn1, true);
-            $cdd += $dd;
-         }
-         $n->div($mbn2, true)->int(true);
-         if ($n->s !== 1) {
-            break;
-         }
-         $rx->mul($rx, true);
-         $dd *= 2;
-      }
-      if ($cdd >= 1) {
-         if ($cdd > 1) {
-            $r->d = array_slice($r->d, 0, 1 - $cdd);
-         }
-         static::mbnRoundLast($r);
-      }
-      if ($ns === -1) {
-         $r->invm(true);
-      }
-      return static::mbnSetReturn($this, $r, $m);
    }
 
    /**
@@ -708,72 +657,121 @@ class Mbn {
     * Returns integer part of number
     * @param {boolean=} m
     */
-   function int($m = false) {
-   $r =($m === true) ? $this: new static($this);
-   return($r->s >= 0) ?  $r->floor(true) :  $r->ceil(true);
-
-
-
-
-
+   function intp($m = false) {
+      $r = ($m === true) ? $this : new static($this);
+      return($r->s >= 0) ? $r->floor(true) : $r->ceil(true);
    }
 
-/**
- * returns if number equals to b, or if d is set, difference is lower or equals d
- * @param {*} b
- * @param {*} d
- */
-function eq($b, $d = 0) {
-   return $this->cmp($b, $d) === 0;
-}
-
-/**
- * returns minimum from value and b
- * @param {*} b
- * @param {boolean=} m
- */
-function min($b, $m = false) {
-   return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
-}
-
-/**
- * returns maximum from value and b
- * @param {*} b
- * @param {boolean=} m
- */
-function max($b, $m = false) {
-   return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
-}
-
-/**
- * calculates square root of number
- * @param {boolean=} m
- */
-function sqrt($m = false) {
-   $t = new static($this);
-   $t->d[] = 0;
-   $t->d[] = 0;
-   $rb = new static($t);
-   $r = new static($t);
-   $mbn2 = new static('2');
-   if ($r->s === -1) {
-      throw new MbnErr('.sqrt', 'square root of negative number', $this);
-   } else if ($r->s === 1) {
-      do {
-         $rb->set($r);
-         $r->add($t->div($r), true)->div($mbn2, true);
-      } while (!$rb->eq($r));
+   /**
+    * returns if number equals to b, or if d is set, difference is lower or equals d
+    * @param {*} b
+    * @param {*} d
+    */
+   function eq($b, $d = 0) {
+      return $this->cmp($b, $d) === 0;
    }
-   static::mbnRoundLast($r);
-   return static::mbnSetReturn($this, $r, $m);
-}
 
-/**
- * returns sign from value
- * @param {boolean=} m
- */
-function sgn($m = false) {
-   return static::mbnSetReturn($this, new Mbn($this->s), $m);
-}
+   /**
+    * returns minimum from value and b
+    * @param {*} b
+    * @param {boolean=} m
+    */
+   function min($b, $m = false) {
+      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
+   }
+
+   /**
+    * returns maximum from value and b
+    * @param {*} b
+    * @param {boolean=} m
+    */
+   function max($b, $m = false) {
+      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
+   }
+
+   /**
+    * calculates square root of number
+    * @param {boolean=} m
+    */
+   function sqrt($m = false) {
+      $t = new static($this);
+      $t->d[] = 0;
+      $t->d[] = 0;
+      $rb = new static($t);
+      $r = new static($t);
+      $mbn2 = new static('2');
+      if ($r->s === -1) {
+         throw new MbnErr('.sqrt', 'square root of negative number', $this);
+      } else if ($r->s === 1) {
+         do {
+            $rb->set($r);
+            $r->add($t->div($r), true)->div($mbn2, true);
+         } while (!$rb->eq($r));
+      }
+      static::mbnRoundLast($r);
+      return static::mbnSetReturn($this, $r, $m);
+   }
+
+   /**
+    * returns sign from value
+    * @param {boolean=} m
+    */
+   function sgn($m = false) {
+      return static::mbnSetReturn($this, new Mbn($this->s), $m);
+   }
+
+   /**
+    * Calculates n-th power of number, n must be integer
+    * @param {number} nd
+    * @param {boolean=} m
+    */
+   function pow($nd, $m = false) {
+      $n = new static($nd);
+      if (!$n->isInt()) {
+         throw new MbnErr('.pow', 'only integer exponents supported', $n);
+      }
+      $ns = $n->s;
+      $n->s *= $n->s;
+
+      $mbn1 = new static(1);
+      $mbn2 = new static(2);
+
+      if ($ns === -1 && $this->abs()->cmp($mbn1) === -1) {
+         $this->invm(true);
+         $ns = -$ns;
+      }
+      $rx = new static($this);
+      $dd = 0;
+      $cdd = 0;
+      $r = new static($mbn1);
+      while (!$rx->isInt()) {
+         $rx->d[] = 0;
+         static::mbnCarry($rx);
+         $dd++;
+      }
+      while ($n->s === 1) {
+         if ($n->d[count($n->d) - static::$MbnP - 1] % 2) {
+            $r->mul($rx, true);
+            $n->sub($mbn1, true);
+            $cdd += $dd;
+         }
+         $n->div($mbn2, true)->intp(true);
+         if ($n->s !== 1) {
+            break;
+         }
+         $rx->mul($rx, true);
+         $dd *= 2;
+      }
+      if ($cdd >= 1) {
+         if ($cdd > 1) {
+            $r->d = array_slice($r->d, 0, 1 - $cdd);
+         }
+         static::mbnRoundLast($r);
+      }
+      if ($ns === -1) {
+         $r->invm(true);
+      }
+      return static::mbnSetReturn($this, $r, $m);
+   }
 
 }

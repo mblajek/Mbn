@@ -26,13 +26,13 @@ var MbnErr = function (f, m, v) {
  * @param {*=} opt
  */
 var MbnCr = function (opt) {
+   var MbnE = false;
 
    if (typeof opt !== "object") {
-
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.10";
+   var MbnV = "1.11";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -56,12 +56,6 @@ var MbnCr = function (opt) {
    if (MbnT !== true && MbnT !== false) {
       throw new MbnErr("Cr", "invalid truncate", MbnT);
    }
-
-   var MbnConst = {
-      PI: "3.1415926535897932384626433832795028841972",
-      E: "2.7182818284590452353602874713526624977573",
-      MbnP: MbnP
-   };
 
    /**
     * Private function, carries digits bigger than 9, and removes leading zeros
@@ -145,7 +139,7 @@ var MbnCr = function (opt) {
       a._s = 1;
       a._d = [];
       var n0 = n.charAt(0);
-      if (n0 === "-" || n0 === "+" || n0 === "=") {
+      if (n0 === "-" || n0 === "+" || (n0 === "=" && MbnE)) {
          a._s = (n0 === "-") ? -1 : 1;
          n = n.slice(1);
          if (n0 === "=") {
@@ -246,7 +240,7 @@ var MbnCr = function (opt) {
     * Returns properties of Mbn class
     */
    Mbn.prop = function () {
-      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT};
+      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE};
    };
 
    /**
@@ -523,7 +517,7 @@ var MbnCr = function (opt) {
     */
    Mbn.prototype.mod = function (b, m) {
       var ba = (!(b instanceof Mbn)) ? (new Mbn(b)).abs() : b.abs();
-      var r = this.sub(this.div(ba).int().mul(ba));
+      var r = this.sub(this.div(ba).intp().mul(ba));
       if ((r._s + this._s) === 0) {
          r = ba.sub(r.abs());
          r._s = this._s;
@@ -586,58 +580,6 @@ var MbnCr = function (opt) {
          }
       }
       return true;
-   };
-
-   /**
-    * Calculates n-th power of number, n must be integer
-    * @param {*} nd
-    * @param {boolean=} m
-    */
-   Mbn.prototype.pow = function (nd, m) {
-      var n = new Mbn(nd);
-      if (!n.isInt()) {
-         throw new MbnErr(".pow", "only integer exponents supported", n);
-      }
-      var ns = n._s;
-      n._s *= n._s;
-      var mbn1 = new Mbn(1);
-      var mbn2 = new Mbn(2);
-      if (ns === -1 && this.abs().cmp(mbn1) === -1) {
-         this.invm(true);
-         ns = -ns;
-      }
-      var rx = new Mbn(this);
-      var dd = 0;
-      var cdd = 0;
-      var r = new Mbn(mbn1);
-      while (!rx.isInt()) {
-         rx._d.push(0);
-         mbnCarry(rx);
-         dd++;
-      }
-      while (n._s === 1) {
-         if (n._d[n._d.length - MbnP - 1] % 2) {
-            r.mul(rx, true);
-            n.sub(mbn1, true);
-            cdd += dd;
-         }
-         n.div(mbn2, true).int(true);
-         if (n._s !== 1) {
-            break;
-         }
-         rx.mul(rx, true);
-         dd *= 2;
-      }
-      if (cdd >= 1) {
-         if (cdd > 1) {
-            r._d = r._d.slice(0, 1 - cdd);
-         }
-         mbnRoundLast(r);
-      }
-      if (ns === -1) {
-         r.invm(true);
-      }
-      return mbnSetReturn(this, r, m);
    };
 
    /**
@@ -718,7 +660,7 @@ var MbnCr = function (opt) {
     * Returns integer part of number
     * @param {boolean=} m
     */
-   Mbn.prototype.int = function (m) {
+   Mbn.prototype.intp = function (m) {
       var r = (m === true) ? this : new Mbn(this);
       return (r._s >= 0) ? r.floor(true) : r.ceil(true);
    };
@@ -780,6 +722,70 @@ var MbnCr = function (opt) {
    Mbn.prototype.sgn = function (m) {
       return mbnSetReturn(this, new Mbn(this._s), m);
    };
+
+// PCE_EXT_START
+
+   MbnE = true;
+
+   /**
+    * Calculates n-th power of number, n must be integer
+    * @param {*} nd
+    * @param {boolean=} m
+    */
+   Mbn.prototype.pow = function (nd, m) {
+      var n = new Mbn(nd);
+      if (!n.isInt()) {
+         throw new MbnErr(".pow", "only integer exponents supported", n);
+      }
+      var ns = n._s;
+      n._s *= n._s;
+      var mbn1 = new Mbn(1);
+      var mbn2 = new Mbn(2);
+      if (ns === -1 && this.abs().cmp(mbn1) === -1) {
+         this.invm(true);
+         ns = -ns;
+      }
+      var rx = new Mbn(this);
+      var dd = 0;
+      var cdd = 0;
+      var r = new Mbn(mbn1);
+      while (!rx.isInt()) {
+         rx._d.push(0);
+         mbnCarry(rx);
+         dd++;
+      }
+      while (n._s === 1) {
+         if (n._d[n._d.length - MbnP - 1] % 2) {
+            r.mul(rx, true);
+            n.sub(mbn1, true);
+            cdd += dd;
+         }
+         n.div(mbn2, true).intp(true);
+         if (n._s !== 1) {
+            break;
+         }
+         rx.mul(rx, true);
+         dd *= 2;
+      }
+      if (cdd >= 1) {
+         if (cdd > 1) {
+            r._d = r._d.slice(0, 1 - cdd);
+         }
+         mbnRoundLast(r);
+      }
+      if (ns === -1) {
+         r.invm(true);
+      }
+      return mbnSetReturn(this, r, m);
+   };
+
+
+   var MbnConst = {
+      PI: "3.1415926535897932384626433832795028841972",
+      E: "2.7182818284590452353602874713526624977573",
+      MbnP: MbnP
+   };
+
 
    /**
     * returns PI
@@ -963,6 +969,9 @@ var MbnCr = function (opt) {
          if (tn instanceof Mbn) {
             rpn.push(tn);
          } else if (fnames.hasOwnProperty(tn)) {
+            if (tn === "int") {
+               tn = "intp";
+            }
             rpn[rpn.length - 1][tn](true);
          } else {
             var pp = rpn.pop();
@@ -977,6 +986,8 @@ var MbnCr = function (opt) {
          MbnConst[i] = new Mbn(MbnConst[i]);
       }
    }
+
+// PCE_EXT_END
 
    return Mbn;
 };

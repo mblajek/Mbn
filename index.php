@@ -278,7 +278,7 @@
       we(['//floor', 'new Mbn(-5.4).floor(modify);']);
 
       w();
-      we(['//integer part of number', 'new Mbn(-5.6).int(modify);']);
+      we(['//integer part of number', 'new Mbn(-5.6).intp(modify);']);
 
       w();
       we(['//absolute value', 'new Mbn(-5.4).abs(modify);']);

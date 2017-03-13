@@ -287,8 +287,8 @@ var testMbn = function (nl) {
    tests.push(['var m = new Mbn("4.32"); m.invm(true); m', '0.23']);
    tests.push(['var m = new Mbn("-4.32"); m.abs(); m', '-4.32']);
    tests.push(['var m = new Mbn("-4.32"); m.abs(true); m', '4.32']);
-   tests.push(['var m = new Mbn("-4.32"); m.int(); m', '-4.32']);
-   tests.push(['var m = new Mbn("-4.32"); m.int(true); m', '-4.00']);
+   tests.push(['var m = new Mbn("-4.32"); m.intp(); m', '-4.32']);
+   tests.push(['var m = new Mbn("-4.32"); m.intp(true); m', '-4.00']);
    tests.push(['var m = new Mbn("-4.32"); m.floor(); m', '-4.32']);
    tests.push(['var m = new Mbn("-4.32"); m.floor(true); m', '-5.00']);
    tests.push(['var m = new Mbn("-4.32"); m.ceil(); m', '-4.32']);
@@ -318,11 +318,11 @@ var testMbn = function (nl) {
    tests.push(['new Mbn3c("-3.234").mod("1")', '-0,234']);
    tests.push(['new Mbn3c("2.234").mod("4")', '2,234']);
 
-   tests.push(['new Mbn3c("2.123").int()', '2,000']);
-   tests.push(['new Mbn3c("3.987").int()', '3,000']);
-   tests.push(['new Mbn3c("-4.123").int()', '-4,000']);
-   tests.push(['new Mbn3c("-5.987").int()', '-5,000']);
-   tests.push(['new Mbn3c("0").int()', '0,000']);
+   tests.push(['new Mbn3c("2.123").intp()', '2,000']);
+   tests.push(['new Mbn3c("3.987").intp()', '3,000']);
+   tests.push(['new Mbn3c("-4.123").intp()', '-4,000']);
+   tests.push(['new Mbn3c("-5.987").intp()', '-5,000']);
+   tests.push(['new Mbn3c("0").intp()', '0,000']);
 
    tests.push(['new Mbn("-99.5").mod(100)', '-99.50']);
    tests.push(['new Mbn("99.5").mod(100)', '99.50']);
