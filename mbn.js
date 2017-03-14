@@ -32,7 +32,7 @@ var MbnCr = function (opt) {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.11";
+   var MbnV = "1.12";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -128,6 +128,8 @@ var MbnCr = function (opt) {
       mbnCarry(a);
    };
 
+   var wsRx1 = /^\s*([+=-]?)\s*/;
+   var wsRx2 = /\s+$/;
    /**
     * Private function, sets value of a to string value n
     * @param {Mbn} a
@@ -135,7 +137,7 @@ var MbnCr = function (opt) {
     * @param {*=} v
     */
    var mbnFromString = function (a, nd, v) {
-      var n = nd.replace(/^\s*([+=-]?)\s*/, "$1").replace(/\s+$/, "");
+      var n = nd.replace(wsRx1, "$1").replace(wsRx2, "");
       a._s = 1;
       a._d = [];
       var n0 = n.charAt(0);
@@ -779,6 +781,36 @@ var MbnCr = function (opt) {
       return mbnSetReturn(this, r, m);
    };
 
+   var fnReduce = {abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1, add: 2, mul: 2, min: 2, max: 2};
+   /**
+    * run function on each element, returns single value for 2 argument function,
+    * and array, for 1 argument
+    * @param {string} fn
+    * @param {Array} arr
+    */
+   Mbn.reduce = function(fn, arr) {
+      if (!fnReduce.hasOwnProperty(fn)){
+         throw new MbnErr(".reduce", "invalid function name", fn);
+      }
+      if (!(arr instanceof Array)){
+         throw new MbnErr(".reduce", "argument is not array", arr);
+      }
+      var r;
+      var arrl = arr.length;
+      if(fnReduce[fn] === 1){
+         r = [];
+         for(var i = 0; i < arrl; i++){
+            r.push((new Mbn(arr[i]))[fn](true));
+         }
+      }else{
+         r = new Mbn((arrl > 0) ? arr[0] : 0);
+         for(var i = 1; i < arrl; i++){
+            r[fn](arr[i], true);
+         }
+      }
+      return r;
+   }
+
 
    var MbnConst = {
       PI: "3.1415926535897932384626433832795028841972",
@@ -808,7 +840,7 @@ var MbnCr = function (opt) {
       return new Mbn(MbnConst.MbnP);
    };
 
-   var fnames = {abs: 1, inva: 2, ceil: 1, floor: 1, invm: 2, sqrt: 1, round: 1, sgn: 1, int: 1};
+   var fnEval = {abs: true, inva: false, ceil: true, floor: true, sqrt: true, round: true, sgn: true, int: "intp"};
    var endBop = ['bop', 'pc'];
    var uopVal = ['num', "name", "uop", "po"];
    var bops = {
@@ -833,13 +865,14 @@ var MbnCr = function (opt) {
       pr: {rx: /^(%)\s*/, next: endBop, end: true}
    };
 
+   var wsRx3 = /^\s+/;
    /**
     * eval expression
     * @param {string} expr
     * @param {*=} vars
     */
    Mbn.eval = function (expr, vars) {
-      expr = expr.replace(/^\s+/, "");
+      expr = expr.replace(wsRx3, "");
       var vnames = {};
       if (vars !== undefined) {
          for (var i in vars) {
@@ -885,7 +918,7 @@ var MbnCr = function (opt) {
                rpns.push(new Mbn(tok));
                break;
             case "name":
-               if (fnames.hasOwnProperty(tok) && fnames[tok] === 1) {
+               if (fnEval.hasOwnProperty(tok) && fnEval[tok] !== false) {
                   t = "fn";
                   rpno.push([funPrx, true, tok]);
                } else if (vnames.hasOwnProperty(tok)) {
@@ -968,9 +1001,9 @@ var MbnCr = function (opt) {
          var tn = rpns[i];
          if (tn instanceof Mbn) {
             rpn.push(tn);
-         } else if (fnames.hasOwnProperty(tn)) {
-            if (tn === "int") {
-               tn = "intp";
+         } else if (fnEval.hasOwnProperty(tn)) {
+            if (typeof fnEval[tn] === "string") {
+               tn = fnEval[tn];
             }
             rpn[rpn.length - 1][tn](true);
          } else {

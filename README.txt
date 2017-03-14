@@ -20,7 +20,7 @@ JS & PHP
    - Optimize div()
    - Refactoring
    - More tests
-   ?- Reduce
-   ?- version without pow(), eval() and constants
+   - enhance index.php
 PHP
+   - Reduce
    ?- add eval() and constants

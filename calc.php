@@ -14,7 +14,7 @@
          <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="pchange(+1);">&gt;</div>
          <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="window.open(location.href, 'w' + (new Date()), 'width=320,height=128,resizable=yes,toolbar=no,scrollbars=no');">+</div>
       </div>
-      <div style="padding:1px;">constants: PI, E, MbnP</div>
+      <div style="padding:1px;">constants: PI, E, <a href="index.php" style="color:black">Mbn</a>P</div>
       <div>functions: abs, ceil, floor, round, sqrt, sgn, int</div>
       <input onkeyup="inchange(this);" id="in" style="display: block; width:100%; box-sizing: border-box">
       =>

@@ -17,7 +17,7 @@
    <script>
       var testPHP = <?php echo is_int($testPHP) ? $testPHP : '"' . (addslashes($testPHP) . '"') ?>;
       var worktimePHP = <?php echo $worktimePHP ?>;
-      var versionPHP = <?php echo $versionPHP ?>;
+      var versionPHP = "<?php echo $versionPHP ?>";
       var starttimeJS = new Date();
       var testJS = testMbn();
       var worktimeJS = new Date() - starttimeJS;
@@ -332,7 +332,7 @@
       we("new Mbn(1.4).sub(0.4).eq(1);");
 
       w();
-      we(["//orrect in IE", "(315.5 * 1.23).toFixed(2);"]);
+      we(["//correct in IE", "(315.5 * 1.23).toFixed(2);"]);
 
       we('new Mbn(315.5).mul(1.23);');
 
