@@ -30,7 +30,7 @@ class Mbn {
    protected static $MbnE = false;
 
    //version of MultiByteNumber library
-   const MbnV = '1.10';
+   protected static $MbnV = '1.11';
 
    //default precision
    protected static $MbnP = 2;
@@ -221,7 +221,7 @@ class Mbn {
     */
    public static function prop() {
       return array(
-          'MbnV' => static::MbnV,
+          'MbnV' => static::$MbnV,
           'MbnP' => static::$MbnP,
           'MbnS' => static::$MbnS,
           'MbnT' => static::$MbnT,
@@ -540,6 +540,7 @@ class Mbn {
             $arr[] = $mbn1;
          }
       } else {
+         $arr = array_values($arr);
          $asum = new static(0);
          $n = count($ar);
          for ($i = 0; $i < $n; $i++) {
@@ -774,4 +775,54 @@ class Mbn {
       return static::mbnSetReturn($this, $r, $m);
    }
 
+   protected static $fnReduce = null;
+   protected static function fnReduceInit(){
+      return array(
+         'abs' => 1,
+         'inva' => 1,
+         'invm' => 1,
+         'ceil' => 1,
+         'floor' => 1,
+         'sqrt' => 1,
+         'round' => 1,
+         'sgn' => 1,
+         'intp' => 1,
+         'add' => 2,
+         'mul' => 2,
+         'min' => 2,
+         'max' => 2
+      );
+   }
+   /**
+    * run function on each element, returns single value for 2 argument function,
+    * and array, for 1 argument
+    * @param {string} fn
+    * @param {Array} arr
+    */
+   public static function reduce($fn, $arr) {
+      if(static::$fnReduce === null){
+         static::$fnReduce = static::fnReduceInit();
+      }
+      if (!isset(static::$fnReduce[$fn])){
+         throw new MbnErr(".reduce", "invalid function name", $fn);
+      }
+      if (!is_array($arr)){
+         throw new MbnErr(".reduce", "argument is not array", $arr);
+      } else {
+         $arr = array_values($arr);
+      }
+      $arrl = count($arr);
+      if(static::$fnReduce[$fn] === 1){
+         $r = array();
+         for($i = 0; $i < $arrl; $i++){
+            $r[] = (new static($arr[$i]))->{$fn}(true);
+         }
+      }else{
+         $r = new static(($arrl > 0) ? $arr[0] : 0);
+         for($i = 1; $i < $arrl; $i++){
+            $r->{$fn}($arr[$i], true);
+         }
+      }
+      return $r;
+   }
 }

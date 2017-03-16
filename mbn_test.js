@@ -404,6 +404,13 @@ var testMbn = function (nl) {
    tests.push(['new Mbn("=ceil(3/2)")', '2.00']);
    tests.push(['new Mbn("=ceil(-3/2)")', '-1.00']);
 
+   tests.push(['Mbn.reduce("add", [])', '0.00']);
+   tests.push(['Mbn.reduce("add", [1,6,-2])', '5.00']);
+   tests.push(['Mbn.reduce("mul", [1,6,-2])', '-12.00']);
+   tests.push(['Mbn.reduce("inva", [1,6,-2])', '-1.00,-6.00,2.00']);
+   tests.push(['Mbn.reduce("sgn", [1,6,-2])', '1.00,1.00,-1.00']);
+   tests.push(['Mbn.reduce("sgn", [])', '']);
+
    tests.push(['new Mbn("=ceil(PI)")', '4.00']);
    tests.push(['new Mbn("=floor(PI)")', '3.00']);
    tests.push(['new Mbn("=ceil(-PI)")', '-3.00']);

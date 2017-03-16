@@ -34,6 +34,8 @@ function testMbn ($nl  = '<br>' ) {
                $o = 'true';
             } else if ($o === false) {
                $o = 'false';
+            } else if (is_array($o)) {
+               $o = implode(',', $o);
             }
             $evv = (string)$o;
          } catch (Exception $s) {
@@ -321,14 +323,14 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['$m = new Mbn("-4.32"); $m->sgn(); $o=$m', '-4.32'];
    $tests[] = ['$m = new Mbn("-4.32"); $m->sgn(true); $o=$m', '-1.00'];
    
-   $tests[] = ['implode(",", (new Mbn("3"))->split([1,3]))', '0.75,2.25'];
-   $tests[] = ['implode(",", (new Mbn("3"))->split([2,3]))', '1.20,1.80'];
-   $tests[] = ['implode(",", (new Mbn("3"))->split([3,3]))', '1.50,1.50'];
-   $tests[] = ['implode(",", (new Mbn("3"))->split([1,2,3]))', '0.50,1.00,1.50'];
-   $tests[] = ['implode(",", (new Mbn("2"))->split([1,1,1]))', '0.67,0.67,0.66'];
-   $tests[] = ['implode(",", (new Mbn("100"))->split([100,23]))', '81.30,18.70'];
-   $tests[] = ['implode(",", (new Mbn("42"))->split())', '21.00,21.00'];
-   $tests[] = ['implode(",", (new Mbn("42"))->split(5))', '8.40,8.40,8.40,8.40,8.40'];
+   $tests[] = ['(new Mbn("3"))->split([1,3])', '0.75,2.25'];
+   $tests[] = ['(new Mbn("3"))->split([2,3])', '1.20,1.80'];
+   $tests[] = ['(new Mbn("3"))->split([3,3])', '1.50,1.50'];
+   $tests[] = ['(new Mbn("3"))->split([1,2,3])', '0.50,1.00,1.50'];
+   $tests[] = ['(new Mbn("2"))->split([1,1,1])', '0.67,0.67,0.66'];
+   $tests[] = ['(new Mbn("100"))->split([100,23])', '81.30,18.70'];
+   $tests[] = ['(new Mbn("42"))->split()', '21.00,21.00'];
+   $tests[] = ['(new Mbn("42"))->split(5)', '8.40,8.40,8.40,8.40,8.40'];
    
    $tests[] = ['(new Mbn3c("1.234"))->mod("0.401")', '0,031'];
    $tests[] = ['(new Mbn3c("3.234"))->mod("1")', '0,234'];
@@ -374,6 +376,13 @@ function testMbn ($nl  = '<br>' ) {
    $tests[] = ['(new Mbn("0"))->sgn()', '0.00'];
    $tests[] = ['(new Mbn("-0.01"))->sgn()', '-1.00'];
    $tests[] = ['(new Mbn("0.03"))->sgn()', '1.00'];
+
+   $tests[] = ['Mbn::reduce("add", [])', '0.00'];
+   $tests[] = ['Mbn::reduce("add", [1,6,-2])', '5.00'];
+   $tests[] = ['Mbn::reduce("mul", [1,6,-2])', '-12.00'];
+   $tests[] = ['Mbn::reduce("inva", [1,6,-2])', '-1.00,-6.00,2.00'];
+   $tests[] = ['Mbn::reduce("sgn", [1,6,-2])', '1.00,1.00,-1.00'];
+   $tests[] = ['Mbn::reduce("sgn", [])', ''];
 
    /*tests.push(['Mbn.E()', '2.72']);
    tests.push(['Mbn0.E()', '3']);

@@ -22,5 +22,4 @@ JS & PHP
    - More tests
    - enhance index.php
 PHP
-   - Reduce
    ?- add eval() and constants
