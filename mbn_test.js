@@ -429,11 +429,8 @@ var testMbn = function () {
 
    var starttimeJS = new Date();
    var ret = runTestMbn(tests);
-   var worktimeJS = new Date() - starttimeJS;
-   
+   ret.time = new Date() - starttimeJS;
    ret.MbnV = Mbn.prop().MbnV;
-   ret.time = worktimeJS;
-   
    return JSON.stringify(ret);
 };
 

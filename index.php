@@ -51,7 +51,6 @@
       }
    </style>
    <script>
-
       function w(a, c) {
          if (a === undefined) {
             a = "";
@@ -81,12 +80,10 @@
 
       var modify = false;
 
-      //w("Mbn examples (JS v" + Mbn.prop().MbnV + " / PHP v" + versionPHP + ")", "title1");
+      w("Mbn examples", "title1");
       w("Tests and benchmark", "title2");
-      w('<strong>PHP: <span id="resultPHP"></span></strong>', "mono");
-      w('<strong>JS: <span id="resultJS"></span></strong>', "mono");
-      /*w("<strong>JS<br>" + ((typeof testJS === "number") ? ("OK: " + testJS + " tests") : testJS) +
-              "</strong><br>" + worktimeJS + " ms", "mono");*/
+      w('<strong id="resultJS">..</strong>', "mono");
+      w('<strong id="resultPHP">..</strong>', "mono");
 
       w("Class declarations in JS", "title2");
 
@@ -325,36 +322,30 @@
    </script>
    <script src="mbn_test.js"></script>
    <script>
-      setTimeout(function(){
-         function displayTestStatus(field, result) {
-            document.getElementById(field).innerText = result;
-         }
-
-         function AJAXsend(query, func, postdata) {
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function () {
-               if (xmlhttp.readyState === 4) {
-                  func(xmlhttp.responseText);
-               }
-            };
-            if (postdata !== undefined) {
-               xmlhttp.open("POST", query, true);
-               xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-               xmlhttp.setRequestHeader("Content-length", postdata.length);
-               xmlhttp.setRequestHeader("Connection", "close");
-               xmlhttp.send(postdata);
-            } else {
-               xmlhttp.open("GET", query, true);
-               xmlhttp.send();
+      setTimeout(function () {
+         function displayTestStatus(lng, result) {
+            var res = JSON.parse(result);
+            var txt = lng + " v" + res.MbnV + ": " + res.status + " (" + res.count + " tests, " + res.time + " ms)";
+            for (var i = 0; i < res.errors.length; i++) {
+               var error = res.errors[i];
+               txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;
             }
+            document.getElementById("result" + lng).innerText = txt;
          }
 
-         AJAXsend("mbn_test.php", function (txt) {
-            displayTestStatus("resultPHP", txt);
-         }, "");
+         displayTestStatus("JS", testMbn());
 
-         displayTestStatus("resultJS", testMbn());
-      }, 10);
-
+         var xmlhttp = new XMLHttpRequest();
+         xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState === 4) {
+               displayTestStatus("PHP", xmlhttp.responseText);
+            }
+         };
+         xmlhttp.open("POST", "mbn_test.php", true);
+         xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+         xmlhttp.setRequestHeader("Content-length", 0);
+         xmlhttp.setRequestHeader("Connection", "close");
+         xmlhttp.send("");
+      }, 100);
    </script>
 </body>

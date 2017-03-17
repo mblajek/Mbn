@@ -395,21 +395,14 @@ function testMbn () {
    tests.push(['Mbn.PI()', '3.14']);
    tests.push(['Mbn0.PI()', '3']);
    tests.push(['Mbn3c.PI()', '3,142']);
-   tests.push(['Mbn20u.PI()', '3,14159265358979323846']);
-
-   tests.push(['Mbn.MbnP()', '2.00']);
-   tests.push(['Mbn0.MbnP()', '0']);
-   tests.push(['Mbn3c.MbnP()', '3,000']);
-   tests.push(['Mbn20u.MbnP()', '20']);*/
+   tests.push(['Mbn20u.PI()', '3,14159265358979323846']);*/
 
 
    $starttimePHP = microtime(true);
    $testPHP = runTestMbn($tests);
-   $worktimePHP = round((microtime(true) - $starttimePHP) * 1000);
+   $testPHP['time'] = round((microtime(true) - $starttimePHP) * 1000);
+   $testPHP['MbnV'] = Mbn::prop()['MbnV'];
 
-   return $testPHP + array(
-       'MbnV' => Mbn::prop()['MbnV'],
-       'time' => $worktimePHP,
-   );
+   return json_encode($testPHP);
 }
-echo json_encode(testMbn());
+echo testMbn();
