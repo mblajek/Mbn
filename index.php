@@ -3,25 +3,7 @@
    <title>Mbn examples</title>
    <meta charset="UTF-8">
 </head><body>
-   <?php
-   include 'mbn.php';
-   include 'mbn_test.php';
-   $starttimePHP = microtime(true);
-   $testPHP = testMbn();
-   $worktimePHP = round((microtime(true) - $starttimePHP) * 1000);
-   $versionPHP = Mbn::prop()['MbnV'];
-
-   ?>
    <script src="mbn.js"></script>
-   <script src="mbn_test.js"></script>
-   <script>
-      var testPHP = <?php echo is_int($testPHP) ? $testPHP : '"' . (addslashes($testPHP) . '"') ?>;
-      var worktimePHP = <?php echo $worktimePHP ?>;
-      var versionPHP = "<?php echo $versionPHP ?>";
-      var starttimeJS = new Date();
-      var testJS = testMbn();
-      var worktimeJS = new Date() - starttimeJS;
-   </script>
 
    <style>
       div{
@@ -68,12 +50,11 @@
          border-radius: 0px;
       }
    </style>
-
    <script>
 
       function w(a, c) {
          if (a === undefined) {
-            a = ""
+            a = "";
          } else if (a instanceof Array) {
             var al = a.length;
             for (var i = 0; i < al; i++) {
@@ -100,12 +81,12 @@
 
       var modify = false;
 
-      w("Mbn examples (JS v" + Mbn.prop().MbnV + " / PHP v" + versionPHP + ")", "title1");
+      //w("Mbn examples (JS v" + Mbn.prop().MbnV + " / PHP v" + versionPHP + ")", "title1");
       w("Tests and benchmark", "title2");
-      w("<strong>PHP<br>" + ((typeof testPHP === "number") ? ("OK: " + testPHP + " tests") : testPHP) +
-              "</strong><br>" + worktimePHP + " ms", "mono");
-      w("<strong>JS<br>" + ((typeof testJS === "number") ? ("OK: " + testJS + " tests") : testJS) +
-              "</strong><br>" + worktimeJS + " ms", "mono");
+      w('<strong>PHP: <span id="resultPHP"></span></strong>', "mono");
+      w('<strong>JS: <span id="resultJS"></span></strong>', "mono");
+      /*w("<strong>JS<br>" + ((typeof testJS === "number") ? ("OK: " + testJS + " tests") : testJS) +
+              "</strong><br>" + worktimeJS + " ms", "mono");*/
 
       w("Class declarations in JS", "title2");
 
@@ -140,7 +121,7 @@
       w(['class Mbn4c extends Mbn{', '  protected static $MbnX;', '  protected static $MbnP = 4;', "  protected static $MbnS = ',';", '}'], "mono");
 
       w();
-      w(['class Mbn5t extends Mbn{', '  protected static $MbnX;', '  protected static $MbnP = 5;',  "  protected static $MbnT = true;", '}'], "mono");
+      w(['class Mbn5t extends Mbn{', '  protected static $MbnX;', '  protected static $MbnP = 5;', "  protected static $MbnT = true;", '}'], "mono");
 
       w("Constructor calls", "title2");
 
@@ -340,6 +321,40 @@
       we(["//correct in IE", "(13492105 / 1000).toFixed(2);"]);
 
       we('new Mbn(13492105).div(1000);');
+
+   </script>
+   <script src="mbn_test.js"></script>
+   <script>
+      setTimeout(function(){
+         function displayTestStatus(field, result) {
+            document.getElementById(field).innerText = result;
+         }
+
+         function AJAXsend(query, func, postdata) {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+               if (xmlhttp.readyState === 4) {
+                  func(xmlhttp.responseText);
+               }
+            };
+            if (postdata !== undefined) {
+               xmlhttp.open("POST", query, true);
+               xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+               xmlhttp.setRequestHeader("Content-length", postdata.length);
+               xmlhttp.setRequestHeader("Connection", "close");
+               xmlhttp.send(postdata);
+            } else {
+               xmlhttp.open("GET", query, true);
+               xmlhttp.send();
+            }
+         }
+
+         AJAXsend("mbn_test.php", function (txt) {
+            displayTestStatus("resultPHP", txt);
+         }, "");
+
+         displayTestStatus("resultJS", testMbn());
+      }, 10);
 
    </script>
 </body>

@@ -4,18 +4,23 @@
  * mblajek_mbn(at)mailplus.pl
  */
 
-
+"use strict";
 /**
  * Common error message object
  * @export
  * @constructor
- * @param {string} f
- * @param {string} m
- * @param {*=} v
+ * @param {string} fn
+ * @param {string} msg
+ * @param {*=} val
  */
-var MbnErr = function (f, m, v) {
+var MbnErr = function (fn, msg, val) {
    this.toString = function () {
-      return "Mbn" + f + " error: " + m + ((v !== undefined) ? (": " + v) : "");
+      var ret = "Mbn" + fn + " error: " + msg;
+      if(val !== undefined){
+         val = String(val);
+         ret += ": " + ((val.length > 10) ? (val.slice(0, 8) + '..') : val);
+      }
+      return ret;
    };
 };
 
@@ -32,7 +37,7 @@ var MbnCr = function (opt) {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.12";
+   var MbnV = "1.13";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -120,7 +125,7 @@ var MbnCr = function (opt) {
     * @param {Mbn} a
     */
    var mbnRoundLast = function (a) {
-      r = a._d;
+      var r = a._d;
       if (r.length < 2) {
          r.unshift(0);
       }
@@ -809,15 +814,13 @@ var MbnCr = function (opt) {
          }
       }
       return r;
-   }
-
+   };
 
    var MbnConst = {
       PI: "3.1415926535897932384626433832795028841972",
       E: "2.7182818284590452353602874713526624977573",
       MbnP: MbnP
    };
-
 
    /**
     * returns PI
@@ -831,13 +834,6 @@ var MbnCr = function (opt) {
     */
    Mbn.E = function () {
       return new Mbn(MbnConst.E);
-   };
-
-   /**
-    * returns MbnP
-    */
-   Mbn.MbnP = function () {
-      return new Mbn(MbnConst.MbnP);
    };
 
    var fnEval = {abs: true, inva: false, ceil: true, floor: true, sqrt: true, round: true, sgn: true, int: "intp"};

@@ -1,9 +1,7 @@
-var testMbn = function (nl) {
-   var runTestMbn = function (tests, nl) {
-      if (nl === undefined) {
-         nl = '<br>';
-      }
-      var ret = "";
+var testMbn = function () {
+   var runTestMbn = function (tests) {
+      var ret = [];
+      var tl = tests.length;
       for (var i = 0; i < tests.length; i++) {
          var test = tests[i];
          var evv;
@@ -16,20 +14,16 @@ var testMbn = function (nl) {
 
          var req = test[1];
 
+
          if ((req === false && err !== 1) || evv !== req) {
             var rlm1 = req.length - 1;
             if (req.charAt(rlm1) === '*' && req.slice(0, rlm1) === evv.slice(0, rlm1)) {
                continue;
             }
-            if (ret !== "") {
-               ret += nl + nl;
-            }
-            ret += "ERR " + i + ":" + nl + test[0] + nl;
-            ret += "! " + req + nl + "= " + evv;
+            ret.push( {id: i, code: test[0], correct: req, incorrect: evv});
          }
       }
-      return (ret === "") ? tests.length : ret;
-
+      return {status: (ret.length === 0) ? 'OK' : 'ERR', count: tl, errors: ret};
    };
    var Mbn0 = MbnCr(0);
    var Mbn3c = MbnCr({MbnP: 3, MbnS: ','});
@@ -365,11 +359,6 @@ var testMbn = function (nl) {
    tests.push(['Mbn3c.PI()', '3,142']);
    tests.push(['Mbn20u.PI()', '3,14159265358979323846']);
 
-   tests.push(['Mbn.MbnP()', '2.00']);
-   tests.push(['Mbn0.MbnP()', '0']);
-   tests.push(['Mbn3c.MbnP()', '3,000']);
-   tests.push(['Mbn20u.MbnP()', '20']);
-
    tests.push(['new Mbn("=2")', '2.00']);
    tests.push(['new Mbn("=2+3")', '5.00']);
    tests.push(['new Mbn("=2-3")', '-1.00']);
@@ -436,8 +425,15 @@ var testMbn = function (nl) {
    tests.push(['new Mbn("=0&(1|1)")', '0.00']);
    tests.push(['new Mbn("=(1|1)&0")', '0.00']);
    tests.push(['Mbn.eval("0&1|1")', '1.00']);
-   tests.push(['Mbn.eval("0&(1|1)")', '0.00']); 
+   tests.push(['Mbn.eval("0&(1|1)")', '0.00']);
 
-   return runTestMbn(tests);
+   var starttimeJS = new Date();
+   var ret = runTestMbn(tests);
+   var worktimeJS = new Date() - starttimeJS;
+   
+   ret.MbnV = Mbn.prop().MbnV;
+   ret.time = worktimeJS;
+   
+   return JSON.stringify(ret);
 };
 

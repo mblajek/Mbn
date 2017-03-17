@@ -1,4 +1,5 @@
 <?php
+require_once 'mbn.php';
 
 class Mbn0 extends Mbn{
    protected static $MbnX;
@@ -18,11 +19,11 @@ class Mbn20u extends Mbn{
    protected static $MbnT = true;
 }
 
-function testMbn ($nl  = '<br>' ) {
+function testMbn () {
    $MbnErr = "Mbn error";
-   function runTestMbn  ($tests, $nl) {
+   function runTestMbn  ($tests) {
       $MbnErr = "Mbn error";
-      $ret = '';
+      $ret = array();
       $tl = count($tests);
       for ($i = 0; $i < $tl; $i++) {
          $test = $tests[$i];
@@ -44,19 +45,21 @@ function testMbn ($nl  = '<br>' ) {
 
          $req = $test[1];
 
-         if (($req === false && $err !== 1) || $evv !== $req) {
-            if ($ret !== "") {
-               $ret .= $nl . $nl;
-            }
-            $ret .= "ERR " . $i . ":" . $nl . $test[0] . $nl;
-            $ret .= "! " . $req . $nl . "= " . $evv;
+         if ($evv !== $req) {
+            $ret [] = array(
+                'id' => $i,
+                'code' => $test[0],
+                'correct' => $req,
+                'incorrect' => $evv
+            );
          }
       }
-      return ($ret === "") ? count($tests) : $ret;
-
+      return array(
+          'status' => (count($ret) === 0) ? 'OK' : 'ERR',
+          'count' => $tl,
+          'errors' => $ret
+      );
    }
-
-
    $tests = [["0;", "0"]];
 
    $tests[] = ['new Mbn(null);', '0.00'];
@@ -399,5 +402,14 @@ function testMbn ($nl  = '<br>' ) {
    tests.push(['Mbn3c.MbnP()', '3,000']);
    tests.push(['Mbn20u.MbnP()', '20']);*/
 
-   return runTestMbn($tests, $nl);
+
+   $starttimePHP = microtime(true);
+   $testPHP = runTestMbn($tests);
+   $worktimePHP = round((microtime(true) - $starttimePHP) * 1000);
+
+   return $testPHP + array(
+       'MbnV' => Mbn::prop()['MbnV'],
+       'time' => $worktimePHP,
+   );
 }
+echo json_encode(testMbn());

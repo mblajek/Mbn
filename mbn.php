@@ -10,14 +10,19 @@
  * Common error message object
  * @export
  * @constructor
- * @param {string} f
- * @param {string} m
- * @param {*=} v
+ * @param {string} fn
+ * @param {string} msg
+ * @param {*=} val
  */
 class MbnErr extends Exception {
 
-   function __construct($f = '', $m = '', $v = null) {
-      parent::__construct('Mbn' . $f . ' error: ' . $m . (($v !== null) ? (": " . $v) : ""));
+   function __construct($fn, $msg, $val = null) {
+      $ret = "Mbn" . $fn . " error: " . $msg;
+      if($val !== null){
+         $val = (string) $val;
+         $ret .= ': ' . ((strlen($val) > 10) ? (substr($val, 0, 8) . '..') : $val);
+      }
+      parent::__construct($ret);
    }
 
 }
@@ -30,7 +35,7 @@ class Mbn {
    protected static $MbnE = false;
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.11';
+   protected static $MbnV = '1.12';
 
    //default precision
    protected static $MbnP = 2;
@@ -207,7 +212,7 @@ class Mbn {
          if (static::isNotMbn($n)) {
             $this->fromString($n->toString(static::$MbnS));
          } else {
-            $this->set($n);
+            $this->set((string)$n);
          }
       } elseif (is_bool($n) || is_null($n)) {
          $n = $this->mbnFromNumber(intval($n));
