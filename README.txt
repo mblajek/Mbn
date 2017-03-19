@@ -1,5 +1,7 @@
 Library for PHP and JS to do calculations with any precission, with correct approximations
 
+project page: http://mirkles.net/n/
+
 	mbn.js - Library in JS
 	mbn.php - Library in PHP
 

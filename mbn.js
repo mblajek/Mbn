@@ -31,8 +31,6 @@ var MbnErr = function (fn, msg, val) {
  * @param {*=} opt
  */
 var MbnCr = function (opt) {
-   var MbnE = false;
-
    if (typeof opt !== "object") {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
@@ -146,11 +144,11 @@ var MbnCr = function (opt) {
       a._s = 1;
       a._d = [];
       var n0 = n.charAt(0);
-      if (n0 === "-" || n0 === "+" || (n0 === "=" && MbnE)) {
+      if (n0 === "-" || n0 === "+" || n0 === "=") {
          a._s = (n0 === "-") ? -1 : 1;
          n = n.slice(1);
          if (n0 === "=") {
-            a.set(Mbn.eval(n, v));
+            a.set((typeof Mbn.eval === "function") ? Mbn.eval(n, v) : (new Mbn(n)));
             return;
          }
       }
@@ -247,7 +245,7 @@ var MbnCr = function (opt) {
     * Returns properties of Mbn class
     */
    Mbn.prop = function () {
-      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE};
+      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: (typeof Mbn.eval === "function")};
    };
 
    /**
@@ -730,9 +728,7 @@ var MbnCr = function (opt) {
       return mbnSetReturn(this, new Mbn(this._s), m);
    };
 
-// PCE_EXT_START
-
-   MbnE = true;
+//SLIM_EXCLUDE_START
 
    /**
     * Calculates n-th power of number, n must be integer
@@ -1016,7 +1012,7 @@ var MbnCr = function (opt) {
       }
    }
 
-// PCE_EXT_END
+//SLIM_EXCLUDE_END
 
    return Mbn;
 };

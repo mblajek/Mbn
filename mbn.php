@@ -17,7 +17,7 @@
 class MbnErr extends Exception {
 
    function __construct($fn, $msg, $val = null) {
-      $ret = "Mbn" . $fn . " error: " . $msg;
+      $ret = 'Mbn' . $fn . ' error: ' . $msg;
       if($val !== null){
          $val = (string) $val;
          $ret .= ': ' . ((strlen($val) > 10) ? (substr($val, 0, 8) . '..') : $val);
