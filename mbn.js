@@ -16,7 +16,7 @@
 var MbnErr = function (fn, msg, val) {
    this.toString = function () {
       var ret = "Mbn" + fn + " error: " + msg;
-      if(val !== undefined){
+      if (val !== undefined) {
          val = String(val);
          ret += ": " + ((val.length > 10) ? (val.slice(0, 8) + '..') : val);
       }
@@ -65,37 +65,37 @@ var MbnCr = function (opt) {
     * @param {Mbn} a
     */
    var mbnCarry = function (a) {
-      var r = a._d;
-      var i = r.length - 1;
+      var ad = a._d;
+      var i = ad.length - 1;
       var di, dd, ci;
       while (i >= 0) {
-         di = r[i];
+         di = ad[i];
          while (di < 0) {
             di += 10;
-            r[i - 1]--;
+            ad[i - 1]--;
          }
          dd = di % 10;
          ci = (di - dd) / 10;
-         r[i] = dd;
-         if (ci) {
-            if (i) {
-               r[--i] += ci;
+         ad[i] = dd;
+         if (ci !== 0) {
+            if (i !== 0) {
+               ad[--i] += ci;
             } else {
-               r.unshift(ci);
+               ad.unshift(ci);
             }
          } else {
             i--;
          }
       }
-      while (r.length > MbnP + 1 && r[0] === 0) {
-         r.shift();
+      while (ad.length > MbnP + 1 && ad[0] === 0) {
+         ad.shift();
       }
-      while (r.length < MbnP + 1) {
-         r.unshift(0);
+      while (ad.length < MbnP + 1) {
+         ad.unshift(0);
       }
-      if (r.length === MbnP + 1) {
+      if (ad.length === MbnP + 1) {
          for (var i = 0; i <= MbnP; i++) {
-            if (r[i] !== 0) {
+            if (ad[i] !== 0) {
                break;
             }
          }
@@ -123,11 +123,13 @@ var MbnCr = function (opt) {
     * @param {Mbn} a
     */
    var mbnRoundLast = function (a) {
-      var r = a._d;
-      if (r.length < 2) {
-         r.unshift(0);
+      var ad = a._d;
+      if (ad.length < 2) {
+         ad.unshift(0);
       }
-      r[r.length - 2] += (r.pop() >= 5) ? 1 : 0;
+      if(ad.pop() >= 5){
+         ad[ad.length - 1] ++;
+      }
       mbnCarry(a);
    };
 
@@ -789,23 +791,23 @@ var MbnCr = function (opt) {
     * @param {string} fn
     * @param {Array} arr
     */
-   Mbn.reduce = function(fn, arr) {
-      if (!fnReduce.hasOwnProperty(fn)){
+   Mbn.reduce = function (fn, arr) {
+      if (!fnReduce.hasOwnProperty(fn)) {
          throw new MbnErr(".reduce", "invalid function name", fn);
       }
-      if (!(arr instanceof Array)){
+      if (!(arr instanceof Array)) {
          throw new MbnErr(".reduce", "argument is not array", arr);
       }
       var r;
       var arrl = arr.length;
-      if(fnReduce[fn] === 1){
+      if (fnReduce[fn] === 1) {
          r = [];
-         for(var i = 0; i < arrl; i++){
+         for (var i = 0; i < arrl; i++) {
             r.push((new Mbn(arr[i]))[fn](true));
          }
-      }else{
+      } else {
          r = new Mbn((arrl > 0) ? arr[0] : 0);
-         for(var i = 1; i < arrl; i++){
+         for (var i = 1; i < arrl; i++) {
             r[fn](arr[i], true);
          }
       }

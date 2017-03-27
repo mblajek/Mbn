@@ -18,7 +18,7 @@ class MbnErr extends Exception {
 
    function __construct($fn, $msg, $val = null) {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
-      if($val !== null){
+      if ($val !== null) {
          $val = (string) $val;
          $ret .= ': ' . ((strlen($val) > 10) ? (substr($val, 0, 8) . '..') : $val);
       }
@@ -33,10 +33,8 @@ class MbnErr extends Exception {
 class Mbn {
 
    protected static $MbnE = false;
-
    //version of MultiByteNumber library
    protected static $MbnV = '1.12';
-
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -52,36 +50,36 @@ class Mbn {
     * @param {Mbn} a
     */
    private static function mbnCarry($a) {
-      $r = &$a->d;
-      $i = count($r) - 1;
+      $ad = &$a->d;
+      $i = count($ad) - 1;
       while ($i >= 0) {
-         $di = $r[$i];
+         $di = $ad[$i];
          while ($di < 0) {
             $di += 10;
-            $r[$i - 1] --;
+            $ad[$i - 1] --;
          }
          $dd = $di % 10;
          $ci = ($di - $dd) / 10;
-         $r[$i] = $dd;
-         if ($ci) {
-            if ($i) {
-               $r[--$i] += $ci;
+         $ad[$i] = $dd;
+         if ($ci !== 0) {
+            if ($i !== 0) {
+               $ad[--$i] += $ci;
             } else {
-               array_unshift($r, $ci);
+               array_unshift($ad, $ci);
             }
          } else {
             $i--;
          }
       }
-      while (count($r) > static::$MbnP + 1 && $r[0] === 0) {
-         array_shift($r);
+      while (count($ad) > static::$MbnP + 1 && $ad[0] === 0) {
+         array_shift($ad);
       }
-      while (count($r) < static::$MbnP + 1) {
-         array_unshift($r, 0);
+      while (count($ad) < static::$MbnP + 1) {
+         array_unshift($ad, 0);
       }
-      if (count($r) === static::$MbnP + 1) {
+      if (count($ad) === static::$MbnP + 1) {
          for ($i = 0; $i <= static::$MbnP; $i++) {
-            if ($r[$i] !== 0) {
+            if ($ad[$i] !== 0) {
                break;
             }
          }
@@ -109,11 +107,13 @@ class Mbn {
     * @param {Mbn} a
     */
    private static function mbnRoundLast($a) {
-      $r = &$a->d;
-      if (count($r) < 2) {
-         array_unshift($r, 0);
+      $ad = &$a->d;
+      if (count($ad) < 2) {
+         array_unshift($ad, 0);
       }
-      $r[count($r) - 2] += (array_pop($r) >= 5) ? 1 : 0;
+      if (array_pop($ad) >= 5) {
+         $ad[count($ad) - 1] ++;
+      }
       static::mbnCarry($a);
    }
 
@@ -212,7 +212,7 @@ class Mbn {
          if (static::isNotMbn($n)) {
             $this->fromString($n->toString(static::$MbnS));
          } else {
-            $this->set((string)$n);
+            $this->set((string) $n);
          }
       } elseif (is_bool($n) || is_null($n)) {
          $n = $this->mbnFromNumber(intval($n));
@@ -779,25 +779,22 @@ class Mbn {
       }
       return static::mbnSetReturn($this, $r, $m);
    }
+   protected static $fnReduce = array(
+       'abs' => 1,
+       'inva' => 1,
+       'invm' => 1,
+       'ceil' => 1,
+       'floor' => 1,
+       'sqrt' => 1,
+       'round' => 1,
+       'sgn' => 1,
+       'intp' => 1,
+       'add' => 2,
+       'mul' => 2,
+       'min' => 2,
+       'max' => 2
+   );
 
-   protected static $fnReduce = null;
-   protected static function fnReduceInit(){
-      return array(
-         'abs' => 1,
-         'inva' => 1,
-         'invm' => 1,
-         'ceil' => 1,
-         'floor' => 1,
-         'sqrt' => 1,
-         'round' => 1,
-         'sgn' => 1,
-         'intp' => 1,
-         'add' => 2,
-         'mul' => 2,
-         'min' => 2,
-         'max' => 2
-      );
-   }
    /**
     * run function on each element, returns single value for 2 argument function,
     * and array, for 1 argument
@@ -805,29 +802,27 @@ class Mbn {
     * @param {Array} arr
     */
    public static function reduce($fn, $arr) {
-      if(static::$fnReduce === null){
-         static::$fnReduce = static::fnReduceInit();
-      }
-      if (!isset(static::$fnReduce[$fn])){
+      if (!isset(static::$fnReduce[$fn])) {
          throw new MbnErr(".reduce", "invalid function name", $fn);
       }
-      if (!is_array($arr)){
+      if (!is_array($arr)) {
          throw new MbnErr(".reduce", "argument is not array", $arr);
       } else {
          $arr = array_values($arr);
       }
       $arrl = count($arr);
-      if(static::$fnReduce[$fn] === 1){
+      if (static::$fnReduce[$fn] === 1) {
          $r = array();
-         for($i = 0; $i < $arrl; $i++){
+         for ($i = 0; $i < $arrl; $i++) {
             $r[] = (new static($arr[$i]))->{$fn}(true);
          }
-      }else{
+      } else {
          $r = new static(($arrl > 0) ? $arr[0] : 0);
-         for($i = 1; $i < $arrl; $i++){
+         for ($i = 1; $i < $arrl; $i++) {
             $r->{$fn}($arr[$i], true);
          }
       }
       return $r;
    }
+
 }
