@@ -349,15 +349,15 @@ var testMbn = function () {
    tests.push(['new Mbn("-0.01").sgn()', '-1.00']);
    tests.push(['new Mbn("0.03").sgn()', '1.00']);
 
-   tests.push(['Mbn.E()', '2.72']);
-   tests.push(['Mbn0.E()', '3']);
-   tests.push(['Mbn3c.E()', '2,718']);
-   tests.push(['Mbn20u.E()', '2,71828182845904523536']);
+   tests.push(['Mbn.const("E")', '2.72']);
+   tests.push(['Mbn0.const("E")', '3']);
+   tests.push(['Mbn3c.const("E")', '2,718']);
+   tests.push(['Mbn20u.const("E")', '2,71828182845904523536']);
 
-   tests.push(['Mbn.PI()', '3.14']);
-   tests.push(['Mbn0.PI()', '3']);
-   tests.push(['Mbn3c.PI()', '3,142']);
-   tests.push(['Mbn20u.PI()', '3,14159265358979323846']);
+   tests.push(['Mbn.const("PI")', '3.14']);
+   tests.push(['Mbn0.const("PI")', '3']);
+   tests.push(['Mbn3c.const("PI")', '3,142']);
+   tests.push(['Mbn20u.const("PI")', '3,14159265358979323846']);
 
    tests.push(['new Mbn("=2")', '2.00']);
    tests.push(['new Mbn("=2+3")', '5.00']);

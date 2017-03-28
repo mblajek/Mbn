@@ -35,7 +35,7 @@ var MbnCr = function (opt) {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.13";
+   var MbnV = "1.14";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -127,8 +127,8 @@ var MbnCr = function (opt) {
       if (ad.length < 2) {
          ad.unshift(0);
       }
-      if(ad.pop() >= 5){
-         ad[ad.length - 1] ++;
+      if (ad.pop() >= 5) {
+         ad[ad.length - 1]++;
       }
       mbnCarry(a);
    };
@@ -820,18 +820,36 @@ var MbnCr = function (opt) {
       MbnP: MbnP
    };
 
+   var cnRx = /^[A-Z]\w*$/;
    /**
-    * returns PI
+    * Sets and reads constant
+    * @param {string} n
+    * @param {*=} v
     */
-   Mbn.PI = function () {
-      return new Mbn(MbnConst.PI);
-   };
-
-   /**
-    * returns E
-    */
-   Mbn.E = function () {
-      return new Mbn(MbnConst.E);
+   Mbn.const = function (n, v) {
+      if (n.match(cnRx) === null) {
+         throw new MbnErr(".const", "incorrect name", n);
+      }
+      if (v === undefined) {
+         if (MbnConst.hasOwnProperty(n)) {
+            v = MbnConst[n];
+            if (!(v instanceof Mbn)) {
+               v = new Mbn(v);
+               MbnConst[n] = v;
+            }
+            return new Mbn(v);
+         } else {
+            throw new MbnErr(".const", "undefined constant", n);
+         }
+      } else {
+         if (MbnConst.hasOwnProperty(n)) {
+            throw new MbnErr(".const", "constant allready set", n);
+         } else {
+            v = new Mbn(v);
+            MbnConst[n] = v;
+            return new Mbn(v);
+         }
+      }
    };
 
    var fnEval = {abs: true, inva: false, ceil: true, floor: true, sqrt: true, round: true, sgn: true, int: "intp"};
@@ -849,7 +867,7 @@ var MbnCr = function (opt) {
    var funPrx = 4;
    var rxs = {
       num: {rx: /^([0-9\.,]+)\s*/, next: endBop.concat("pr"), end: true},
-      name: {rx: /^([A-za-z_]\w*)\s*/},
+      name: {rx: /^([A-Za-z_]\w*)\s*/},
       fn: {next: ["po"], end: false},
       vr: {next: endBop, end: true},
       bop: {rx: /^([-+\*\/#^&|])\s*/, next: uopVal, end: false},
@@ -920,7 +938,7 @@ var MbnCr = function (opt) {
                   rpns.push(new Mbn(vnames[tok]));
                } else if (MbnConst.hasOwnProperty(tok)) {
                   t = "vr";
-                  rpns.push(new Mbn(MbnConst[tok]));
+                  rpns.push(Mbn.const(tok));
                } else {
                   throw new MbnErr(".eval", "undefined", tok);
                }
@@ -1008,11 +1026,6 @@ var MbnCr = function (opt) {
       return rpn[0];
    };
 
-   for (var i in MbnConst) {
-      if (MbnConst.hasOwnProperty(i)) {
-         MbnConst[i] = new Mbn(MbnConst[i]);
-      }
-   }
 
 //SLIM_EXCLUDE_END
 
