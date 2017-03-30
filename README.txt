@@ -1,15 +1,9 @@
 Library for PHP and JS to do calculations with any precission, with correct approximations
 
-project page: http://mirkles.net/n/index.php
-
-	mbn.js - Library in JS
-	mbn.php - Library in PHP
+project page: http://mirkles.net/n/index.php - library files avalaible there
 
 	mbn_test.js - Unit tests for JS version
 	mbn_test.php - Unit tests for PHP version
-
-	mbn.min.js - Minified library in JS
-	mbn.slim.min.js - Minified library in JS without pow(). eval() and constants
 
 	index.php - Destription of library with examples, also runs unit tests
 
@@ -22,6 +16,5 @@ JS & PHP
    - Optimize div()
    - Refactoring
    - More tests
-   - enhance index.php
 PHP
    ?- add eval() and constants

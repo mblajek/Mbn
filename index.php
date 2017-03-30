@@ -1,21 +1,45 @@
 <?php
 $relFiles = array(
-    'mbn.js',
-    'mbn.php',
-    'mbn.min.js',
-    'mbn.min.php',
-    'mbn.slim.js',
-    'mbn.slim.min.js',
+    array(
+        'mbn.js',
+        'Library in JS'
+    ),
+    array(
+        'mbn.php',
+        'Library in PHP'
+    ),
+    array(
+        'mbn.min.js',
+        'Minified library in JS'
+    ),
+    array(
+        'mbn.min.php',
+        'Minified library in PHP'
+    ),
+    array(
+        'mbn.slim.js',
+        'Slim library version in JS - without pow(), eval() and constants'
+    ),
+    array(
+        'mbn.slim.min.js',
+        'Minified slim library version in JS'
+    ),
 );
+foreach ($relFiles as &$relFile) {
+   $relFile[] = filesize('release/' . $relFile[0]);
+}
+unset($relFile);
+
 $getFile = filter_input(INPUT_GET, 'gf');
 if ($getFile != null && isset($relFiles[$getFile])) {
-   $fn = $relFiles[$getFile];
+   $fn = $relFiles[$getFile][0];
    $ext = pathinfo($fn, PATHINFO_EXTENSION);
-   header('Content-Type: text/' . $ext);
-   header('Content-Disposition: attachment; filename="' . $fn . '"');
+   header('Content-Type: text/plain');
+   header('Content-Disposition: inline; filename="' . $fn . '"');
    readfile('release/' . $fn);
    die;
 }
+
 ?><!DOCTYPE html>
 <head>
    <title>Mbn examples</title>
@@ -102,12 +126,12 @@ if ($getFile != null && isset($relFiles[$getFile])) {
       w("Tests and benchmark", "title2");
       w('<strong id="resultJS">..</strong>', "mono");
       w('<strong id="resultPHP">..</strong>', "mono");
-      
+
       w("Downloads", "title2");
 
       var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
-      relFiles.forEach(function(f, i){
-         w('<a href="?gf=' + i + '">' + f + "</a>", "mono");
+      relFiles.forEach(function (f, i) {
+         w(['<a href="?gf=' + i + '">' + f[0] + "</a> (" + (new Mbn(f[2])).div(1024) + " kB)", f[1]], "mono");
       });
 
       w("Class declarations in JS", "title2");
