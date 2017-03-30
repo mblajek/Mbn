@@ -1,4 +1,22 @@
-<!DOCTYPE html>
+<?php
+$relFiles = array(
+    'mbn.js',
+    'mbn.php',
+    'mbn.min.js',
+    'mbn.min.php',
+    'mbn.slim.js',
+    'mbn.slim.min.js',
+);
+$getFile = filter_input(INPUT_GET, 'gf');
+if ($getFile != null && isset($relFiles[$getFile])) {
+   $fn = $relFiles[$getFile];
+   $ext = pathinfo($fn, PATHINFO_EXTENSION);
+   header('Content-Type: text/' . $ext);
+   header('Content-Disposition: attachment; filename="' . $fn . '"');
+   readfile('release/' . $fn);
+   die;
+}
+?><!DOCTYPE html>
 <head>
    <title>Mbn examples</title>
    <meta charset="UTF-8">
@@ -84,6 +102,13 @@
       w("Tests and benchmark", "title2");
       w('<strong id="resultJS">..</strong>', "mono");
       w('<strong id="resultPHP">..</strong>', "mono");
+      
+      w("Downloads", "title2");
+
+      var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
+      relFiles.forEach(function(f, i){
+         w('<a href="?gf=' + i + '">' + f + "</a>", "mono");
+      });
 
       w("Class declarations in JS", "title2");
 
@@ -183,7 +208,6 @@
 
       w('Standard rules for operations', "title2");
 
-      w();
       we(['//all numbers are rounded with half-up rule', 'new Mbn("1.125");']);
 
       w();
@@ -219,7 +243,6 @@
 
       w('Basic methods, returning number as Mbn object', "title2");
 
-      w();
       we(['//add', 'new Mbn(5, modify).add(2);']);
 
       w();
