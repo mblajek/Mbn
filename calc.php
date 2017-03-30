@@ -5,7 +5,7 @@
    <meta name=viewport content="width=device-width, initial-scale=1">
 </head>
 <body style="margin:2px;">
-   <script src="mbn.min.js"></script>
+   <script src="release/mbn.min.js"></script>
    <div style="border:2px solid green; max-width:512px; margin-left:auto; margin-right:auto; padding:2px;">
       <div style="float:right; border: 1px solid black;">
          <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="pchange(0,true);" id="pst"></div>
