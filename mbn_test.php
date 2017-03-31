@@ -20,9 +20,7 @@ class Mbn20u extends Mbn{
 }
 
 function testMbn () {
-   $MbnErr = "Mbn error";
    function runTestMbn  ($tests) {
-      $MbnErr = "Mbn error";
       $ret = array();
       $tl = count($tests);
       for ($i = 0; $i < $tl; $i++) {
@@ -40,12 +38,18 @@ function testMbn () {
             }
             $evv = (string)$o;
          } catch (Exception $s) {
-            $evv = (get_class($s) === 'MbnErr') ? $MbnErr : $s->getMessage();
+            $evv = $s->getMessage();
          }
 
          $req = $test[1];
 
-         if ($evv !== $req) {
+         if(strrpos($req, '*')){
+            $cmpn = strpos($req, '*');
+         }else{
+            $cmpn = strlen($req) + strlen($evv);
+         }
+
+         if (strncmp($evv, $req, $cmpn)) {
             $ret [] = array(
                 'id' => $i,
                 'code' => $test[0],
@@ -188,8 +192,8 @@ function testMbn () {
    $tests[] = ['(new Mbn0(-3))->mul(0)', '0'];
    $tests[] = ['(new Mbn0(0))->mul(3)', '0'];
    $tests[] = ['(new Mbn0(0))->mul(-3)', '0'];
-   $tests[] = ['(new Mbn0(3))->div(0)', $MbnErr];
-   $tests[] = ['(new Mbn0(-3))->div(0)', $MbnErr];
+   $tests[] = ['(new Mbn0(3))->div(0)', 'Mbn.div error*'];
+   $tests[] = ['(new Mbn0(-3))->div(0)', 'Mbn.div error*'];
    $tests[] = ['(new Mbn0(0))->div(3)', '0'];
    $tests[] = ['(new Mbn0(0))->div(-3)', '0'];
 
@@ -215,7 +219,7 @@ function testMbn () {
    $tests[] = ['(new Mbn3c("-1.1"))->inva()', '1,100'];
 
    $tests[] = ['(new Mbn3c("1.1"))->invm()','0,909'];
-   $tests[] = ['(new Mbn3c("0"))->invm()', $MbnErr];
+   $tests[] = ['(new Mbn3c("0"))->invm()', 'Mbn.div error*'];
    $tests[] = ['(new Mbn3c("-1.1"))->invm()', '-0,909'];
 
    $tests[] = ['(new Mbn3c("1.1"))->abs()', '1,100'];
@@ -379,6 +383,22 @@ function testMbn () {
    $tests[] = ['(new Mbn("0"))->sgn()', '0.00'];
    $tests[] = ['(new Mbn("-0.01"))->sgn()', '-1.00'];
    $tests[] = ['(new Mbn("0.03"))->sgn()', '1.00'];
+
+   $tests[] = ['Mbn::def("E")', '2.72'];
+   $tests[] = ['Mbn0::def("E")', '3'];
+   $tests[] = ['Mbn3c::def("E")', '2,718'];
+   $tests[] = ['Mbn20u::def("E")', '2,71828182845904523536'];
+
+   $tests[] = ['Mbn::def("PI")', '3.14'];
+   $tests[] = ['Mbn0::def("PI")', '3'];
+   $tests[] = ['Mbn3c::def("PI")', '3,142'];
+   $tests[] = ['Mbn20u::def("PI")', '3,14159265358979323846'];
+
+   $tests[] = ['Mbn::def("MbnP")', '2.00'];
+   $tests[] = ['Mbn3c::def("MbnP")', '3,000'];
+   $tests[] = ['Mbn::def("X")', 'Mbn.def error*'];
+   $tests[] = ['Mbn::def("X", 4.2)', '4.20'];
+   $tests[] = ['Mbn::def("X")', '4.20'];
 
    $tests[] = ['Mbn::reduce("add", [])', '0.00'];
    $tests[] = ['Mbn::reduce("add", [1,6,-2])', '5.00'];

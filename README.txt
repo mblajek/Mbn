@@ -9,12 +9,9 @@ project page: http://mirkles.net/n/index.php - library files avalaible there
 
 	eval.php - Calculator based on library
 
-Now versions of PHP and JS are not the same, PHP does not have some functions and some arguments will be synchronised soon.
-
 TO DO:
 JS & PHP
    - Optimize div()
-   - Refactoring
    - More tests
 PHP
-   ?- add eval() and constants
+   ?- add eval()

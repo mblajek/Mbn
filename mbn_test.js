@@ -14,13 +14,12 @@ var testMbn = function () {
 
          var req = test[1];
 
-
          if ((req === false && err !== 1) || evv !== req) {
             var rlm1 = req.length - 1;
             if (req.charAt(rlm1) === '*' && req.slice(0, rlm1) === evv.slice(0, rlm1)) {
                continue;
             }
-            ret.push( {id: i, code: test[0], correct: req, incorrect: evv});
+            ret.push({id: i, code: test[0], correct: req, incorrect: evv});
          }
       }
       return {status: (ret.length === 0) ? 'OK' : 'ERR', count: tl, errors: ret};
@@ -349,15 +348,28 @@ var testMbn = function () {
    tests.push(['new Mbn("-0.01").sgn()', '-1.00']);
    tests.push(['new Mbn("0.03").sgn()', '1.00']);
 
-   tests.push(['Mbn.const("E")', '2.72']);
-   tests.push(['Mbn0.const("E")', '3']);
-   tests.push(['Mbn3c.const("E")', '2,718']);
-   tests.push(['Mbn20u.const("E")', '2,71828182845904523536']);
+   tests.push(['Mbn.def("E")', '2.72']);
+   tests.push(['Mbn0.def("E")', '3']);
+   tests.push(['Mbn3c.def("E")', '2,718']);
+   tests.push(['Mbn20u.def("E")', '2,71828182845904523536']);
 
-   tests.push(['Mbn.const("PI")', '3.14']);
-   tests.push(['Mbn0.const("PI")', '3']);
-   tests.push(['Mbn3c.const("PI")', '3,142']);
-   tests.push(['Mbn20u.const("PI")', '3,14159265358979323846']);
+   tests.push(['Mbn.def("PI")', '3.14']);
+   tests.push(['Mbn0.def("PI")', '3']);
+   tests.push(['Mbn3c.def("PI")', '3,142']);
+   tests.push(['Mbn20u.def("PI")', '3,14159265358979323846']);
+
+   tests.push(['Mbn.def("MbnP")', '2.00']);
+   tests.push(['Mbn3c.def("MbnP")', '3,000']);
+   tests.push(['Mbn.def("X")', 'Mbn.def error*']);
+   tests.push(['Mbn.def("X", 4.2)', '4.20']);
+   tests.push(['Mbn.def("X")', '4.20']);
+
+   tests.push(['Mbn.reduce("add", [])', '0.00']);
+   tests.push(['Mbn.reduce("add", [1,6,-2])', '5.00']);
+   tests.push(['Mbn.reduce("mul", [1,6,-2])', '-12.00']);
+   tests.push(['Mbn.reduce("inva", [1,6,-2])', '-1.00,-6.00,2.00']);
+   tests.push(['Mbn.reduce("sgn", [1,6,-2])', '1.00,1.00,-1.00']);
+   tests.push(['Mbn.reduce("sgn", [])', '']);
 
    tests.push(['new Mbn("=2")', '2.00']);
    tests.push(['new Mbn("=2+3")', '5.00']);
@@ -392,13 +404,6 @@ var testMbn = function () {
    tests.push(['new Mbn("=floor(-3/-2)")', '1.00']);
    tests.push(['new Mbn("=ceil(3/2)")', '2.00']);
    tests.push(['new Mbn("=ceil(-3/2)")', '-1.00']);
-
-   tests.push(['Mbn.reduce("add", [])', '0.00']);
-   tests.push(['Mbn.reduce("add", [1,6,-2])', '5.00']);
-   tests.push(['Mbn.reduce("mul", [1,6,-2])', '-12.00']);
-   tests.push(['Mbn.reduce("inva", [1,6,-2])', '-1.00,-6.00,2.00']);
-   tests.push(['Mbn.reduce("sgn", [1,6,-2])', '1.00,1.00,-1.00']);
-   tests.push(['Mbn.reduce("sgn", [])', '']);
 
    tests.push(['new Mbn("=ceil(PI)")', '4.00']);
    tests.push(['new Mbn("=floor(PI)")', '3.00']);

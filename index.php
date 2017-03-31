@@ -18,7 +18,7 @@ $relFiles = array(
     ),
     array(
         'mbn.slim.js',
-        'Slim library version in JS - without pow(), eval() and constants'
+        'Slim library version in JS - without pow(), eval(), reduce() and constants'
     ),
     array(
         'mbn.slim.min.js',

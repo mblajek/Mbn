@@ -87,19 +87,21 @@ var MbnCr = function (opt) {
             i--;
          }
       }
-      while (ad.length > MbnP + 1 && ad[0] === 0) {
+      var adlm1 = ad.length - 1;
+      while (adlm1 > MbnP && ad[0] === 0) {
          ad.shift();
+         adlm1--;
       }
-      while (ad.length < MbnP + 1) {
+      while (adlm1 < MbnP) {
          ad.unshift(0);
+         adlm1++;
       }
-      if (ad.length === MbnP + 1) {
-         for (var i = 0; i <= MbnP; i++) {
-            if (ad[i] !== 0) {
-               break;
-            }
+      if (adlm1 === MbnP) {
+         i = 0;
+         while (i <= adlm1 && ad[i] === 0) {
+            i++;
          }
-         a._s *= (i <= MbnP) ? 1 : 0;
+         a._s *= (i <= adlm1) ? 1 : 0;
       }
    };
 
@@ -256,7 +258,7 @@ var MbnCr = function (opt) {
     */
    Mbn.prototype.set = function (b) {
       if (!(b instanceof Mbn)) {
-         this.set(new Mbn(b));
+         mbnSetReturn(this, new Mbn(b), true);
       } else {
          this._d = b._d.slice();
          this._s = b._s;
@@ -826,9 +828,9 @@ var MbnCr = function (opt) {
     * @param {string} n
     * @param {*=} v
     */
-   Mbn.const = function (n, v) {
+   Mbn.def = function (n, v) {
       if (n.match(cnRx) === null) {
-         throw new MbnErr(".const", "incorrect name", n);
+         throw new MbnErr(".def", "incorrect name", n);
       }
       if (v === undefined) {
          if (MbnConst.hasOwnProperty(n)) {
@@ -839,11 +841,11 @@ var MbnCr = function (opt) {
             }
             return new Mbn(v);
          } else {
-            throw new MbnErr(".const", "undefined constant", n);
+            throw new MbnErr(".def", "undefined constant", n);
          }
       } else {
          if (MbnConst.hasOwnProperty(n)) {
-            throw new MbnErr(".const", "constant allready set", n);
+            throw new MbnErr(".def", "constant allready set", n);
          } else {
             v = new Mbn(v);
             MbnConst[n] = v;
@@ -938,7 +940,7 @@ var MbnCr = function (opt) {
                   rpns.push(new Mbn(vnames[tok]));
                } else if (MbnConst.hasOwnProperty(tok)) {
                   t = "vr";
-                  rpns.push(Mbn.const(tok));
+                  rpns.push(Mbn.def(tok));
                } else {
                   throw new MbnErr(".eval", "undefined", tok);
                }

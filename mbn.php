@@ -34,7 +34,7 @@ class Mbn {
 
    protected static $MbnE = false;
    //version of MultiByteNumber library
-   protected static $MbnV = '1.12';
+   protected static $MbnV = '1.13';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -49,8 +49,8 @@ class Mbn {
     * Private function, carries digits bigger than 9, and removes leading zeros
     * @param {Mbn} a
     */
-   private static function mbnCarry($a) {
-      $ad = &$a->d;
+   private function mbnCarry() {
+      $ad = &$this->d;
       $i = count($ad) - 1;
       while ($i >= 0) {
          $di = $ad[$i];
@@ -71,19 +71,21 @@ class Mbn {
             $i--;
          }
       }
-      while (count($ad) > static::$MbnP + 1 && $ad[0] === 0) {
+      $adlm1 = count($ad) - 1;
+      while ($adlm1 > static::$MbnP && $ad[0] === 0) {
          array_shift($ad);
+         $adlm1 --;
       }
-      while (count($ad) < static::$MbnP + 1) {
+      while ($adlm1 < static::$MbnP) {
          array_unshift($ad, 0);
+         $adlm1 ++;
       }
-      if (count($ad) === static::$MbnP + 1) {
-         for ($i = 0; $i <= static::$MbnP; $i++) {
-            if ($ad[$i] !== 0) {
-               break;
-            }
+      if ($adlm1 === static::$MbnP) {
+         $i = 0;
+         while ($i <= $adlm1 && $ad[$i] === 0) {
+            $i++;
          }
-         $a->s *= ($i <= static::$MbnP) ? 1 : 0;
+         $this->s *= ($i <= $adlm1) ? 1 : 0;
       }
    }
 
@@ -93,11 +95,11 @@ class Mbn {
     * @param {Mbn} b
     * @param {boolean} m
     */
-   private static function mbnSetReturn($a, $b, $m) {
+   private function mbnSetReturn($b, $m) {
       if ($m === true) {
-         $a->d = &$b->d;
-         $a->s = $b->s;
-         return $a;
+         $this->d = &$b->d;
+         $this->s = $b->s;
+         return $this;
       }
       return $b;
    }
@@ -106,15 +108,15 @@ class Mbn {
     * Private function, removes last digit and rounds next-to-last depending on it
     * @param {Mbn} a
     */
-   private static function mbnRoundLast($a) {
-      $ad = &$a->d;
+   private function mbnRoundLast() {
+      $ad = &$this->d;
       if (count($ad) < 2) {
          array_unshift($ad, 0);
       }
       if (array_pop($ad) >= 5) {
          $ad[count($ad) - 1] ++;
       }
-      static::mbnCarry($a);
+      $this->mbnCarry();
    }
 
    /**
@@ -151,7 +153,7 @@ class Mbn {
             throw new MbnErr('', 'invalid format', $nd);
          }
       }
-      static::mbnRoundLast($this);
+      $this->mbnRoundLast();
    }
 
    /**
@@ -183,7 +185,7 @@ class Mbn {
          $this->d[] = $xffi;
          $xf -= $xffi;
       }
-      static::mbnRoundLast($this);
+      $this->mbnRoundLast();
    }
 
    /**
@@ -240,7 +242,7 @@ class Mbn {
     */
    public function set($b) {
       if (static::isNotMbn($b)) {
-         $this->set(new static($b));
+         $this->mbnSetReturn(new static($b), true);
       } else {
          $this->d = $b->d;
          $this->s = $b->s;
@@ -354,13 +356,13 @@ class Mbn {
                $r->d[$i] += $b->d[$i - $ld];
             }
          }
-         static::mbnCarry($r);
+         $r->mbnCarry();
       } else {
          $r->s = -$r->s;
          $r->sub($this, true);
          $r->s = -$r->s;
       }
-      return static::mbnSetReturn($this, $r, $m);
+      return $this->mbnSetReturn($r, $m);
    }
 
    /**
@@ -398,13 +400,13 @@ class Mbn {
                }
             }
             $r->s = $cmp * $this->s;
-            static::mbnCarry($r);
+            $r->mbnCarry();
          }
       } else {
          $r->s = -$r->s;
          $r->add($this, true);
       }
-      return static::mbnSetReturn($this, $r, $m);
+      return $this->mbnSetReturn($r, $m);
    }
 
    /**
@@ -427,14 +429,14 @@ class Mbn {
          }
       }
       $r->s = $this->s * $b->s;
-      static::mbnCarry($r);
+      $r->mbnCarry();
       if (static::$MbnP >= 1) {
          if (static::$MbnP > 1) {
             $r->d = array_slice($r->d, 0, 1 - static::$MbnP);
          }
-         static::mbnRoundLast($r);
+         $r->mbnRoundLast();
       }
-      return static::mbnSetReturn($this, $r, $m);
+      return $this->mbnSetReturn($r, $m);
    }
 
    /**
@@ -450,7 +452,7 @@ class Mbn {
          throw new MbnErr('.div', 'division by zero');
       }
       if ($this->s === 0) {
-         return static::mbnSetReturn($this, new static($this), $m);
+         return $this->mbnSetReturn(new static($this), $m);
       }
       $x = $this->d;
       $y = $b->d;
@@ -509,8 +511,8 @@ class Mbn {
       $r = new static($b);
       $r->s *= $this->s;
       $r->d = $ra;
-      static::mbnRoundLast($r);
-      return static::mbnSetReturn($this, $r, $m);
+      $r->mbnRoundLast();
+      return $this->mbnSetReturn($r, $m);
    }
 
    /**
@@ -525,7 +527,7 @@ class Mbn {
          $r = $ba->sub($r->abs());
          $r->s = $this->s;
       }
-      return static::mbnSetReturn($this, $r, $m);
+      return $this->mbnSetReturn($r, $m);
    }
 
    /**
@@ -598,7 +600,7 @@ class Mbn {
          if ($r->s === -1 && $ds > 0) {
             $r->d[$ct - static::$MbnP - 1] ++;
          }
-         static::mbnCarry($r);
+         $r->mbnCarry();
       }
       return $r;
    }
@@ -616,7 +618,7 @@ class Mbn {
          while ($l < $ct) {
             $r->d[$l++] = 0;
          }
-         static::mbnCarry($r);
+         $r->mbnCarry();
       }
       return $r;
    }
@@ -647,7 +649,7 @@ class Mbn {
     */
    function invm($m = false) {
       $r = (new static(1))->div($this);
-      return static::mbnSetReturn($this, $r, $m);
+      return $this->mbnSetReturn($r, $m);
    }
 
    /**
@@ -683,7 +685,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function min($b, $m = false) {
-      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
+      return $this->mbnSetReturn(new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
    }
 
    /**
@@ -692,7 +694,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function max($b, $m = false) {
-      return static::mbnSetReturn($this, new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
+      return $this->mbnSetReturn(new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
    }
 
    /**
@@ -714,8 +716,8 @@ class Mbn {
             $r->add($t->div($r), true)->div($mbn2, true);
          } while (!$rb->eq($r));
       }
-      static::mbnRoundLast($r);
-      return static::mbnSetReturn($this, $r, $m);
+      $r->mbnRoundLast();
+      return $this->mbnSetReturn($r, $m);
    }
 
    /**
@@ -723,7 +725,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function sgn($m = false) {
-      return static::mbnSetReturn($this, new Mbn($this->s), $m);
+      return $this->mbnSetReturn(new Mbn($this->s), $m);
    }
 
    /**
@@ -752,7 +754,7 @@ class Mbn {
       $r = new static($mbn1);
       while (!$rx->isInt()) {
          $rx->d[] = 0;
-         static::mbnCarry($rx);
+         $rx->mbnCarry();
          $dd++;
       }
       while ($n->s === 1) {
@@ -772,12 +774,12 @@ class Mbn {
          if ($cdd > 1) {
             $r->d = array_slice($r->d, 0, 1 - $cdd);
          }
-         static::mbnRoundLast($r);
+         $r->mbnRoundLast();
       }
       if ($ns === -1) {
          $r->invm(true);
       }
-      return static::mbnSetReturn($this, $r, $m);
+      return $this->mbnSetReturn($r, $m);
    }
    protected static $fnReduce = array(
        'abs' => 1,
@@ -823,6 +825,49 @@ class Mbn {
          }
       }
       return $r;
+   }
+   protected static $MbnConst = array(
+       '' => array(
+           'PI' => "3.1415926535897932384626433832795028841972",
+           'E' => "2.7182818284590452353602874713526624977573",
+       )
+   );
+
+   //$cnRx = ;
+   /**
+    * Sets and reads constant
+    * @param {string} n
+    * @param {*=} v
+    */
+   public static function def($n, $v = null) {
+      if (preg_match('/^[A-Z]\\w*$/', $n) !== 1) {
+         throw new MbnErr(".def", "incorrect name", $n);
+      }
+      $mc = &static::$MbnConst;
+      $mx = &static::$MbnX;
+      if ($v === null) {
+         if (!isset($mc[$mx])) {
+            $mc[$mx] = array();
+         }
+         if (!isset($mc[$mx][$n])) {
+            if (isset($mc[''][$n])) {
+               $mc[$mx][$n] = new static($mc[''][$n]);
+            } elseif ($n === 'MbnP') {
+               $mc[$mx][$n] = new static(static::$MbnP);
+            } else {
+               throw new MbnErr(".def", "undefined constant", $n);
+            }
+         }
+         return new static($mc[$mx][$n]);
+      } else {
+         if (isset($mc[$mx][$n]) || isset($mc[''][$n])) {
+            throw new MbnErr(".def", "constant allready set", $n);
+         } else {
+            $v = new static($v);
+            $mc[$mx][$n] = $v;
+            return new static($v);
+         }
+      }
    }
 
 }
