@@ -547,27 +547,30 @@ class Mbn {
             $arr[] = $mbn1;
          }
       } else {
-         $arr = array_values($arr);
          $asum = new static(0);
          $n = count($ar);
-         for ($i = 0; $i < $n; $i++) {
-            $arr[] = new static($ar[$i]);
-            $asum->add($arr[$i], true);
+         foreach ($ar as $k => &$v) {
+            $v = new static($v);
+            $asum->add($v, true);
+            if ($v->s < 0) {
+               throw new MbnErr('.split', 'only non-negative ratio values supported');
+            }
          }
+         unset($v);
+         $arr = &$ar;
       }
-      if (count($ar) === 0) {
+      if ($n === 0) {
          return array();
       }
       $a = new static($this);
       $brr = array();
-      $n--;
-      for ($i = 0; $i < $n; $i++) {
-         $b = $a->mul($arr[$i])->div($asum);
-         $asum->sub($arr[$i], true);
+      foreach ($arr as $k => &$v) {
+         $b = $a->mul($v)->div($asum);
+         $asum->sub($v, true);
          $a->sub($b, true);
-         $brr[] = $b;
+         $brr[$k] = $b;
       }
-      $brr[] = $a;
+      unset($v);
       return $brr;
    }
 
@@ -809,20 +812,25 @@ class Mbn {
       }
       if (!is_array($arr)) {
          throw new MbnErr(".reduce", "argument is not array", $arr);
-      } else {
-         $arr = array_values($arr);
       }
-      $arrl = count($arr);
       if (static::$fnReduce[$fn] === 1) {
          $r = array();
-         for ($i = 0; $i < $arrl; $i++) {
-            $r[] = (new static($arr[$i]))->{$fn}(true);
+         foreach ($arr as $k => &$v) {
+            $r[$k] = (new static($v))->{$fn}(true);
          }
+         unset($v);
       } else {
-         $r = new static(($arrl > 0) ? $arr[0] : 0);
-         for ($i = 1; $i < $arrl; $i++) {
-            $r->{$fn}($arr[$i], true);
+         $r = new static(0);
+         $fst = true;
+         foreach ($arr as $k => &$v) {
+            if ($fst) {
+               $r->set($v);
+               $fst = false;
+            } else {
+               $r->{$fn}($v, true);
+            }
          }
+         unset($v);
       }
       return $r;
    }

@@ -338,6 +338,13 @@ function testMbn () {
    $tests[] = ['(new Mbn("100"))->split([100,23])', '81.30,18.70'];
    $tests[] = ['(new Mbn("42"))->split()', '21.00,21.00'];
    $tests[] = ['(new Mbn("42"))->split(5)', '8.40,8.40,8.40,8.40,8.40'];
+   $tests[] = ['(new Mbn("100"))->split([100,-23])', 'Mbn.split error*'];
+
+   //PHP only, asocjative arrays
+   $tests[] = ['array_values((new Mbn("42"))->split(5))', '8.40,8.40,8.40,8.40,8.40'];
+   $tests[] = ['array_keys((new Mbn("42"))->split(5))', '0,1,2,3,4'];
+   $tests[] = ['array_values((new Mbn("42"))->split(["a"=>2,0=>3,"c"=>5]))', '8.40,12.60,21.00'];
+   $tests[] = ['array_keys((new Mbn("42"))->split(["a"=>2,0=>3,"c"=>5]))', 'a,0,c'];
    
    $tests[] = ['(new Mbn3c("1.234"))->mod("0.401")', '0,031'];
    $tests[] = ['(new Mbn3c("3.234"))->mod("1")', '0,234'];
@@ -407,15 +414,10 @@ function testMbn () {
    $tests[] = ['Mbn::reduce("sgn", [1,6,-2])', '1.00,1.00,-1.00'];
    $tests[] = ['Mbn::reduce("sgn", [])', ''];
 
-   /*tests.push(['Mbn.E()', '2.72']);
-   tests.push(['Mbn0.E()', '3']);
-   tests.push(['Mbn3c.E()', '2,718']);
-   tests.push(['Mbn20u.E()', '2,71828182845904523536']);
-
-   tests.push(['Mbn.PI()', '3.14']);
-   tests.push(['Mbn0.PI()', '3']);
-   tests.push(['Mbn3c.PI()', '3,142']);
-   tests.push(['Mbn20u.PI()', '3,14159265358979323846']);*/
+   //PHP only, asocjative arrays
+   $tests[] = ['Mbn::reduce("mul", ["a"=>2,0=>3,"c"=>5])', '30.00'];
+   $tests[] = ['array_values(Mbn::reduce("invm", ["a"=>2,0=>3,"c"=>5]))', '0.50,0.33,0.20'];
+   $tests[] = ['array_keys(Mbn::reduce("invm", ["a"=>2,0=>3,"c"=>5]))', 'a,0,c'];
 
 
    $starttimePHP = microtime(true);

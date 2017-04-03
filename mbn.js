@@ -559,6 +559,9 @@ var MbnCr = function (opt) {
          asum = new Mbn(0);
          n = ar.length;
          for (var i = 0; i < n; i++) {
+            if (ar[i] < 0) {
+               throw new MbnErr('.split', 'only non-negative ratio values supported');
+            }
             arr.push(new Mbn(ar[i]));
             asum.add(arr[i], true);
          }
@@ -568,14 +571,12 @@ var MbnCr = function (opt) {
       }
       var a = new Mbn(this);
       var brr = [];
-      n--;
       for (var i = 0; i < n; i++) {
          var b = a.mul(arr[i]).div(asum);
          asum.sub(arr[i], true);
          a.sub(b, true);
          brr.push(b);
       }
-      brr.push(a);
       return brr;
    };
 

@@ -302,6 +302,7 @@ var testMbn = function () {
    tests.push(['new Mbn("100").split([100,23])', '81.30,18.70']);
    tests.push(['new Mbn("42").split()', '21.00,21.00']);
    tests.push(['new Mbn("42").split(5)', '8.40,8.40,8.40,8.40,8.40']);
+   tests.push(['(new Mbn("100")).split([100,-23])', 'Mbn.split error*']);
 
    tests.push(['new Mbn3c("1.234").mod("0.401")', '0,031']);
    tests.push(['new Mbn3c("3.234").mod("1")', '0,234']);
