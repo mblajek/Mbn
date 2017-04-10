@@ -164,7 +164,7 @@ var MbnCr = function (opt) {
       }
       if (ln === 0) {
          ln = 1;
-         n = "0" + n;
+         n = "0" + ((n !== "") ? n : n0);
       }
       var c;
       var nl = n.length;

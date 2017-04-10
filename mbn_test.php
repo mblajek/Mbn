@@ -86,6 +86,7 @@ function testMbn () {
    $tests[] = ['new Mbn0(" - .6 ")', '-1'];
    $tests[] = ['new Mbn0(" + .6 ")', '1'];
 
+   $tests[] = ['new Mbn(".")', 'Mbn error*'];
    $tests[] = ['new Mbn()', '0.00'];
    $tests[] = ['new Mbn("1.234")', '1.23'];
    $tests[] = ['new Mbn("1.235")', '1.24'];

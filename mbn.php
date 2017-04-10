@@ -126,8 +126,9 @@ class Mbn {
     */
    private function fromString($nd) {
       $n = preg_replace('/\\s+$/', '', preg_replace('/^\\s*([+=-]?)\\s*/', '$1', $nd));
-      if ($n[0] === '-' || $n[0] === '+') {
-         $this->s = ($n[0] === '-') ? -1 : 1;
+      $n0 = $n[0];
+      if ($n0 === '-' || $n0 === '+') {
+         $this->s = ($n0 === '-') ? -1 : 1;
          $n = substr($n, 1);
       }
       $ln = strpos($n, '.');
@@ -141,7 +142,7 @@ class Mbn {
       }
       if ($ln === 0) {
          $ln = 1;
-         $n = '0' . $n;
+         $n = '0' . (($n !== '') ? $n : $n0);
       }
       $c = '';
       $nl = strlen($n);
@@ -730,7 +731,7 @@ class Mbn {
    function sgn($m = false) {
       return $this->mbnSetReturn(new Mbn($this->s), $m);
    }
-
+//SLIM_EXCLUDE_START
    /**
     * Calculates n-th power of number, n must be integer
     * @param {number} nd
@@ -877,5 +878,5 @@ class Mbn {
          }
       }
    }
-
+//SLIM_EXCLUDE_END
 }

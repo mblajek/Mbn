@@ -19,10 +19,12 @@ function releaseMbn() {
    $newHash = hash('sha256', $mbn_js . $mbn_php);
 
    if ($oldHash === $newHash) {
-      return 'allready up-to-date';
+      return 'already up-to-date';
    }
 
-   $mbn_slim_js = preg_replace('/SLIM_EXCLUDE_START.*SLIM_EXCLUDE_END/s', 'SLIM_EXCLUDED', $mbn_js);
+   function getSlim($code) {
+      return preg_replace('/SLIM_EXCLUDE_START.*SLIM_EXCLUDE_END/s', 'SLIM_EXCLUDED', $code);
+   }
 
    function checkMinifyJS(&$errorsJS, $file, $code = null) {
       if ($code === null) {
@@ -78,21 +80,6 @@ function releaseMbn() {
       }
       return '';
    }
-   $errorsJS = array();
-
-   $mbn_min_js = checkMinifyJS($errorsJS, 'mbn.js', $mbn_js);
-   $mbn_slim_min_js = checkMinifyJS($errorsJS, 'mbn.slim.js', $mbn_slim_js);
-
-   if (!empty($errorsJS)) {
-      $errJsStr = '';
-      foreach ($errorsJS as $err) {
-         foreach ($err as $errc => $errl) {
-            $errJsStr .= $errc . ' => ' . trim($errl) . PHP_EOL;
-         }
-         $errJsStr .= PHP_EOL;
-      }
-      return $errJsStr;
-   }
 
    function minifyPHP($file) {
       $mbn_min_php = php_strip_whitespace($file);
@@ -115,10 +102,34 @@ function releaseMbn() {
       } while ($mbn_min_phpLenNew < $mbn_min_phpLen);
       return $mbn_min_php;
    }
-   $mbn_min_php = minifyPHP('mbn.php');
+
+   $errorsJS = array();
+
+   $mbn_slim_js = getSlim($mbn_js);
+   $mbn_min_js = checkMinifyJS($errorsJS, 'mbn.js', $mbn_js);
+   $mbn_slim_min_js = checkMinifyJS($errorsJS, 'mbn.slim.js', $mbn_slim_js);
+
+   if (!empty($errorsJS)) {
+      $errJsStr = '';
+      foreach ($errorsJS as $err) {
+         foreach ($err as $errc => $errl) {
+            $errJsStr .= $errc . ' => ' . trim($errl) . PHP_EOL;
+         }
+         $errJsStr .= PHP_EOL;
+      }
+      return $errJsStr;
+   }
+
+   $mbn_slim_php = getSlim($mbn_php);
 
    file_put_contents('release/mbn.php', $mbn_php);
+   file_put_contents('release/mbn.slim.php', $mbn_slim_php);
+
+   $mbn_min_php = minifyPHP('release/mbn.php');
+   $mbn_slim_min_php = minifyPHP('release/mbn.slim.php');
+
    file_put_contents('release/mbn.min.php', $mbn_min_php);
+   file_put_contents('release/mbn.slim.min.php', $mbn_slim_min_php);
 
    file_put_contents('release/mbn.js', $mbn_js);
    file_put_contents('release/mbn.slim.js', $mbn_slim_js);

@@ -51,6 +51,7 @@ var testMbn = function () {
    tests.push(['new Mbn0(" + .6 ")', '1']);
 
    tests.push(['new Mbn()', '0.00']);
+   tests.push(['new Mbn(".")', 'Mbn error*']);
    tests.push(['new Mbn("1.234")', '1.23']);
    tests.push(['new Mbn("1.235")', '1.24']);
    tests.push(['new Mbn(1.236)', '1.24']);

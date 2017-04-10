@@ -21,8 +21,16 @@ $relFiles = array(
         'Slim library version in JS - without pow(), eval(), reduce() and constants'
     ),
     array(
+        'mbn.slim.php',
+        'Slim library version in PHP - without pow(), /*eval(),*/ reduce() and constants'
+    ),
+    array(
         'mbn.slim.min.js',
         'Minified slim library version in JS'
+    ),
+    array(
+        'mbn.slim.min.php',
+        'Minified slim library version in PHP'
     ),
 );
 foreach ($relFiles as &$relFile) {
@@ -129,6 +137,7 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 
       w("Downloads", "title2");
 
+      w(["//tests are run only on mbn.php and mbn.js"], "mono");
       var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
       relFiles.forEach(function (f, i) {
          w(['<a href="?gf=' + i + '">' + f[0] + "</a> (" + (new Mbn(f[2])).div(1024) + " kB)", f[1]], "mono");
