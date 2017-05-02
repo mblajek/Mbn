@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-   <title>MbnEval</title>
+   <title>MbnCalc</title>
    <meta charset="UTF-8">
    <meta name=viewport content="width=device-width, initial-scale=1">
 </head>
@@ -29,17 +29,19 @@ var lastIn = null;
 var vars = {
 };
 var inchange = function(el){
-   if(lastIn === el.value + "_" + MbnP + "_" + MbnST){
+   var currIn = el.value + "|" + MbnP + "|" + MbnST;
+   if(lastIn === currIn){
       return;
    }
    var n = el.nextElementSibling;
    if(el.value !== "") {
-      n.value = '...';
       try{
          n.value = Mbnx.eval(el.value, vars);
-         lastIn = el.value + "_" + MbnP + "_" + MbnST;
+         n.style.color = "black";
+         lastIn = currIn;
       }catch(e){
          n.value = e;
+         n.style.color = "firebrick";
          lastIn = null;
       }
    } else {
@@ -59,7 +61,10 @@ var pchange = function(d, a){
    document.getElementById("in").onkeyup();
    document.getElementById("op").innerText = MbnP;
    document.getElementById("pst").innerText = MbnST;
+   document.getElementById("in").focus();
 };
-pchange(0);
+window.onload = function() {
+   pchange(0);
+};
    </script>
 </body>
