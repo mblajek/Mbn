@@ -300,6 +300,8 @@ var testMbn = function () {
    tests.push(['new Mbn("3").split([3,3])', '1.50,1.50']);
    tests.push(['new Mbn("3").split([1,2,3])', '0.50,1.00,1.50']);
    tests.push(['new Mbn("2").split([1,1,1])', '0.67,0.67,0.66']);
+   tests.push(['new Mbn("1").split([0,1,1])', '0.00,0.50,0.50']);
+   tests.push(['new Mbn("1").split([1,1,0])', '0.50,0.50,0.00']);
    tests.push(['new Mbn("100").split([100,23])', '81.30,18.70']);
    tests.push(['new Mbn("42").split()', '21.00,21.00']);
    tests.push(['new Mbn("42").split(5)', '8.40,8.40,8.40,8.40,8.40']);

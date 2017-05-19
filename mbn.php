@@ -34,7 +34,7 @@ class Mbn {
 
    protected static $MbnE = false;
    //version of MultiByteNumber library
-   protected static $MbnV = '1.13';
+   protected static $MbnV = '1.14';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -551,14 +551,14 @@ class Mbn {
          $asum = new static(0);
          $n = count($ar);
          foreach ($ar as $k => &$v) {
-            $v = new static($v);
-            $asum->add($v, true);
-            if ($v->s < 0) {
+            $ai = new static($v);
+            if ($ai->s === -1) {
                throw new MbnErr('.split', 'only non-negative ratio values supported');
             }
+            $asum->add($ai, true);
+            $arr[$k] = $ai;
          }
          unset($v);
-         $arr = &$ar;
       }
       if ($n === 0) {
          return array();
@@ -566,10 +566,14 @@ class Mbn {
       $a = new static($this);
       $brr = array();
       foreach ($arr as $k => &$v) {
-         $b = $a->mul($v)->div($asum);
-         $asum->sub($v, true);
-         $a->sub($b, true);
-         $brr[$k] = $b;
+         if ($v->s === 0) {
+            $brr[$k] = $v;
+         } else {
+            $b = $a->mul($v)->div($asum);
+            $asum->sub($v, true);
+            $a->sub($b, true);
+            $brr[$k] = $b;
+         }
       }
       unset($v);
       return $brr;
@@ -731,6 +735,7 @@ class Mbn {
    function sgn($m = false) {
       return $this->mbnSetReturn(new Mbn($this->s), $m);
    }
+
 //SLIM_EXCLUDE_START
    /**
     * Calculates n-th power of number, n must be integer
@@ -879,4 +884,5 @@ class Mbn {
       }
    }
 //SLIM_EXCLUDE_END
+
 }

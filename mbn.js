@@ -35,7 +35,7 @@ var MbnCr = function (opt) {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.14";
+   var MbnV = "1.15";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -559,11 +559,12 @@ var MbnCr = function (opt) {
          asum = new Mbn(0);
          n = ar.length;
          for (var i = 0; i < n; i++) {
-            if (ar[i] < 0) {
+            var ai = new Mbn(ar[i]);
+            if (ai._s === -1) {
                throw new MbnErr('.split', 'only non-negative ratio values supported');
             }
-            arr.push(new Mbn(ar[i]));
-            asum.add(arr[i], true);
+            arr.push(ai);
+            asum.add(ai, true);
          }
       }
       if (arr.length === 0) {
@@ -572,10 +573,14 @@ var MbnCr = function (opt) {
       var a = new Mbn(this);
       var brr = [];
       for (var i = 0; i < n; i++) {
-         var b = a.mul(arr[i]).div(asum);
-         asum.sub(arr[i], true);
-         a.sub(b, true);
-         brr.push(b);
+         if (arr[i]._s === 0) {
+            brr.push(arr[i]);
+         } else {
+            var b = a.mul(arr[i]).div(asum);
+            asum.sub(arr[i], true);
+            a.sub(b, true);
+            brr.push(b);
+         }
       }
       return brr;
    };
