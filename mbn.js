@@ -556,10 +556,14 @@ var MbnCr = function (opt) {
             arr.push(mbn1);
          }
       } else {
+         var mulp = new Mbn(1);
+         for (var i = 0; i < MbnP; i++) {
+            mulp._d.push(0);
+         }
          asum = new Mbn(0);
          n = ar.length;
          for (var i = 0; i < n; i++) {
-            var ai = new Mbn(ar[i]);
+            var ai = (new Mbn(ar[i])).mul(mulp);
             if (ai._s === -1) {
                throw new MbnErr('.split', 'only non-negative ratio values supported');
             }

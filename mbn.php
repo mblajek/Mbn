@@ -548,10 +548,14 @@ class Mbn {
             $arr[] = $mbn1;
          }
       } else {
+         $mulp = new static(1);
+         for ($i = 0; $i < static::$MbnP; $i++) {
+            $mulp->d[] = 0;
+         }
          $asum = new static(0);
          $n = count($ar);
          foreach ($ar as $k => &$v) {
-            $ai = new static($v);
+            $ai = (new static($v))->mul($mulp);
             if ($ai->s === -1) {
                throw new MbnErr('.split', 'only non-negative ratio values supported');
             }
