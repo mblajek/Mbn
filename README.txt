@@ -2,11 +2,11 @@ Library for PHP and JS to do calculations with any precission, with correct appr
 
 project page: http://mirkles.net/n/index.php - library files avalaible there
 
-	Main page:
+   Main page:
       index.php - Main page - destription of library with examples, also runs unit tests
       calc.php - Calculator based on library ( http://mirkles.net/n )
 
-	Library:
+   Library:
       mbn.js - JavaScript version
       mbn.php - PHP version
 
