@@ -32,11 +32,11 @@ function testMbn() {
       $ret = array();
       $i = 0;
       foreach ($tests as $test) {
-         list($exp, $req) = $test;
+         list($raw, $req, $exp) = $test;
          $i++;
          try {
             $o = '';
-            eval('$o = ' . $exp . ';');
+            eval($exp);
             if ($o === true) {
                $o = 'true';
             } else if ($o === false) {
@@ -44,20 +44,21 @@ function testMbn() {
             } else if (is_array($o)) {
                $o = implode(',', $o);
             }
-            $evv = (string) $o;
+            $evv = strval($o);
          } catch (Exception $s) {
             $evv = $s->getMessage();
          }
 
-         if (strrpos($req, '*')) {
-            $cmpn = strpos($req, '*');
+         if ($req[strlen($req) - 1] === '*') {
+            $cmpn = strlen($req) - 1;
          } else {
             $cmpn = strlen($req) + strlen($evv);
          }
 
-         if (strncmp($evv, $req, $cmpn)) {
+         if (strncmp($evv, $req, $cmpn) !== 0) {
             $ret [] = array(
                 'id' => $i,
+                'raw' => $raw,
                 'code' => $exp,
                 'correct' => $req,
                 'incorrect' => $evv
@@ -70,8 +71,15 @@ function testMbn() {
           'errors' => $ret
       );
    }
+
    $testsAll = json_decode(file_get_contents('mbn_test_set.json'));
    $tests = array_merge($testsAll->php, $testsAll->both);
+   foreach($tests as &$test) {
+      $expArr = explode('; ', $test[0]);
+      $expArr[count($expArr) - 1] = '$o = ' . $expArr[count($expArr) - 1] . ';';
+      $test[2] = implode('; ', $expArr);
+   }
+   unset($test);
 
    $starttimePHP = microtime(true);
    $testPHP = runTestMbn($tests);

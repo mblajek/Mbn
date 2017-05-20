@@ -52,6 +52,7 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 <head>
    <title>Mbn examples</title>
    <meta charset="UTF-8">
+   <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAGUExURQAAAP///6XZn90AAAAxSURBVAgdY/zPwLhfj3G+HuP6f4zbtzGucmacG8C4zh7EBooAxYGy//+BUEMj438GAL6WE3n6ZaTTAAAAAElFTkSuQmCC" type="image/png" />
 </head><body>
    <script src="mbn.js"></script>
 
@@ -399,8 +400,6 @@ if ($getFile != null && isset($relFiles[$getFile])) {
          };
          xmlhttp.open("POST", "mbn_test.php", true);
          xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-         xmlhttp.setRequestHeader("Content-length", 0);
-         xmlhttp.setRequestHeader("Connection", "close");
          xmlhttp.send("");
       }, 100);
    </script>
