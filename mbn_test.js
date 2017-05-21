@@ -1,4 +1,4 @@
-var testMbn = function () {
+var testMbn = function (displayResp) {
    var runTestMbn = function (tests) {
       var ret = [];
       var tl = tests.length;
@@ -33,22 +33,24 @@ var testMbn = function () {
    var Mbn20u = MbnCr({MbnP: 20, MbnS: ',', MbnT: true});
 
    var xmlhttp = new XMLHttpRequest();
-   xmlhttp.open("POST", "mbn_test_set.json", false);
+   xmlhttp.onreadystatechange = function () {
+      if (xmlhttp.readyState === 4) {
+         var testsAll = JSON.parse(xmlhttp.responseText);
+         var tests = testsAll.js.concat(testsAll.both);
+         var testsl = tests.length;
+         for(var i=0; i< testsl; i++) {
+            var test = tests[i];
+            test[2] = test[0].replace(/->|::/g, ".").replace(/^\$/, "var $");
+         }
+         var starttimeJS = new Date();
+         var ret = runTestMbn(tests);
+         ret.time = new Date() - starttimeJS;
+         ret.MbnV = Mbn.prop().MbnV;
+         displayResp(JSON.stringify(ret));
+      }
+   };
+   xmlhttp.open("POST", "mbn_test_set.json", true);
    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
    xmlhttp.send("");
-   var testsAll = JSON.parse(xmlhttp.responseText);
-   var tests = testsAll.js.concat(testsAll.both);
-   var testsl = tests.length;
-   for(var i=0; i< testsl; i++) {
-      var test = tests[i];
-      test[2] = test[0].replace(/->|::/g, ".").replace(/^\$/, "var $");
-   }
-   console.log(tests);
-
-   var starttimeJS = new Date();
-   var ret = runTestMbn(tests);
-   ret.time = new Date() - starttimeJS;
-   ret.MbnV = Mbn.prop().MbnV;
-   return JSON.stringify(ret);
 };
 

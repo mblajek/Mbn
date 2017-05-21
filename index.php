@@ -390,8 +390,6 @@ if ($getFile != null && isset($relFiles[$getFile])) {
             document.getElementById("result" + lng).innerText = txt;
          }
 
-         displayTestStatus("JS", testMbn());
-
          var xmlhttp = new XMLHttpRequest();
          xmlhttp.onreadystatechange = function () {
             if (xmlhttp.readyState === 4) {
@@ -400,7 +398,10 @@ if ($getFile != null && isset($relFiles[$getFile])) {
          };
          xmlhttp.open("POST", "mbn_test.php", true);
          xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-         xmlhttp.send("");
+         testMbn(function (responseText) {
+            displayTestStatus("JS", responseText);
+            xmlhttp.send("");
+         });
       }, 100);
    </script>
 </body>
