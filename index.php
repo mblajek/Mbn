@@ -46,13 +46,17 @@ if ($getFile != null && isset($relFiles[$getFile])) {
    header('Content-Disposition: inline; filename="' . $fn . '"');
    readfile('release/' . $fn);
    die;
+} elseif ($getFile === 'icon') {
+   header('Content-Type: image/bmp');
+   echo gzinflate(base64_decode('c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDA'
+           . 'wNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
 }
 
 ?><!DOCTYPE html>
 <head>
    <title>Mbn examples</title>
    <meta charset="UTF-8">
-   <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAGUExURQAAAP///6XZn90AAAAxSURBVAgdY/zPwLhfj3G+HuP6f4zbtzGucmacG8C4zh7EBooAxYGy//+BUEMj438GAL6WE3n6ZaTTAAAAAElFTkSuQmCC" type="image/png" />
+   <link rel="icon" href="?gf=icon" type="image/bmp" />
 </head><body>
    <script src="mbn.js"></script>
 

@@ -16,10 +16,11 @@ var testMbn = function (displayResp) {
          }
 
          var cmpn;
-         if(req.charAt(req.length - 1) === '*') {
-            cmpn = req.length - 1;
+         var reql = req.length;
+         if (reql !== 0 && req.charAt(reql - 1) === '*') {
+            cmpn = reql - 1;
          } else {
-            cmpn = req.length + evv.length;
+            cmpn = reql + evv.length;
          }
 
          if (req.slice(0, cmpn) !== evv.slice(0, cmpn)) {
@@ -38,7 +39,7 @@ var testMbn = function (displayResp) {
          var testsAll = JSON.parse(xmlhttp.responseText);
          var tests = testsAll.js.concat(testsAll.both);
          var testsl = tests.length;
-         for(var i=0; i< testsl; i++) {
+         for (var i = 0; i < testsl; i++) {
             var test = tests[i];
             test[2] = test[0].replace(/->|::/g, ".").replace(/^\$/, "var $");
          }

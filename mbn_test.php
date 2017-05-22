@@ -49,10 +49,11 @@ function testMbn() {
             $evv = $s->getMessage();
          }
 
-         if ($req[strlen($req) - 1] === '*') {
-            $cmpn = strlen($req) - 1;
+         $reql = strlen($req);
+         if ($reql !== 0 && $req[$reql - 1] === '*') {
+            $cmpn = $reql - 1;
          } else {
-            $cmpn = strlen($req) + strlen($evv);
+            $cmpn = $reql + strlen($evv);
          }
 
          if (strncmp($evv, $req, $cmpn) !== 0) {
@@ -71,10 +72,9 @@ function testMbn() {
           'errors' => $ret
       );
    }
-
    $testsAll = json_decode(file_get_contents('mbn_test_set.json'));
    $tests = array_merge($testsAll->php, $testsAll->both);
-   foreach($tests as &$test) {
+   foreach ($tests as &$test) {
       $expArr = explode('; ', $test[0]);
       $expArr[count($expArr) - 1] = '$o = ' . $expArr[count($expArr) - 1] . ';';
       $test[2] = implode('; ', $expArr);
