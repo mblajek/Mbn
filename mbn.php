@@ -34,7 +34,7 @@ class Mbn {
 
    protected static $MbnE = false;
    //version of MultiByteNumber library
-   protected static $MbnV = '1.14';
+   protected static $MbnV = '1.15';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -795,6 +795,7 @@ class Mbn {
       return $this->mbnSetReturn($r, $m);
    }
    protected static $fnReduce = array(
+       'set' => 0,
        'abs' => 1,
        'inva' => 1,
        'invm' => 1,
@@ -823,13 +824,8 @@ class Mbn {
       if (!is_array($arr)) {
          throw new MbnErr(".reduce", "argument is not array", $arr);
       }
-      if (static::$fnReduce[$fn] === 1) {
-         $r = array();
-         foreach ($arr as $k => &$v) {
-            $r[$k] = (new static($v))->{$fn}(true);
-         }
-         unset($v);
-      } else {
+      $mode = static::$fnReduce[$fn];
+      if ($mode === 2) {
          $r = new static(0);
          $fst = true;
          foreach ($arr as $k => &$v) {
@@ -839,6 +835,13 @@ class Mbn {
             } else {
                $r->{$fn}($v, true);
             }
+         }
+         unset($v);
+      } else {
+         $r = array();
+         foreach ($arr as $k => &$v) {
+            $e = new static($v);
+            $r[$k] = ($mode === 1) ? $e->{$fn}(true) : $e;
          }
          unset($v);
       }
@@ -858,11 +861,15 @@ class Mbn {
     * @param {*=} v
     */
    public static function def($n, $v = null) {
-      if (preg_match('/^[A-Z]\\w*$/', $n) !== 1) {
+      $check = ($n === null);
+      if (preg_match('/^[A-Z]\\w*$/', ($check ? $v : $n)) !== 1) {
          throw new MbnErr(".def", "incorrect name", $n);
       }
       $mc = &static::$MbnConst;
       $mx = &static::$MbnX;
+      if ($check) {
+         return (isset($mc[$mx][$v]) || isset($mc[''][$v]));
+      }
       if ($v === null) {
          if (!isset($mc[$mx])) {
             $mc[$mx] = array();

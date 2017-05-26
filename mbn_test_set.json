@@ -363,13 +363,16 @@
       ["Mbn::def('MbnP')", "2.00"],
       ["Mbn3c::def('MbnP')", "3,000"],
       ["Mbn::def('X')", "Mbn.def error*"],
+      ["Mbn::def(null, 'X')", "false"],
       ["Mbn::def('X', 4.2)", "4.20"],
+      ["Mbn::def(null, 'X')", "true"],
       ["Mbn::def('X')", "4.20"],
       ["Mbn::reduce('add', [])", "0.00"],
       ["Mbn::reduce('add', [1,6,-2])", "5.00"],
       ["Mbn::reduce('mul', [1,6,-2])", "-12.00"],
       ["Mbn::reduce('inva', [1,6,-2])", "-1.00,-6.00,2.00"],
       ["Mbn::reduce('sgn', [1,6,-2])", "1.00,1.00,-1.00"],
-      ["Mbn::reduce('sgn', [])", ""]
+      ["Mbn::reduce('sgn', [])", ""],
+      ["Mbn::reduce('set', [1,6,-2])", "1.00,6.00,-2.00"]
    ]
 }

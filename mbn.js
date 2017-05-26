@@ -35,7 +35,7 @@ var MbnCr = function (opt) {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.15";
+   var MbnV = "1.16";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -796,7 +796,7 @@ var MbnCr = function (opt) {
       return mbnSetReturn(this, r, m);
    };
 
-   var fnReduce = {abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1, add: 2, mul: 2, min: 2, max: 2};
+   var fnReduce = {set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1, add: 2, mul: 2, min: 2, max: 2};
    /**
     * run function on each element, returns single value for 2 argument function,
     * and array, for 1 argument
@@ -812,15 +812,17 @@ var MbnCr = function (opt) {
       }
       var r;
       var arrl = arr.length;
-      if (fnReduce[fn] === 1) {
-         r = [];
-         for (var i = 0; i < arrl; i++) {
-            r.push((new Mbn(arr[i]))[fn](true));
-         }
-      } else {
+      var mode = fnReduce[fn];
+      if (mode === 2) {
          r = new Mbn((arrl > 0) ? arr[0] : 0);
          for (var i = 1; i < arrl; i++) {
             r[fn](arr[i], true);
+         }
+      } else {
+         r = [];
+         for (var i = 0; i < arrl; i++) {
+            var e = new Mbn(arr[i]);
+            r.push((mode === 1) ? e[fn](true) : e);
          }
       }
       return r;
@@ -839,8 +841,12 @@ var MbnCr = function (opt) {
     * @param {*=} v
     */
    Mbn.def = function (n, v) {
-      if (n.match(cnRx) === null) {
+      var check = (n === null);
+      if ((check ? v : n).match(cnRx) === null) {
          throw new MbnErr(".def", "incorrect name", n);
+      }
+      if (check) {
+         return MbnConst.hasOwnProperty(v);
       }
       if (v === undefined) {
          if (MbnConst.hasOwnProperty(n)) {

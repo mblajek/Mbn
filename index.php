@@ -212,7 +212,7 @@ if ($getFile != null && isset($relFiles[$getFile])) {
       we(['//another Mbn class object (any object convertible to string)', 'new Mbn4c(new Mbn("1,2"));']);
 
       w();
-      we(['//called as funcion, calls itself as constructor', 'Mbn(4);']);
+      we(['//called as funcion, calls itself as constructor (JS only)', 'Mbn(4);']);
 
       w('Mbn behaviour is similar to string', "title2");
 

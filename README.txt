@@ -2,7 +2,7 @@ Library for PHP and JS to do calculations with any precission, with correct appr
 
 project page: http://mirkles.net/n/index.php - library files avalaible there
 
-   Main page:
+   Pages:
       index.php - Main page - destription of library with examples, also runs unit tests
       calc.php - Calculator based on library ( http://mirkles.net/n )
 
@@ -18,7 +18,6 @@ project page: http://mirkles.net/n/index.php - library files avalaible there
 
 TO DO:
 JS & PHP
-   - ?Optimize div()
    - More tests
 PHP
    - add eval()
