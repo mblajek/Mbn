@@ -32,9 +32,8 @@ class MbnErr extends Exception {
  */
 class Mbn {
 
-   protected static $MbnE = false;
    //version of MultiByteNumber library
-   protected static $MbnV = '1.15';
+   protected static $MbnV = '1.16';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -42,7 +41,8 @@ class Mbn {
    //default truncate
    protected static $MbnT = false;
    protected static $MbnX;
-   private $d = array();
+   private $d = [
+       ];
    private $s = 1;
 
    /**
@@ -166,7 +166,8 @@ class Mbn {
          throw new MbnErr('', 'invalid value', $x);
       }
       $this->s = 1;
-      $this->d = array();
+      $this->d = [
+          ];
       if ($x < 0) {
          $x = -$x;
          $this->s = -1;
@@ -228,13 +229,14 @@ class Mbn {
     * Returns properties of Mbn class
     */
    public static function prop() {
-      return array(
+      static::isNotMbn(0);
+      return [
           'MbnV' => static::$MbnV,
           'MbnP' => static::$MbnP,
           'MbnS' => static::$MbnS,
           'MbnT' => static::$MbnT,
-          'MbnE' => static::$MbnE
-      );
+          'MbnE' => method_exists(static::$MbnX, 'calc'),
+      ];
    }
 
    /**
@@ -420,7 +422,8 @@ class Mbn {
          $b = new static($b);
       }
       $r = new static($b);
-      $r->d = array();
+      $r->d = [
+          ];
       $tc = count($this->d);
       $bc = count($b->d);
       for ($i = 0; $i < $tc; $i++) {
@@ -458,8 +461,8 @@ class Mbn {
       $x = $this->d;
       $y = $b->d;
       $p = 0;
-      $ra = array(
-          0);
+      $ra = [
+          0];
       while ($y[0] === 0) {
          array_shift($y);
       }
@@ -536,7 +539,8 @@ class Mbn {
     * @param {array} ar
     */
    function split($ar = 2) {
-      $arr = array();
+      $arr = [
+          ];
       if (!is_array($ar)) {
          $mbn1 = new static(1);
          $asum = new static($ar);
@@ -565,10 +569,12 @@ class Mbn {
          unset($v);
       }
       if ($n === 0) {
-         return array();
+         return [
+             ];
       }
       $a = new static($this);
-      $brr = array();
+      $brr = [
+          ];
       foreach ($arr as $k => &$v) {
          if ($v->s === 0) {
             $brr[$k] = $v;
@@ -794,7 +800,7 @@ class Mbn {
       }
       return $this->mbnSetReturn($r, $m);
    }
-   protected static $fnReduce = array(
+   protected static $fnReduce = [
        'set' => 0,
        'abs' => 1,
        'inva' => 1,
@@ -809,7 +815,7 @@ class Mbn {
        'mul' => 2,
        'min' => 2,
        'max' => 2
-   );
+   ];
 
    /**
     * run function on each element, returns single value for 2 argument function,
@@ -838,7 +844,8 @@ class Mbn {
          }
          unset($v);
       } else {
-         $r = array();
+         $r = [
+             ];
          foreach ($arr as $k => &$v) {
             $e = new static($v);
             $r[$k] = ($mode === 1) ? $e->{$fn}(true) : $e;
@@ -847,12 +854,12 @@ class Mbn {
       }
       return $r;
    }
-   protected static $MbnConst = array(
-       '' => array(
+   protected static $MbnConst = [
+       '' => [
            'PI' => "3.1415926535897932384626433832795028841972",
            'E' => "2.7182818284590452353602874713526624977573",
-       )
-   );
+       ]
+   ];
 
    //$cnRx = ;
    /**
@@ -872,7 +879,8 @@ class Mbn {
       }
       if ($v === null) {
          if (!isset($mc[$mx])) {
-            $mc[$mx] = array();
+            $mc[$mx] = [
+                ];
          }
          if (!isset($mc[$mx][$n])) {
             if (isset($mc[''][$n])) {
@@ -894,6 +902,202 @@ class Mbn {
          }
       }
    }
+   protected static $fnEval = [
+       'abs' => true,
+       'inva' => false,
+       'ceil' => true,
+       'floor' => true,
+       'sqrt' => true,
+       'round' => true,
+       'sgn' => true,
+       'int' => 'intp'];
+
+   protected static $states = [
+'endBopPr' => [
+'bop',
+ 'pc', 'pr'],
+ 'endBop' => [
+'bop',
+ 'pc'],
+ 'uopVal' => ['num',
+ 'name',
+ 'uop',
+ 'po'],
+ 'po' => ['po']
+];
+protected static $endBop = [
+       'bop',
+       'pc'];
+   protected static $uopVal = [
+       'num',
+       "name",
+       "uop",
+       "po"];
+      protected static $bops = [
+      "|"=> [1, true, 'max'],
+      "&"=> [2, true, 'min'],
+      "+"=> [3, true, 'add'],
+      "-"=> [3, true, 'sub'],
+      "*"=> [4, true, 'mul'],
+      "#"=> [4, true, 'mod'],
+      "/"=> [4, true, 'div'],
+      "^"=> [5, false, 'pow']];
+   protected static $funPrx = 4;
+   protected static $rxs = [
+      'num'=> ['rx'=> '/^([0-9\.,]+)\s*/', 'next'=> 'endBopPr', 'end'=> true],
+      'name'=> ['rx' => '/^([A-Za-z_]\w*)\s*/'],
+      'fn'=> ['next'=> 'po', 'end'=> false],
+      'vr'=> ['next' => 'endBop', 'end' => true],
+      'bop'=> ['rx' => '/^([-+\*\/#^&|])\s*/', 'next'=> 'uopVal', 'end'=> false],
+      'uop'=> ['rx'=> '/^([-+])\s*/', 'next'=> 'uopVal', 'end'=> false],
+      'po'=> ['rx'=>'/^(\()\s*/', 'next'=> 'uopVal', 'end'=> false],
+      'pc'=> ['rx'=>'/^(\))\s*/', 'next'=> 'endBop', 'end'=> true],
+      'pr'=> ['rx'=> '/^(%)\s*/', 'next'=> 'endBop', 'end'=> true]
+   ];
+   /**
+    * eval expression
+    * @param {string} expr
+    * @param {*=} vars
+    */
+   public static function calc ($expr, $vars = null) {
+      $expr = preg_replace('/^\s+/', '', $expr);
+      $vnames = [];
+      if ($vars !== null) {
+         foreach ($vars as $k => &$v) {
+               $vnames[i] = new Mbn(vars[i]);
+         }
+      }
+      $larr = &static::$states['uopVal'];
+      $larl = count($larr);
+      $lare = false;
+      $rpns = [];
+      $rpno = [];
+      $neg = false;
+      $t = null;
+      $invaUop = [static::$funPrx, true, 'inva'];
+
+      while (strlen($expr) > 0) {
+         $mtch = [];
+         foreach ($larr as $t) {
+            if(preg_match(static::$rxs[$t]['rx'],$expr , $mtch) == 1){
+               break;
+            }
+         }
+         if (empty($mtch)) {
+            if ($larr[0] === "bop") {
+               $tok = "*";
+               $t = "bop";
+            } else {
+               throw new MbnErr(".eval", "unexpected", $expr);
+            }
+         } else {
+            $tok = $mtch[1];
+            $expr = substr($expr, strlen($mtch[0]));
+         }
+         if ($t !== "uop" && $neg) {
+            $rpno[]=&$invaUop;
+            $neg = false;
+         }
+         switch ($t) {
+            case 'num':
+               $rpns[]=new static($tok);
+               break;
+            case 'name':
+               /*if (fnEval.hasOwnProperty(tok) && fnEval[tok] !== false) {
+                  t = "fn";
+                  rpno.push([funPrx, true, tok]);
+               } else if (vnames.hasOwnProperty(tok)) {
+                  t = "vr";
+                  rpns.push(new Mbn(vnames[tok]));
+               } else if (MbnConst.hasOwnProperty(tok)) {
+                  t = "vr";
+                  rpns.push(Mbn.def(tok));
+               } else {
+                  throw new MbnErr(".eval", "undefined", tok);
+               }*/
+               break;
+            case 'bop':
+               $bop = static::$bops[$tok];
+               while (($rolm = count($rpno) - 1) !== -1) {
+                  $rolp = $rpno[$rolm];
+                  if ($rolp !== '(' && ($rolp[0] > $bop[0] - ($bop[1] ? 1 : 0))) {
+                     $rpns[]=array_pop($rpno)[2];
+                  } else {
+                     break;
+                  }
+               }
+               $rpno[]=$bop;
+               break;
+            case "uop":
+               if (tok === "-") {
+                  $neg = !$neg;
+               }
+               break;
+            case "po":
+               rpno.push(tok);
+               break;
+            case "pc":
+               while (($rolm = count($rpno) - 1) !== -1) {
+                  $rolp = $rpno[$rolm];
+                  if ($rolp !== "(") {
+                     $rpns[]=array_pop($rpno)[2];
+                  } else {
+                     array_pop($rpno);
+                     break;
+                  }
+               }
+               if ($rolm === -1) {
+                  throw new MbnErr(".eval", "unexpected", ")");
+               } else {
+                  $rolm = count($rpno) - 1;
+                  if ($rolm !== -1 && $rpno[$rolm][2] === static::$funPrx) {
+                     $rpns[]=array_pop($rpno)[2];
+                  }
+               }
+               break;
+            case 'pr':
+               $rpns[count($rpns) - 1]->div(100, true);
+               break;
+            default:
+         }
+
+         $larr = &static::$states[static::$rxs[$t]['next']];
+         $larl = count($larr);
+         $lare = static::$rxs[$t]['end'];
+      }
+      while (count($rpno) !== 0) {
+         $v = array_pop($rpno);
+         if ($v !== "(") {
+            $rpns[]=$v[2];
+         } else {
+            throw new MbnErr('.eval', 'unexpected', '(');
+         }
+      }
+      if (!$lare) {
+         throw new MbnErr('.eval', 'unexpected', 'END');
+      }
+
+      $rpn = [];
+
+      $rpnsl = count($rpns);
+
+      foreach ($rpns as $tn) {
+         if (!static::isNotMbn($tn)) {
+            $rpn[]=$tn;
+         } /*else if (fnEval.hasOwnProperty(tn)) {
+            if (typeof fnEval[tn] === "string") {
+               tn = fnEval[tn];
+            }
+            rpn[rpn.length - 1][tn](true);
+         }*/ else {
+            $pp = array_pop($rpn);
+            $rpn[count($rpn) - 1]->{$tn}($pp, true);
+         }
+      }
+      return $rpn[0];
+   }
+
+
 //SLIM_EXCLUDE_END
 
 }

@@ -20,4 +20,4 @@ TO DO:
 JS & PHP
    - More tests
 PHP
-   - add eval()
+   - finish calc()

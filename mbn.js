@@ -35,7 +35,7 @@ var MbnCr = function (opt) {
       opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
    }
    //version of MultiByteNumber library
-   var MbnV = "1.16";
+   var MbnV = "1.17";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -152,7 +152,7 @@ var MbnCr = function (opt) {
          a._s = (n0 === "-") ? -1 : 1;
          n = n.slice(1);
          if (n0 === "=") {
-            a.set((typeof Mbn.eval === "function") ? Mbn.eval(n, v) : (new Mbn(n)));
+            a.set((typeof Mbn.calc === "function") ? Mbn.calc(n, v) : (new Mbn(n)));
             return;
          }
       }
@@ -249,7 +249,7 @@ var MbnCr = function (opt) {
     * Returns properties of Mbn class
     */
    Mbn.prop = function () {
-      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: (typeof Mbn.eval === "function")};
+      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: (typeof Mbn.calc === "function")};
    };
 
    /**
@@ -871,8 +871,8 @@ var MbnCr = function (opt) {
    };
 
    var fnEval = {abs: true, inva: false, ceil: true, floor: true, sqrt: true, round: true, sgn: true, int: "intp"};
-   var endBop = ['bop', 'pc'];
-   var uopVal = ['num', "name", "uop", "po"];
+   var endBop = ["bop", "pc"];
+   var uopVal = ["num", "name", "uop", "po"];
    var bops = {
       "|": [1, true, 'max'],
       "&": [2, true, 'min'],
@@ -884,7 +884,7 @@ var MbnCr = function (opt) {
       "^": [5, false, 'pow']};
    var funPrx = 4;
    var rxs = {
-      num: {rx: /^([0-9\.,]+)\s*/, next: endBop.concat("pr"), end: true},
+      num: {rx: /^([0-9\.,]+)\s*/, next: ["bop", "pc", "pr"], end: true},
       name: {rx: /^([A-Za-z_]\w*)\s*/},
       fn: {next: ["po"], end: false},
       vr: {next: endBop, end: true},
@@ -897,11 +897,11 @@ var MbnCr = function (opt) {
 
    var wsRx3 = /^\s+/;
    /**
-    * eval expression
+    * calc expression
     * @param {string} expr
     * @param {*=} vars
     */
-   Mbn.eval = function (expr, vars) {
+   Mbn.calc = function (expr, vars) {
       expr = expr.replace(wsRx3, "");
       var vnames = {};
       if (vars !== undefined) {
@@ -933,7 +933,7 @@ var MbnCr = function (opt) {
                tok = "*";
                t = "bop";
             } else {
-               throw new MbnErr(".eval", "unexpected", expr);
+               throw new MbnErr(".calc", "unexpected", expr);
             }
          } else {
             tok = mtch[1];
@@ -958,7 +958,7 @@ var MbnCr = function (opt) {
                   t = "vr";
                   rpns.push(Mbn.def(tok));
                } else {
-                  throw new MbnErr(".eval", "undefined", tok);
+                  throw new MbnErr(".calc", "undefined", tok);
                }
                break;
             case "bop":
@@ -994,7 +994,7 @@ var MbnCr = function (opt) {
                   }
                }
                if (rolm === -1) {
-                  throw new MbnErr(".eval", "unexpected", ")");
+                  throw new MbnErr(".calc", "unexpected", ")");
                } else {
                   rolm = rpno.length - 1;
                   if (rolm !== -1 && rpno[rolm][2] === funPrx) {
@@ -1005,6 +1005,7 @@ var MbnCr = function (opt) {
             case "pr":
                rpns[rpns.length - 1].div(100, true);
                break;
+            default:
          }
 
          larr = rxs[t].next;
@@ -1016,11 +1017,11 @@ var MbnCr = function (opt) {
          if (v !== "(") {
             rpns.push(v[2]);
          } else {
-            throw new MbnErr(".eval", "unexpected", "(");
+            throw new MbnErr(".calc", "unexpected", "(");
          }
       }
       if (!lare) {
-         throw new MbnErr(".eval", "unexpected", "END");
+         throw new MbnErr(".calc", "unexpected", "END");
       }
 
       var rpn = [];

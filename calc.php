@@ -36,7 +36,7 @@ var inchange = function(el){
    var n = el.nextElementSibling;
    if(el.value !== "") {
       try{
-         n.value = Mbnx.eval(el.value, vars);
+         n.value = Mbnx.calc(el.value, vars);
          n.style.color = "black";
          lastIn = currIn;
       }catch(e){
