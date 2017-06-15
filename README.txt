@@ -19,5 +19,4 @@ project page: http://mirkles.net/n/index.php - library files avalaible there
 TO DO:
 JS & PHP
    - More tests
-PHP
-   - finish calc()
+   - review code

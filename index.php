@@ -22,7 +22,7 @@ $relFiles = array(
     ),
     array(
         'mbn.slim.php',
-        'Slim library version in PHP - without pow(), /*calc(),*/ reduce() and constants'
+        'Slim library version in PHP - without pow(), calc(), reduce() and constants'
     ),
     array(
         'mbn.slim.min.js',
@@ -123,7 +123,7 @@ if ($getFile != null && isset($relFiles[$getFile])) {
          var acode = (a instanceof Array) ? a.join("\n") : a;
          w(a, "mono");
          try {
-            var e = calc(acode);
+            var e = eval(acode);
             w(String(e), "result");
             w(typeof e, "label");
          } catch (er) {

@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.16';
+   protected static $MbnV = '1.17';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -124,12 +124,16 @@ class Mbn {
     * @param {Mbn} a
     * @param {string} nd
     */
-   private function fromString($nd) {
+   private function fromString($nd, $v) {
       $n = preg_replace('/\\s+$/', '', preg_replace('/^\\s*([+=-]?)\\s*/', '$1', $nd));
       $n0 = $n[0];
-      if ($n0 === '-' || $n0 === '+') {
+      if ($n0 === '-' || $n0 === '+' || $n0 === '=') {
          $this->s = ($n0 === '-') ? -1 : 1;
          $n = substr($n, 1);
+         if($n0 === '=' && method_exists(get_class(), 'calc')){
+            $this->set(static::calc($n, $v));
+            return;
+         }
       }
       $ln = strpos($n, '.');
       if ($ln === false) {
@@ -207,14 +211,14 @@ class Mbn {
     * @param {*=} n
     * @param {*=} v
     */
-   public function __construct($n = 0) {
+   public function __construct($n = 0, $v = null) {
       if (is_float($n) || is_int($n)) {
          $this->mbnFromNumber($n);
       } elseif (is_string($n)) {
-         $this->fromString($n);
+         $this->fromString($n, $v);
       } elseif (is_object($n)) {
          if (static::isNotMbn($n)) {
-            $this->fromString($n->toString(static::$MbnS));
+            $this->fromString(strval($n), $v);
          } else {
             $this->set((string) $n);
          }
@@ -229,13 +233,12 @@ class Mbn {
     * Returns properties of Mbn class
     */
    public static function prop() {
-      static::isNotMbn(0);
       return [
           'MbnV' => static::$MbnV,
           'MbnP' => static::$MbnP,
           'MbnS' => static::$MbnS,
           'MbnT' => static::$MbnT,
-          'MbnE' => method_exists(static::$MbnX, 'calc'),
+          'MbnE' => method_exists(get_class(), 'calc'),
       ];
    }
 
@@ -703,7 +706,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function min($b, $m = false) {
-      return $this->mbnSetReturn(new Mbn((($this->cmp($b)) <= 0) ? $this : $b), $m);
+      return $this->mbnSetReturn(new static((($this->cmp($b)) <= 0) ? $this : $b), $m);
    }
 
    /**
@@ -712,7 +715,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function max($b, $m = false) {
-      return $this->mbnSetReturn(new Mbn((($this->cmp($b)) >= 0) ? $this : $b), $m);
+      return $this->mbnSetReturn(new static((($this->cmp($b)) >= 0) ? $this : $b), $m);
    }
 
    /**
@@ -743,7 +746,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function sgn($m = false) {
-      return $this->mbnSetReturn(new Mbn($this->s), $m);
+      return $this->mbnSetReturn(new static($this->s), $m);
    }
 
 //SLIM_EXCLUDE_START
@@ -864,7 +867,7 @@ class Mbn {
    //$cnRx = ;
    /**
     * Sets and reads constant
-    * @param {string} n
+    * @param {string|null} n
     * @param {*=} v
     */
    public static function def($n, $v = null) {
@@ -964,7 +967,7 @@ protected static $endBop = [
       $vnames = [];
       if ($vars !== null) {
          foreach ($vars as $k => &$v) {
-               $vnames[i] = new Mbn(vars[i]);
+            $vnames[$k] = new static($vars[$k]);
          }
       }
       $larr = &static::$states['uopVal'];
@@ -1003,18 +1006,18 @@ protected static $endBop = [
                $rpns[]=new static($tok);
                break;
             case 'name':
-               /*if (fnEval.hasOwnProperty(tok) && fnEval[tok] !== false) {
-                  t = "fn";
-                  rpno.push([funPrx, true, tok]);
-               } else if (vnames.hasOwnProperty(tok)) {
-                  t = "vr";
-                  rpns.push(new Mbn(vnames[tok]));
-               } else if (MbnConst.hasOwnProperty(tok)) {
-                  t = "vr";
-                  rpns.push(Mbn.def(tok));
+               if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
+                  $t = "fn";
+                  $rpno []= [static::$funPrx, true, $tok];
+               } elseif (isset($vnames[$tok])) {
+                  $t = "vr";
+                  $rpns []= new static($vnames[$tok]);
+               } elseif (static::def(null, $tok)) {
+                  $t = "vr";
+                  $rpns []= static::def($tok);
                } else {
-                  throw new MbnErr(".eval", "undefined", tok);
-               }*/
+                  throw new MbnErr('.eval', 'undefined', $tok);
+               }
                break;
             case 'bop':
                $bop = static::$bops[$tok];
@@ -1028,18 +1031,18 @@ protected static $endBop = [
                }
                $rpno[]=$bop;
                break;
-            case "uop":
-               if (tok === "-") {
+            case 'uop':
+               if ($tok === '-') {
                   $neg = !$neg;
                }
                break;
-            case "po":
-               rpno.push(tok);
+            case 'po':
+               $rpno []= $tok;
                break;
-            case "pc":
+            case 'pc':
                while (($rolm = count($rpno) - 1) !== -1) {
                   $rolp = $rpno[$rolm];
-                  if ($rolp !== "(") {
+                  if ($rolp !== '(') {
                      $rpns[]=array_pop($rpno)[2];
                   } else {
                      array_pop($rpno);
@@ -1047,7 +1050,7 @@ protected static $endBop = [
                   }
                }
                if ($rolm === -1) {
-                  throw new MbnErr(".eval", "unexpected", ")");
+                  throw new MbnErr('.eval', 'unexpected', ')');
                } else {
                   $rolm = count($rpno) - 1;
                   if ($rolm !== -1 && $rpno[$rolm][2] === static::$funPrx) {
@@ -1084,12 +1087,12 @@ protected static $endBop = [
       foreach ($rpns as $tn) {
          if (!static::isNotMbn($tn)) {
             $rpn[]=$tn;
-         } /*else if (fnEval.hasOwnProperty(tn)) {
-            if (typeof fnEval[tn] === "string") {
-               tn = fnEval[tn];
+         } elseif (isset(static::$fnEval[$tn])) {
+            if (is_string(static::$fnEval[$tn])) {
+               $tn = static::$fnEval[$tn];
             }
-            rpn[rpn.length - 1][tn](true);
-         }*/ else {
+            $rpn[count($rpn) - 1]->{$tn}(true);
+         } else {
             $pp = array_pop($rpn);
             $rpn[count($rpn) - 1]->{$tn}($pp, true);
          }

@@ -151,8 +151,8 @@ var MbnCr = function (opt) {
       if (n0 === "-" || n0 === "+" || n0 === "=") {
          a._s = (n0 === "-") ? -1 : 1;
          n = n.slice(1);
-         if (n0 === "=") {
-            a.set((typeof Mbn.calc === "function") ? Mbn.calc(n, v) : (new Mbn(n)));
+         if (n0 === "=" && (typeof Mbn.calc === "function")) {
+            a.set(Mbn.calc(n, v));
             return;
          }
       }
@@ -837,7 +837,7 @@ var MbnCr = function (opt) {
    var cnRx = /^[A-Z]\w*$/;
    /**
     * Sets and reads constant
-    * @param {string} n
+    * @param {string|null} n
     * @param {*=} v
     */
    Mbn.def = function (n, v) {
@@ -874,14 +874,14 @@ var MbnCr = function (opt) {
    var endBop = ["bop", "pc"];
    var uopVal = ["num", "name", "uop", "po"];
    var bops = {
-      "|": [1, true, 'max'],
-      "&": [2, true, 'min'],
-      "+": [3, true, 'add'],
-      "-": [3, true, 'sub'],
-      "*": [4, true, 'mul'],
-      "#": [4, true, 'mod'],
-      "/": [4, true, 'div'],
-      "^": [5, false, 'pow']};
+      "|": [1, true, "max"],
+      "&": [2, true, "min"],
+      "+": [3, true, "add"],
+      "-": [3, true, "sub"],
+      "*": [4, true, "mul"],
+      "#": [4, true, "mod"],
+      "/": [4, true, "div"],
+      "^": [5, false, "pow"]};
    var funPrx = 4;
    var rxs = {
       num: {rx: /^([0-9\.,]+)\s*/, next: ["bop", "pc", "pr"], end: true},
@@ -920,7 +920,7 @@ var MbnCr = function (opt) {
       var t = null;
       var tok;
       var mtch;
-      var invaUop = [funPrx, true, 'inva'];
+      var invaUop = [funPrx, true, "inva"];
 
       while (expr.length > 0) {
          mtch = null;
@@ -954,7 +954,7 @@ var MbnCr = function (opt) {
                } else if (vnames.hasOwnProperty(tok)) {
                   t = "vr";
                   rpns.push(new Mbn(vnames[tok]));
-               } else if (MbnConst.hasOwnProperty(tok)) {
+               } else if (Mbn.def(null, tok)) {
                   t = "vr";
                   rpns.push(Mbn.def(tok));
                } else {
