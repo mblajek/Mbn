@@ -130,7 +130,7 @@ class Mbn {
       if ($n0 === '-' || $n0 === '+' || $n0 === '=') {
          $this->s = ($n0 === '-') ? -1 : 1;
          $n = substr($n, 1);
-         if($n0 === '=' && method_exists(get_class(), 'calc')){
+         if ($n0 === '=' && method_exists(get_class(), 'calc')) {
             $this->set(static::calc($n, $v));
             return;
          }
@@ -914,21 +914,23 @@ class Mbn {
        'round' => true,
        'sgn' => true,
        'int' => 'intp'];
-
    protected static $states = [
-'endBopPr' => [
-'bop',
- 'pc', 'pr'],
- 'endBop' => [
-'bop',
- 'pc'],
- 'uopVal' => ['num',
- 'name',
- 'uop',
- 'po'],
- 'po' => ['po']
-];
-protected static $endBop = [
+       'endBopPr' => [
+           'bop',
+           'pc',
+           'pr'],
+       'endBop' => [
+           'bop',
+           'pc'],
+       'uopVal' => [
+           'num',
+           'name',
+           'uop',
+           'po'],
+       'po' => [
+           'po']
+   ];
+   protected static $endBop = [
        'bop',
        'pc'];
    protected static $uopVal = [
@@ -936,35 +938,84 @@ protected static $endBop = [
        "name",
        "uop",
        "po"];
-      protected static $bops = [
-      "|"=> [1, true, 'max'],
-      "&"=> [2, true, 'min'],
-      "+"=> [3, true, 'add'],
-      "-"=> [3, true, 'sub'],
-      "*"=> [4, true, 'mul'],
-      "#"=> [4, true, 'mod'],
-      "/"=> [4, true, 'div'],
-      "^"=> [5, false, 'pow']];
+   protected static $bops = [
+       "|" => [
+           1,
+           true,
+           'max'],
+       "&" => [
+           2,
+           true,
+           'min'],
+       "+" => [
+           3,
+           true,
+           'add'],
+       "-" => [
+           3,
+           true,
+           'sub'],
+       "*" => [
+           4,
+           true,
+           'mul'],
+       "#" => [
+           4,
+           true,
+           'mod'],
+       "/" => [
+           4,
+           true,
+           'div'],
+       "^" => [
+           5,
+           false,
+           'pow']];
    protected static $funPrx = 4;
    protected static $rxs = [
-      'num'=> ['rx'=> '/^([0-9\.,]+)\s*/', 'next'=> 'endBopPr', 'end'=> true],
-      'name'=> ['rx' => '/^([A-Za-z_]\w*)\s*/'],
-      'fn'=> ['next'=> 'po', 'end'=> false],
-      'vr'=> ['next' => 'endBop', 'end' => true],
-      'bop'=> ['rx' => '/^([-+\*\/#^&|])\s*/', 'next'=> 'uopVal', 'end'=> false],
-      'uop'=> ['rx'=> '/^([-+])\s*/', 'next'=> 'uopVal', 'end'=> false],
-      'po'=> ['rx'=>'/^(\()\s*/', 'next'=> 'uopVal', 'end'=> false],
-      'pc'=> ['rx'=>'/^(\))\s*/', 'next'=> 'endBop', 'end'=> true],
-      'pr'=> ['rx'=> '/^(%)\s*/', 'next'=> 'endBop', 'end'=> true]
+       'num' => [
+           'rx' => '/^([0-9\.,]+)\s*/',
+           'next' => 'endBopPr',
+           'end' => true],
+       'name' => [
+           'rx' => '/^([A-Za-z_]\w*)\s*/'],
+       'fn' => [
+           'next' => 'po',
+           'end' => false],
+       'vr' => [
+           'next' => 'endBop',
+           'end' => true],
+       'bop' => [
+           'rx' => '/^([-+\*\/#^&|])\s*/',
+           'next' => 'uopVal',
+           'end' => false],
+       'uop' => [
+           'rx' => '/^([-+])\s*/',
+           'next' => 'uopVal',
+           'end' => false],
+       'po' => [
+           'rx' => '/^(\()\s*/',
+           'next' => 'uopVal',
+           'end' => false],
+       'pc' => [
+           'rx' => '/^(\))\s*/',
+           'next' => 'endBop',
+           'end' => true],
+       'pr' => [
+           'rx' => '/^(%)\s*/',
+           'next' => 'endBop',
+           'end' => true]
    ];
+
    /**
     * eval expression
     * @param {string} expr
     * @param {*=} vars
     */
-   public static function calc ($expr, $vars = null) {
+   public static function calc($expr, $vars = null) {
       $expr = preg_replace('/^\s+/', '', $expr);
-      $vnames = [];
+      $vnames = [
+];
       if ($vars !== null) {
          foreach ($vars as $k => &$v) {
             $vnames[$k] = new static($vars[$k]);
@@ -973,16 +1024,22 @@ protected static $endBop = [
       $larr = &static::$states['uopVal'];
       $larl = count($larr);
       $lare = false;
-      $rpns = [];
-      $rpno = [];
+      $rpns = [
+];
+      $rpno = [
+];
       $neg = false;
       $t = null;
-      $invaUop = [static::$funPrx, true, 'inva'];
+      $invaUop = [
+          static::$funPrx,
+          true,
+          'inva'];
 
       while (strlen($expr) > 0) {
-         $mtch = [];
+         $mtch = [
+];
          foreach ($larr as $t) {
-            if(preg_match(static::$rxs[$t]['rx'],$expr , $mtch) == 1){
+            if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch) == 1) {
                break;
             }
          }
@@ -998,23 +1055,26 @@ protected static $endBop = [
             $expr = substr($expr, strlen($mtch[0]));
          }
          if ($t !== "uop" && $neg) {
-            $rpno[]=&$invaUop;
+            $rpno[] = &$invaUop;
             $neg = false;
          }
          switch ($t) {
             case 'num':
-               $rpns[]=new static($tok);
+               $rpns[] = new static($tok);
                break;
             case 'name':
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
                   $t = "fn";
-                  $rpno []= [static::$funPrx, true, $tok];
+                  $rpno [] = [
+                      static::$funPrx,
+                      true,
+                      $tok];
                } elseif (isset($vnames[$tok])) {
                   $t = "vr";
-                  $rpns []= new static($vnames[$tok]);
+                  $rpns [] = new static($vnames[$tok]);
                } elseif (static::def(null, $tok)) {
                   $t = "vr";
-                  $rpns []= static::def($tok);
+                  $rpns [] = static::def($tok);
                } else {
                   throw new MbnErr('.eval', 'undefined', $tok);
                }
@@ -1024,12 +1084,12 @@ protected static $endBop = [
                while (($rolm = count($rpno) - 1) !== -1) {
                   $rolp = $rpno[$rolm];
                   if ($rolp !== '(' && ($rolp[0] > $bop[0] - ($bop[1] ? 1 : 0))) {
-                     $rpns[]=array_pop($rpno)[2];
+                     $rpns[] = array_pop($rpno)[2];
                   } else {
                      break;
                   }
                }
-               $rpno[]=$bop;
+               $rpno[] = $bop;
                break;
             case 'uop':
                if ($tok === '-') {
@@ -1037,13 +1097,13 @@ protected static $endBop = [
                }
                break;
             case 'po':
-               $rpno []= $tok;
+               $rpno [] = $tok;
                break;
             case 'pc':
                while (($rolm = count($rpno) - 1) !== -1) {
                   $rolp = $rpno[$rolm];
                   if ($rolp !== '(') {
-                     $rpns[]=array_pop($rpno)[2];
+                     $rpns[] = array_pop($rpno)[2];
                   } else {
                      array_pop($rpno);
                      break;
@@ -1054,7 +1114,7 @@ protected static $endBop = [
                } else {
                   $rolm = count($rpno) - 1;
                   if ($rolm !== -1 && $rpno[$rolm][2] === static::$funPrx) {
-                     $rpns[]=array_pop($rpno)[2];
+                     $rpns[] = array_pop($rpno)[2];
                   }
                }
                break;
@@ -1071,7 +1131,7 @@ protected static $endBop = [
       while (count($rpno) !== 0) {
          $v = array_pop($rpno);
          if ($v !== "(") {
-            $rpns[]=$v[2];
+            $rpns[] = $v[2];
          } else {
             throw new MbnErr('.eval', 'unexpected', '(');
          }
@@ -1080,13 +1140,14 @@ protected static $endBop = [
          throw new MbnErr('.eval', 'unexpected', 'END');
       }
 
-      $rpn = [];
+      $rpn = [
+];
 
       $rpnsl = count($rpns);
 
       foreach ($rpns as $tn) {
          if (!static::isNotMbn($tn)) {
-            $rpn[]=$tn;
+            $rpn[] = $tn;
          } elseif (isset(static::$fnEval[$tn])) {
             if (is_string(static::$fnEval[$tn])) {
                $tn = static::$fnEval[$tn];
@@ -1099,8 +1160,6 @@ protected static $endBop = [
       }
       return $rpn[0];
    }
-
-
 //SLIM_EXCLUDE_END
 
 }

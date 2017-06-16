@@ -102,7 +102,6 @@ function releaseMbn() {
       } while ($mbn_min_phpLenNew < $mbn_min_phpLen);
       return $mbn_min_php;
    }
-
    $errorsJS = array();
 
    $mbn_slim_js = getSlim($mbn_js);
