@@ -75,7 +75,15 @@ function testMbn() {
    $testsAll = json_decode(file_get_contents('mbn_test_set.json'));
    $tests = array_merge($testsAll->php, $testsAll->both);
    foreach ($tests as &$test) {
-      $expArr = explode('; ', $test[0]);
+      $tst = $test[0];
+      while (($jsonStart = strpos($tst, '{')) !== false) {
+         $jsonLen = strpos($tst, '}', $jsonStart) - $jsonStart + 1;
+         $json =  substr($tst, $jsonStart, $jsonLen);
+         $jsonCor = preg_replace('/[a-z]+/i', '\'$0\'',$json);
+         $jsonArr = str_replace(explode('|', '{|}|:'), explode('|', '[|]|=>'), $jsonCor);
+         $tst = str_replace($json,$jsonArr , $tst);
+      }
+      $expArr = explode('; ', $tst);
       $expArr[count($expArr) - 1] = '$o = ' . $expArr[count($expArr) - 1] . ';';
       $test[2] = implode('; ', $expArr);
    }
