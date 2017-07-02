@@ -53,7 +53,7 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 
 ?><!DOCTYPE html>
 <head>
-   <title>"Mbn Librabry</title>
+   <title>Mbn Librabry</title>
    <meta charset="UTF-8">
    <link rel="icon" href="index.php?gf=icon" type="image/bmp" />
 </head><body>
