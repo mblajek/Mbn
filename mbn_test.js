@@ -29,9 +29,9 @@ var testMbn = function (displayResp) {
       }
       return {status: (ret.length === 0) ? 'OK' : 'ERR', count: tl, errors: ret};
    };
-   var Mbn0 = MbnCr(0);
-   var Mbn3c = MbnCr({MbnP: 3, MbnS: ','});
-   var Mbn20u = MbnCr({MbnP: 20, MbnS: ',', MbnT: true});
+   var Mbn0 = Mbn.extend(0);
+   var Mbn3c = Mbn.extend({MbnP: 3, MbnS: ','});
+   var Mbn20u = Mbn.extend({MbnP: 20, MbnS: ',', MbnT: true});
 
    var xmlhttp = new XMLHttpRequest();
    xmlhttp.onreadystatechange = function () {

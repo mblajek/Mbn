@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
    <title>MbnCalc</title>
+   <link rel="icon" href="index.php?gf=icon" type="image/bmp" />
    <meta charset="UTF-8">
    <meta name=viewport content="width=device-width, initial-scale=1">
 </head>
@@ -21,7 +22,7 @@
       <input readonly style="display: block; width:100%; box-sizing: border-box" onfocus="this.select();">
    </div>
    <script>
-      var MbnP = new (MbnCr(0))(2);
+      var MbnP = new (Mbn.extend(0))(2);
       var MbnSTs = [".0", ",0", "._", ",_"];
       var MbnST = MbnSTs[0];
       var Mbnx;
@@ -57,7 +58,7 @@
             MbnP.sub(d, true);
             return;
          }
-         Mbnx = MbnCr({MbnP: MbnP.toNumber(), MbnS: MbnST.charAt(0), MbnT: MbnST.charAt(1) === "_"});
+         Mbnx = Mbn.extend({MbnP: MbnP.toNumber(), MbnS: MbnST.charAt(0), MbnT: MbnST.charAt(1) === "_"});
          document.getElementById("in").onkeyup();
          document.getElementById("op").innerText = MbnP;
          document.getElementById("pst").innerText = MbnST;

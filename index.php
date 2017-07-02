@@ -48,15 +48,14 @@ if ($getFile != null && isset($relFiles[$getFile])) {
    die;
 } elseif ($getFile === 'icon') {
    header('Content-Type: image/bmp');
-   echo gzinflate(base64_decode('c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDA'
-           . 'wNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
+   echo gzinflate(base64_decode('c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDAwNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
 }
 
 ?><!DOCTYPE html>
 <head>
-   <title>Mbn examples</title>
+   <title>"Mbn Librabry</title>
    <meta charset="UTF-8">
-   <link rel="icon" href="?gf=icon" type="image/bmp" />
+   <link rel="icon" href="index.php?gf=icon" type="image/bmp" />
 </head><body>
    <script src="mbn.js"></script>
 
@@ -81,7 +80,11 @@ if ($getFile != null && isset($relFiles[$getFile])) {
          font-family: "Consolas", monospace;
          background-color: lightgray;
          border: 1px solid gray;
-         white-space: pre;
+         white-space: pre-wrap;
+      }
+      .mono>span:after{
+         color: gray;
+         content: ">| ";
       }
       .result{
          font-family: "Consolas", monospace;
@@ -110,19 +113,25 @@ if ($getFile != null && isset($relFiles[$getFile])) {
          if (a === undefined) {
             a = "";
          } else if (a instanceof Array) {
+            a = a.slice();
             var al = a.length;
-            for (var i = 0; i < al; i++) {
-               //a[i] = a[i].replace(/^ +/g, "&nbsp;&nbsp;");
+            if(c === 'mono'){
+               for (var i = 0; i < al; i++) {
+                  a[i] = "<span></span>" + a[i];
+               }
             }
             a = a.join("<br>");
+         } else if(c === 'mono'){
+            a = "<span></span>" + a;
          }
          document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + ">" + a + "</div>");
       }
 
       function we(a) {
-         var acode = (a instanceof Array) ? a.join("\n") : a;
          w(a, "mono");
          try {
+            var acode = (a instanceof Array) ? a.join("\n") : a;
+            console.log(acode);
             var e = eval(acode);
             w(String(e), "result");
             w(typeof e, "label");
@@ -135,14 +144,22 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 
       var modify = false;
 
-      w("Mbn examples", "title1");
+      w("Mbn - Multi-Byte Number Librabry", "title1");
+
+      w("About", "title2");
+      w("Library for PHP and JS to do calculations with any precission and correct approximations.");
+
       w("Tests and benchmark", "title2");
       w('<strong id="resultJS">..</strong>', "mono");
       w('<strong id="resultPHP">..</strong>', "mono");
 
       w("Downloads", "title2");
 
-      w(["//tests are run only on mbn.php and mbn.js"], "mono");
+      w("//tests are run only on mbn.php and mbn.js", "mono")
+      w("//slim version are made by cutting out some code from source", "mono");
+      w("//minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a>", "mono");
+      w("//minified PHP is made with php_strip_whitespace() and text replacements", "mono");
+
       var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
       relFiles.forEach(function (f, i) {
          w(['<a href="?gf=' + i + '">' + f[0] + "</a> (" + (new Mbn(f[2])).div(1024) + " kB)", f[1]], "mono");
@@ -150,27 +167,27 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 
       w("Class declarations in JS", "title2");
 
-      w(["//default: precission 2, dot separator, without trimming zeros", "//class allready defined in library", "//var Mbn = MbnCr();"], "mono");
+      w(["//default: precission 2, dot separator, without trimming zeros", "//class allready defined in library", "//var Mbn = Mbn.extend();"], "mono");
       we('new Mbn("12.1");');
 
       w();
-      var Mbn0 = MbnCr(0);
-      w(["//precission 0", "var Mbn0 = MbnCr(0);"], "mono");
+      var Mbn0 = Mbn.extend(0);
+      w(["//precission 0", "var Mbn0 = Mbn.extend(0);"], "mono");
       we('new Mbn0("12.2");');
 
       w();
-      var Mbn3 = MbnCr(3);
-      w(['//precission 3', 'var Mbn3 = MbnCr(3);'], "mono");
+      var Mbn3 = Mbn.extend(3);
+      w(['//precission 3', 'var Mbn3 = Mbn.extend(3);'], "mono");
       we('new Mbn3("12.1");');
 
       w();
-      var Mbn4c = MbnCr({MbnP: 4, MbnS: ","});
-      w(['//precission 4, coma separator', 'var Mbn4c = MbnCr({MbnP: 4, MbnS: ","});'], "mono");
+      var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});
+      w(['//precission 4, coma separator', 'var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});'], "mono");
       we('new Mbn4c("12.1");');
 
       w();
-      var Mbn5t = MbnCr({MbnP: 5, MbnT: true});
-      w(['//precission 5, trim zeros', 'var Mbn5t = MbnCr({MbnP: 5, MbnT: true});'], "mono");
+      var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});
+      w(['//precission 5, trim zeros', 'var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});'], "mono");
       we('new Mbn5t("12.1");');
 
       w("Class declarations in PHP", "title2");
@@ -209,7 +226,7 @@ if ($getFile != null && isset($relFiles[$getFile])) {
       we(['//another Mbn object', 'new Mbn(new Mbn("1,2"));']);
 
       w();
-      we(['//another Mbn class object (any object convertible to string)', 'new Mbn4c(new Mbn("1,2"));']);
+      we(['//another Mbn class object (any object convertible to numeric string)', 'new Mbn4c(new Mbn("1,2"));']);
 
       w();
       we(['//called as funcion, calls itself as constructor (JS only)', 'Mbn(4);']);
@@ -253,9 +270,8 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 
       w();
       we(['//all numeric arguments converted to Mbn', 'new Mbn("1.125").add("1.125");']);
-
-      w();
-      we(['//because', 'new Mbn("1.125").add(1.125);', '//means', 'new Mbn("1.125").add(new Mbn("1.125"));', '//means', 'new Mbn("1.13").add(new Mbn("1.13"));'], "mono");
+      we(['//because', 'new Mbn("1.13").add(new Mbn("1.13"));'], "mono");
+      we(['//needed precission should be used', 'new Mbn(new Mbn3("1.125").add("1.125"));'], "mono");
 
       w();
       we(['//by default original value remains unchanged', 'var a = new Mbn("1.12");', 'a.add("1.12");', 'a;']);
@@ -270,16 +286,10 @@ if ($getFile != null && isset($relFiles[$getFile])) {
       we(['var a = new Mbn("1.12");', 'a.add("1.12", true).add("9", true);', 'a;']);
 
       w();
-      we(['//this code does not make sense', 'var a = new Mbn("1.12");', 'var b = a.add("1.12").add("9", true);', 'a + " " + b;']);
-
-      w();
-      we(['//this code may be usefull, but is somewhat messy', 'var a = new Mbn("1.12");', 'var b = a.add("1.12", true).add("9");', 'a + " " + b;']);
-
-      w();
       we(['//exceptions like wrong formats, division by zero and other are thrown', 'new Mbn("1.x12");', 'new Mbn("1.12");']);
 
 
-      w('Basic methods, returning number as Mbn object', "title2");
+      w('Basic methods, return number as Mbn object', "title2");
 
       we(['//add', 'new Mbn(5, modify).add(2);']);
 
@@ -296,7 +306,7 @@ if ($getFile != null && isset($relFiles[$getFile])) {
       we(['//modulo (result has same sign as the original number)', 'new Mbn(5).mod(-2.1, modify);']);
 
       w();
-      we(['//power (integer exponent)', 'new Mbn(5).pow(2, modify);']);
+      we(['//power (integer exponent only)', 'new Mbn(5).pow(2, modify);']);
 
       w();
       we(['//square root', 'new Mbn(2).sqrt(modify);']);
@@ -341,13 +351,13 @@ if ($getFile != null && isset($relFiles[$getFile])) {
       we(['//compare with other number, returns number', '//1 if number is greater than other value, 0 if equals, -1 if is lower', 'new Mbn(0.5).cmp(4);']);
 
       w();
-      we(['//second argumend defines maximum difference still treated as equality', 'new Mbn(0.5).cmp(0.7, 0.2);']);
+      we(['//second argumend defines maximum difference still treated as equality', 'new Mbn(1.5).cmp(1.7, 0.2);']);
 
       w();
-      we(['//check if numbers are equal, also maximum difference can be passed', 'new Mbn(0.9).eq(0.7, 0.2);']);
+      we(['//check if numbers are equal, also maximum difference can be passed', 'new Mbn(1.9).eq(1.7, 0.2);']);
 
       w();
-      we(['//split value to numbers, which sum correctly to it, returns array', '//number of parts (default 2) or array with ratios can be given', 'new Mbn(3).split();']);
+      we(['//split value to numbers, which sum correctly to it', '//returns array of Mbn objects', '//number of parts (default 2) or array with ratios can be given', 'new Mbn(3).split();']);
 
       we('new Mbn(3).split().join(" ");');
 
@@ -355,14 +365,64 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 
       we('new Mbn(2.02).split([1, 1, 2]).join(" ");');
 
-      //split
+      w();
+      w(['//in PHP works with assocjative arrays', "(new Mbn(2.02))->split(['a' => 1, 'c' => 1, 'b' => 2])", "//gives array ['a' => 0.51, 'c' => 0.50, 'b' => 1.01]"], 'mono');
 
+      w("Other methods - reduce", "title2");
+      we(['//reduce array to value or invoke single argument function on each element (typically called map)', '//2-argument functions: add, mul, min, max', 'Mbn.reduce("add", [2.5, 1.5, 3.4, -4.4]);']);
 
+      w();
+      we(['//1-argument functions: set (simply make array of Mbn objects), abs, inva, invm, ceil, floor, sqrt, round, sgn, intp', 'Mbn.reduce("set", [2.5, 1.5, 3.4, -4.4]);']);
+      we(['Mbn.reduce("inva", [2.5, 1.5, 3.4, -4.4]).join(" ");']);
 
+      w();
+      w(["//in PHP works with assocjative arrays", "Mbn::reduce('sqrt', ['a'=>4, 'b'=>9])", "//gives array ['a'=>2.00, 'b'=>3.00]"], "mono");
 
+      w("Other methods - calc", "title2");
 
+      w();
+      we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);
 
+      w();
+      we(['//standard operators work typically, also with power evaluated right-to-left', 'Mbn.calc("3 ^ 3 ^ 3") + " " + Mbn.calc("(3 ^ 3) ^ 3");']);
 
+      w();
+      we(['//it is posible, to use percentage values', 'Mbn.calc("200 * 123%");']);
+
+      w();
+      we(['//modulo has # operator', 'Mbn.calc("245 # 100");']);
+
+      w();
+      we(['//min and max use & and | symbols, and therefore work like logical operators or/and on 0/1 values', 'Mbn.calc("(1 | 0) & 0");']);
+
+      w();
+      w(['//operator priorities high to low (in partenthesis with the same priority): ^, (*, /, #), (+, -), &, |'], "mono");
+
+      w();
+      we(['//single argument functions abs, ceil, floor, round, sqrt, sgn, int (=intp) are accesible', 'Mbn.calc("((sqrt(5) + 1) / 2)^2");']);
+
+      w();
+      we(['//there are 3 standard constants: PI, E (with 40 digits precission) and MbnP', 'Mbn5t.calc("PI");']);
+      we(['Mbn5t.calc("10^-MbnP");']);
+
+      w();
+      we(["//variables can be passed as second argument", 'Mbn.calc("a / b", {a: 7, b: 3});']);
+
+      w();
+      we(["//calc() is called when constructor is called with string begnning with =", 'new Mbn("=x*x", {x: 2});'])
+
+      w("Defining constants", "title2");
+
+      we(['//constants can be get by name', 'Mbn.def("PI");'])
+
+      w();
+      we(['//constants can be defined, have to start from capital letter', 'Mbn.def("Q", "2");', 'Mbn.def("Q");'])
+
+      w();
+      we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");'])
+
+      w();
+      we(['//constant can be checked if is defined', 'Mbn.def(null, "Q");'])
 
       w("Examples of calculations, that give wrong results, and can be easily corrected with Mbn", "title2");
 

@@ -1,4 +1,4 @@
-Library for PHP and JS to do calculations with any precission, with correct approximations
+Library for PHP and JS to do calculations with any precission and correct approximations
 
 project page: http://mirkles.net/n/index.php - library files avalaible there
 
