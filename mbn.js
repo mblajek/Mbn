@@ -23,6 +23,7 @@ var Mbn = (function(){
          }
          return ret;
       };
+      this.message = String(this);
    };
 
    /**
