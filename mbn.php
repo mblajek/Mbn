@@ -875,6 +875,7 @@ class Mbn {
       if (preg_match('/^[A-Z]\\w*$/', ($check ? $v : $n)) !== 1) {
          throw new MbnErr(".def", "incorrect name", $n);
       }
+      static::isNotMbn(0);
       $mc = &static::$MbnConst;
       $mx = &static::$MbnX;
       if ($check) {
