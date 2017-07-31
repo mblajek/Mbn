@@ -115,13 +115,13 @@ if ($getFile != null && isset($relFiles[$getFile])) {
          } else if (a instanceof Array) {
             a = a.slice();
             var al = a.length;
-            if(c === 'mono'){
+            if (c === 'mono') {
                for (var i = 0; i < al; i++) {
                   a[i] = "<span></span>" + a[i];
                }
             }
             a = a.join("<br>");
-         } else if(c === 'mono'){
+         } else if (c === 'mono') {
             a = "<span></span>" + a;
          }
          document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + ">" + a + "</div>");
@@ -131,7 +131,6 @@ if ($getFile != null && isset($relFiles[$getFile])) {
          w(a, "mono");
          try {
             var acode = (a instanceof Array) ? a.join("\n") : a;
-            console.log(acode);
             var e = eval(acode);
             w(String(e), "result");
             w(typeof e, "label");

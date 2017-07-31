@@ -12,6 +12,8 @@
    ],
    "both": [
       ["0", "0"],
+      ["Mbn::def('V', 4)", "4.00"],
+      ["Mbn0::def('V', 4)", "4"],
       ["Mbn::prop()['MbnE']", "true"],
       ["new Mbn(null)", "0.00"],
       ["new Mbn(true)", "1.00"],

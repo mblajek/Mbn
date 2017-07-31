@@ -73,7 +73,7 @@ function testMbn() {
       );
    }
    $testsAll = json_decode(file_get_contents('mbn_test_set.json'));
-   $tests = array_merge($testsAll->php, $testsAll->both);
+   $tests = array_merge($testsAll->both, $testsAll->php);
    foreach ($tests as &$test) {
       $tst = $test[0];
       while (($jsonStart = strpos($tst, '{')) !== false) {

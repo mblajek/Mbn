@@ -37,7 +37,7 @@ var testMbn = function (displayResp) {
    xmlhttp.onreadystatechange = function () {
       if (xmlhttp.readyState === 4) {
          var testsAll = JSON.parse(xmlhttp.responseText);
-         var tests = testsAll.js.concat(testsAll.both);
+         var tests = testsAll.both.concat(testsAll.js);
          var testsl = tests.length;
          for (var i = 0; i < testsl; i++) {
             var test = tests[i];

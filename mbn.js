@@ -37,7 +37,7 @@ var Mbn = (function(){
          opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
       }
       //version of MultiByteNumber library
-      var MbnV = "1.18";
+      var MbnV = "1.19";
       //default precision
       var MbnDP = 2;
       //default separator

@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.18';
+   protected static $MbnV = '1.19';
    //default precision
    protected static $MbnP = 2;
    //default separator
