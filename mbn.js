@@ -5,7 +5,7 @@
  */
 
 "use strict";
-var Mbn = (function(){
+var Mbn = (function () {
    /**
     * Common error message object
     * @export
@@ -26,6 +26,15 @@ var Mbn = (function(){
       this.message = String(this);
    };
 
+   //version of MultiByteNumber library
+   var MbnV = "1.20";
+   //default precision
+   var MbnDP = 2;
+   //default separator
+   var MbnDS = ".";
+   //default truncate
+   var MbnDT = false;
+
    /**
     * Function returns function, which is constructor of Mbn objects
     * with precision p. and separator s
@@ -36,30 +45,22 @@ var Mbn = (function(){
       if (typeof opt !== "object") {
          opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
       }
-      //version of MultiByteNumber library
-      var MbnV = "1.19";
-      //default precision
-      var MbnDP = 2;
-      //default separator
-      var MbnDS = ".";
-      //default truncate
-      var MbnDT = false;
       //actual precision for Mbn class
       var MbnP = (opt.MbnP === undefined) ? MbnDP : Number(opt.MbnP);
       if (!isFinite(MbnP) || Math.round(MbnP) !== MbnP || MbnP < 0) {
-         throw new MbnErr("Cr", "invalid precision", MbnP);
+         throw new MbnErr(".extend", "invalid precision", MbnP);
       }
 
       //actual separator for Mbn class
       var MbnS = (opt.MbnS === undefined) ? MbnDS : opt.MbnS;
       if (MbnS !== "." && MbnS !== ",") {
-         throw new MbnErr("Cr", "invalid separator", MbnS);
+         throw new MbnErr(".extend", "invalid separator", MbnS);
       }
 
       //actual truncate for Mbn class
       var MbnT = (opt.MbnT === undefined) ? MbnDT : opt.MbnT;
       if (MbnT !== true && MbnT !== false) {
-         throw new MbnErr("Cr", "invalid truncate", MbnT);
+         throw new MbnErr(".extend", "invalid truncate", MbnT);
       }
 
       /**
@@ -68,28 +69,29 @@ var Mbn = (function(){
        */
       var mbnCarry = function (a) {
          var ad = a._d;
-         var i = ad.length - 1;
-         var di, dd, ci;
+         var adlm1 = ad.length - 1;
+         var i = adlm1;
+         var adi, adid, adic;
          while (i >= 0) {
-            di = ad[i];
-            while (di < 0) {
-               di += 10;
+            adi = ad[i];
+            while (adi < 0) {
+               adi += 10;
                ad[i - 1]--;
             }
-            dd = di % 10;
-            ci = (di - dd) / 10;
-            ad[i] = dd;
-            if (ci !== 0) {
+            adid = adi % 10;
+            adic = (adi - adid) / 10;
+            ad[i] = adid;
+            if (adic !== 0) {
                if (i !== 0) {
-                  ad[--i] += ci;
+                  ad[--i] += adic;
                } else {
-                  ad.unshift(ci);
+                  ad.unshift(adic);
+                  adlm1++;
                }
             } else {
                i--;
             }
          }
-         var adlm1 = ad.length - 1;
          while (adlm1 > MbnP && ad[0] === 0) {
             ad.shift();
             adlm1--;
@@ -128,31 +130,31 @@ var Mbn = (function(){
        */
       var mbnRoundLast = function (a) {
          var ad = a._d;
-         if (ad.length < 2) {
+         var adl = ad.length;
+         if (adl < 2) {
             ad.unshift(0);
+            adl++;
          }
          if (ad.pop() >= 5) {
-            ad[ad.length - 1]++;
+            ad[adl - 2]++;
          }
          mbnCarry(a);
       };
 
-      var wsRx1 = /^\s*([+=-]?)\s*/;
-      var wsRx2 = /\s+$/;
+      var wsRx1 = /^\s+|\s+$/g;
+      var wsRx2 = /([+=-]?)\s*(.*)/;
       /**
        * Private function, sets value of a to string value n
        * @param {Mbn} a
-       * @param {string} nd
+       * @param {string} ns
        * @param {*=} v
        */
-      var mbnFromString = function (a, nd, v) {
-         var n = nd.replace(wsRx1, "$1").replace(wsRx2, "");
-         a._s = 1;
-         a._d = [];
-         var n0 = n.charAt(0);
+      var mbnFromString = function (a, ns, v) {
+         var np = ns.replace(wsRx1, "").match(wsRx2);
+         var n0 = np[1];
+         var n = np[2];
          if (n0 === "-" || n0 === "+" || n0 === "=") {
             a._s = (n0 === "-") ? -1 : 1;
-            n = n.slice(1);
             if (n0 === "=" && (typeof Mbn.calc === "function")) {
                a.set(Mbn.calc(n, v));
                return;
@@ -166,7 +168,7 @@ var Mbn = (function(){
          }
          if (ln === 0) {
             ln = 1;
-            n = "0" + ((n !== "") ? n : n0);
+            n = "0" + ((n !== "") ? n : "x");
          }
          var c;
          var nl = n.length;
@@ -175,7 +177,7 @@ var Mbn = (function(){
             if (c >= 0 && c <= 9) {
                a._d.push(c);
             } else {
-               throw new MbnErr("", "invalid format", nd);
+               throw new MbnErr("", "invalid format", ns);
             }
          }
          mbnRoundLast(a);
@@ -184,32 +186,31 @@ var Mbn = (function(){
       /**
        * Private function, returns string from number, with MbnP + 1 digits
        * @param {Mbn} a
-       * @param {number} x
+       * @param {number} nn
        */
-      var mbnFromNumber = function (a, x) {
-         if (!isFinite(x)) {
-            throw new MbnErr("", "invalid value", x);
+      var mbnFromNumber = function (a, nn) {
+         if (!isFinite(nn)) {
+            throw new MbnErr("", "invalid value", nn);
          }
-         a._s = 1;
-         a._d = [];
-         if (x < 0) {
-            x = -x;
+         if (nn < 0) {
+            nn = -nn;
             a._s = -1;
          }
-         var xi = Math.floor(x);
-         var xf = x - xi;
+         var ni = Math.floor(nn);
+         var nf = nn - ni;
+         var nfi, d, i;
          do {
-            var d = xi % 10;
-            xi -= d;
-            xi /= 10;
+            d = ni % 10;
+            ni -= d;
+            ni /= 10;
             a._d.unshift(d);
-         } while (xi > 0);
-         for (var n = 0; n <= MbnP; n++) {
-            xf *= 10;
-            var xff = Math.floor(xf);
-            xff = (xff === 10) ? 9 : xff;
-            a._d.push(xff);
-            xf -= xff;
+         } while (ni > 0);
+         for (i = 0; i <= MbnP; i++) {
+            nf *= 10;
+            nfi = Math.floor(nf);
+            d = (nfi === 10) ? 9 : nfi;
+            a._d.push(d);
+            nf -= d;
          }
          mbnRoundLast(a);
       };
@@ -225,6 +226,8 @@ var Mbn = (function(){
          if (!(this instanceof Mbn)) {
             return new Mbn(n, v);
          }
+         this._s = 1;
+         this._d = [];
          switch (typeof n) {
             case "undefined":
                n = false;
@@ -744,7 +747,7 @@ var Mbn = (function(){
          return mbnSetReturn(this, new Mbn(this._s), m);
       };
 
-   //SLIM_EXCLUDE_START
+      //SLIM_EXCLUDE_START
 
       /**
        * Calculates n-th power of number, n must be integer
@@ -1048,7 +1051,7 @@ var Mbn = (function(){
       };
 
 
-   //SLIM_EXCLUDE_END
+      //SLIM_EXCLUDE_END
 
       return Mbn;
    };

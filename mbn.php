@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.19';
+   protected static $MbnV = '1.20';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -51,27 +51,28 @@ class Mbn {
     */
    private function mbnCarry() {
       $ad = &$this->d;
-      $i = count($ad) - 1;
+      $adlm1 = count($ad) - 1;
+      $i = $adlm1;
       while ($i >= 0) {
-         $di = $ad[$i];
-         while ($di < 0) {
-            $di += 10;
+         $adi = $ad[$i];
+         while ($adi < 0) {
+            $adi += 10;
             $ad[$i - 1] --;
          }
-         $dd = $di % 10;
-         $ci = ($di - $dd) / 10;
-         $ad[$i] = $dd;
-         if ($ci !== 0) {
+         $adid = $adi % 10;
+         $adic = ($adi - $adid) / 10;
+         $ad[$i] = $adid;
+         if ($adic !== 0) {
             if ($i !== 0) {
-               $ad[--$i] += $ci;
+               $ad[--$i] += $adic;
             } else {
-               array_unshift($ad, $ci);
+               array_unshift($ad, $adic);
+               $adlm1++;
             }
          } else {
             $i--;
          }
       }
-      $adlm1 = count($ad) - 1;
       while ($adlm1 > static::$MbnP && $ad[0] === 0) {
          array_shift($ad);
          $adlm1 --;
@@ -110,11 +111,13 @@ class Mbn {
     */
    private function mbnRoundLast() {
       $ad = &$this->d;
-      if (count($ad) < 2) {
+      $adl = count($ad);
+      if ($adl < 2) {
          array_unshift($ad, 0);
+         $adl++;
       }
       if (array_pop($ad) >= 5) {
-         $ad[count($ad) - 1] ++;
+         $ad[$adl - 2] ++;
       }
       $this->mbnCarry();
    }
@@ -122,14 +125,16 @@ class Mbn {
    /**
     * Private function, sets value of a to string value n
     * @param {Mbn} a
-    * @param {string} nd
+    * @param {string} ns
     */
-   private function fromString($nd, $v) {
-      $n = preg_replace('/\\s+$/', '', preg_replace('/^\\s*([+=-]?)\\s*/', '$1', $nd));
-      $n0 = $n[0];
+   private function fromString($ns, $v) {
+      $np = [
+          ];
+      preg_match('/([+=-]?)\\s*(.*)/', trim($ns), $np);
+      $n0 = $np[1];
+      $n = $np[2];
       if ($n0 === '-' || $n0 === '+' || $n0 === '=') {
          $this->s = ($n0 === '-') ? -1 : 1;
-         $n = substr($n, 1);
          if ($n0 === '=' && method_exists(get_class(), 'calc')) {
             $this->set(static::calc($n, $v));
             return;
@@ -146,7 +151,7 @@ class Mbn {
       }
       if ($ln === 0) {
          $ln = 1;
-         $n = '0' . (($n !== '') ? $n : $n0);
+         $n = '0' . (($n !== '') ? $n : 'x');
       }
       $c = '';
       $nl = strlen($n);
@@ -155,7 +160,7 @@ class Mbn {
          if ($c >= 0 && $c <= 9) {
             $this->d[] = $c;
          } else {
-            throw new MbnErr('', 'invalid format', $nd);
+            throw new MbnErr('', 'invalid format', $ns);
          }
       }
       $this->mbnRoundLast();
@@ -163,33 +168,30 @@ class Mbn {
 
    /**
     * Private function, returns string from number, with MbnP + 1 digits
-    * @param {number} x
+    * @param {number} nn
     */
-   private function mbnFromNumber($x) {
-      if (!is_finite($x)) {
-         throw new MbnErr('', 'invalid value', $x);
+   private function mbnFromNumber($nn) {
+      if (!is_finite($nn)) {
+         throw new MbnErr('', 'invalid value', $nn);
       }
-      $this->s = 1;
-      $this->d = [
-          ];
-      if ($x < 0) {
-         $x = -$x;
+      if ($nn < 0) {
+         $nn = -$nn;
          $this->s = -1;
       }
-      $xi = intval($x);
-      $xf = $x - $xi;
+      $ni = intval($nn);
+      $nf = $nn - $ni;
       do {
-         $d = $xi % 10;
-         $xi -= $d;
-         $xi /= 10;
+         $d = $ni % 10;
+         $ni -= $d;
+         $ni /= 10;
          array_unshift($this->d, $d);
-      } while ($xi > 0);
+      } while ($ni > 0);
       for ($n = 0; $n <= static::$MbnP; $n++) {
-         $xf *= 10;
-         $xff = intval($xf);
-         $xffi = ($xff === 10) ? 9 : $xff;
-         $this->d[] = $xffi;
-         $xf -= $xffi;
+         $nf *= 10;
+         $nfi = intval($nf);
+         $d = ($nfi === 10) ? 9 : $nfi;
+         $this->d[] = $d;
+         $nf -= $d;
       }
       $this->mbnRoundLast();
    }
@@ -220,7 +222,7 @@ class Mbn {
          if (static::isNotMbn($n)) {
             $this->fromString(strval($n), $v);
          } else {
-            $this->set((string) $n);
+            $this->set($n->toString());
          }
       } elseif (is_bool($n) || is_null($n)) {
          $n = $this->mbnFromNumber(intval($n));
@@ -1016,7 +1018,7 @@ class Mbn {
    public static function calc($expr, $vars = null) {
       $expr = preg_replace('/^\s+/', '', $expr);
       $vnames = [
-];
+          ];
       if ($vars !== null) {
          foreach ($vars as $k => &$v) {
             $vnames[$k] = new static($vars[$k]);
@@ -1026,9 +1028,9 @@ class Mbn {
       $larl = count($larr);
       $lare = false;
       $rpns = [
-];
+          ];
       $rpno = [
-];
+          ];
       $neg = false;
       $t = null;
       $invaUop = [
@@ -1038,7 +1040,7 @@ class Mbn {
 
       while (strlen($expr) > 0) {
          $mtch = [
-];
+             ];
          foreach ($larr as $t) {
             if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch) == 1) {
                break;
@@ -1142,7 +1144,7 @@ class Mbn {
       }
 
       $rpn = [
-];
+          ];
 
       $rpnsl = count($rpns);
 
