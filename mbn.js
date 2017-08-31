@@ -168,7 +168,7 @@ var Mbn = (function () {
          }
          if (ln === 0) {
             ln = 1;
-            n = "0" + ((n !== "") ? n : "x");
+            n = "0" + ((n !== "") ? n : np[2]);
          }
          var c;
          var nl = n.length;
