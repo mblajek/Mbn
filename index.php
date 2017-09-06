@@ -51,6 +51,15 @@ if ($getFile != null && isset($relFiles[$getFile])) {
    echo gzinflate(base64_decode('c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDAwNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
 }
 
+$hashChanged = 1;
+if (file_exists('release/.LASTHASH')) {
+   $oldHash = file_get_contents('release/.LASTHASH');
+   $newHash = hash('sha256', file_get_contents('mbn.js') . file_get_contents('mbn.php'));
+   if ($oldHash === $newHash) {
+      $hashChanged = 0;
+   }
+}
+
 ?><!DOCTYPE html>
 <head>
    <title>Mbn Librabry</title>
@@ -141,14 +150,35 @@ if ($getFile != null && isset($relFiles[$getFile])) {
 
       }
 
+      var passedTests = <?php echo $hashChanged ?>;
+      function showRelease() {
+         passedTests++;
+         if (passedTests === 3) {
+            var releaseBtn = document.getElementById("releaseBtn");
+            releaseBtn.style.visibility = "visible";
+            releaseBtn.onclick = function () {
+               releaseBtn.style.visibility = "hidden";
+               var xmlhttp = new XMLHttpRequest();
+               xmlhttp.onreadystatechange = function () {
+                  if (xmlhttp.readyState === 4) {
+                     alert(xmlhttp.responseText);
+                  }
+               };
+               xmlhttp.open("POST", "mbn_release.php", true);
+               xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+               xmlhttp.send("");
+            };
+         }
+      }
+
       var modify = false;
 
       w("Mbn - Multi-Byte Number Librabry", "title1");
 
       w("About", "title2");
-      w("Library for PHP and JS to do calculations with any precission and correct approximations.");
+      w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations.");
 
-      w("Tests and benchmark", "title2");
+      w('Tests and benchmark<span id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>', "title2");
       w('<strong id="resultJS">..</strong>', "mono");
       w('<strong id="resultPHP">..</strong>', "mono");
 
@@ -451,6 +481,9 @@ if ($getFile != null && isset($relFiles[$getFile])) {
                txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;
             }
             document.getElementById("result" + lng).innerText = txt;
+            if (res.status === "OK") {
+               showRelease();
+            }
          }
 
          var xmlhttp = new XMLHttpRequest();

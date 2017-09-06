@@ -1,4 +1,8 @@
-Library for PHP and JS to do calculations with any precission and correct approximations
+MultiByteNumber
+Library for PHP and JS to do calculations with any precission and correct (half-up) approximations
+
+Author: Mikołaj Błajek
+mblajek_mbn(at)mailplus.pl
 
 project page: http://mirkles.net/n/index.php - library files avalaible there
 
@@ -14,9 +18,6 @@ project page: http://mirkles.net/n/index.php - library files avalaible there
       mbn_test.js - Unit tests for JS version
       mbn_test.php - Unit tests for PHP version
       mbn_test_set.json - Common set of tests
-      mbn_release.php - Generate slim and minified versions
+      mbn_release.php - Generate slim and minified versions to /release/ folder
 
-TO DO:
-JS & PHP
-   - More tests
-   - review code
+Code is optimized for speed and size; not for readability.

@@ -57,9 +57,9 @@ function releaseMbn() {
       if (!empty($resp['errors'])) {
          foreach ($resp['errors'] as $err) {
             $errorsJS [] = array(
-                'type' => $err['type'],
-                'line' => $err['line'],
                 'place' => $file . ':' . $err['lineno'] . ':' . $err['charno'],
+                'line' => $err['line'],
+                'type' => $err['type'],
                 'message' => $err['error']
             );
          }
@@ -85,7 +85,8 @@ function releaseMbn() {
       $mbn_min_php = php_strip_whitespace($file);
       $ll = 600;
       $mbn_min_phpLen = strlen($mbn_min_php);
-      for ($o = $ll; $o < $mbn_min_phpLen; $o += $ll) {
+      $o = $ll;
+      for (; $o < $mbn_min_phpLen; $o += $ll) {
          $o = strpos($mbn_min_php, ' ', $o);
          if ($o === false) {
             break;
@@ -95,8 +96,8 @@ function releaseMbn() {
 
       $mbn_min_phpLenNew = strlen($mbn_min_php);
       do {
-         $mbn_min_php = preg_replace('/(.) ([^\\w\\$\'])/', '$1$2', $mbn_min_php);
-         $mbn_min_php = preg_replace('/([^\\w\\$\':]) (.)/', '$1$2', $mbn_min_php);
+         $mbn_min_php0 = preg_replace('/(.) ([^\\w\\$\'])/', '$1$2', $mbn_min_php);
+         $mbn_min_php = preg_replace('/([^\\w\\$\':]) (.)/', '$1$2', $mbn_min_php0);
          $mbn_min_phpLen = $mbn_min_phpLenNew;
          $mbn_min_phpLenNew = strlen($mbn_min_php);
       } while ($mbn_min_phpLenNew < $mbn_min_phpLen);
@@ -139,14 +140,4 @@ function releaseMbn() {
 
    return 'update finished';
 }
-
-?>
-
-<!DOCTYPE html>
-<head>
-   <title>Mbn examples</title>
-   <meta charset="UTF-8">
-</head>
-<body>
-   <pre><?php echo releaseMbn(); ?></pre>
-</body>
+echo releaseMbn();
