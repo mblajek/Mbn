@@ -19,7 +19,7 @@
       <div>functions: abs, ceil, floor, round, sqrt, sgn, int</div>
       <input onkeyup="inchange(this);" id="in" style="display: block; width:100%; box-sizing: border-box">
       =>
-      <input readonly style="display: block; width:100%; box-sizing: border-box" onfocus="this.select();">
+      <input readonly id="out" style="display: block; width:100%; box-sizing: border-box" onfocus="this.select();">
    </div>
    <script>
       var MbnP = new (Mbn.extend(0))(2);
@@ -27,6 +27,7 @@
       var MbnST = MbnSTs[0];
       var Mbnx;
       var lastIn = null;
+      var out = document.getElementById("out");
       var vars = {
       };
       var inchange = function (el) {
@@ -34,19 +35,18 @@
          if (lastIn === currIn) {
             return;
          }
-         var n = el.nextElementSibling;
          if (el.value !== "") {
             try {
-               n.value = Mbnx.calc(el.value, vars);
-               n.style.color = "black";
+               out.value = Mbnx.calc(el.value, vars);
+               out.style.color = "black";
                lastIn = currIn;
             } catch (e) {
-               n.value = e;
-               n.style.color = "firebrick";
+               out.value = e;
+               out.style.color = "firebrick";
                lastIn = null;
             }
          } else {
-            n.value = "";
+            out.value = "";
             lastIn = null;
          }
       };

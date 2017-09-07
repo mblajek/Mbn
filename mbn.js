@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.20";
+   var MbnV = "1.21";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -846,12 +846,11 @@ var Mbn = (function () {
        * @param {*=} v
        */
       Mbn.def = function (n, v) {
-         var check = (n === null);
-         if ((check ? v : n).match(cnRx) === null) {
-            throw new MbnErr(".def", "incorrect name", n);
-         }
-         if (check) {
+         if (n === null) {
             return MbnConst.hasOwnProperty(v);
+         }
+         if (!cnRx.test(n)) {
+            throw new MbnErr(".def", "incorrect name", n);
          }
          if (v === undefined) {
             if (MbnConst.hasOwnProperty(n)) {

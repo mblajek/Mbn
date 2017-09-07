@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.20';
+   protected static $MbnV = '1.21';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -873,15 +873,14 @@ class Mbn {
     * @param {*=} v
     */
    public static function def($n, $v = null) {
-      $check = ($n === null);
-      if (preg_match('/^[A-Z]\\w*$/', ($check ? $v : $n)) !== 1) {
-         throw new MbnErr(".def", "incorrect name", $n);
-      }
       static::isNotMbn(0);
       $mc = &static::$MbnConst;
       $mx = &static::$MbnX;
-      if ($check) {
+      if ($n === null) {
          return (isset($mc[$mx][$v]) || isset($mc[''][$v]));
+      }
+      if (preg_match('/^[A-Z]\\w*$/', $n) !== 1) {
+         throw new MbnErr(".def", "incorrect name", $n);
       }
       if ($v === null) {
          if (!isset($mc[$mx])) {
@@ -1051,7 +1050,7 @@ class Mbn {
                $tok = "*";
                $t = "bop";
             } else {
-               throw new MbnErr(".eval", "unexpected", $expr);
+               throw new MbnErr(".calc", "unexpected", $expr);
             }
          } else {
             $tok = $mtch[1];
@@ -1079,7 +1078,7 @@ class Mbn {
                   $t = "vr";
                   $rpns [] = static::def($tok);
                } else {
-                  throw new MbnErr('.eval', 'undefined', $tok);
+                  throw new MbnErr('.calc', 'undefined', $tok);
                }
                break;
             case 'bop':
@@ -1113,7 +1112,7 @@ class Mbn {
                   }
                }
                if ($rolm === -1) {
-                  throw new MbnErr('.eval', 'unexpected', ')');
+                  throw new MbnErr('.calc', 'unexpected', ')');
                } else {
                   $rolm = count($rpno) - 1;
                   if ($rolm !== -1 && $rpno[$rolm][2] === static::$funPrx) {
@@ -1136,19 +1135,16 @@ class Mbn {
          if ($v !== "(") {
             $rpns[] = $v[2];
          } else {
-            throw new MbnErr('.eval', 'unexpected', '(');
+            throw new MbnErr('.calc', 'unexpected', '(');
          }
       }
       if (!$lare) {
-         throw new MbnErr('.eval', 'unexpected', 'END');
+         throw new MbnErr('.calc', 'unexpected', 'END');
       }
 
-      $rpn = [
-          ];
+      $rpn = array();
 
-      $rpnsl = count($rpns);
-
-      foreach ($rpns as $tn) {
+      foreach ($rpns as &$tn) {
          if (!static::isNotMbn($tn)) {
             $rpn[] = $tn;
          } elseif (isset(static::$fnEval[$tn])) {
