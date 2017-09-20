@@ -4,11 +4,11 @@ Library for PHP and JS to do calculations with any precission and correct (half-
 Author: Mikołaj Błajek
 mblajek_mbn(at)mailplus.pl
 
-project page: http://mirkles.net/n/index.php - library files avalaible there
+project page: http://mirkl.es/n/index.php - library files avalaible there
 
    Pages:
       index.php - Main page - destription of library with examples, also runs unit tests
-      calc.php - Calculator based on library ( http://mirkles.net/n )
+      calc.php - Calculator based on library ( http://mirkl.es/n )
 
    Library:
       mbn.js - JavaScript version
