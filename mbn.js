@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.21";
+   var MbnV = "1.22";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -530,7 +530,7 @@ var Mbn = (function () {
        * @param {boolean=} m
        */
       Mbn.prototype.mod = function (b, m) {
-         var ba = (!(b instanceof Mbn)) ? (new Mbn(b)).abs() : b.abs();
+         var ba = (b instanceof Mbn) ? b.abs() : (new Mbn(b)).abs();
          var r = this.sub(this.div(ba).intp().mul(ba));
          if ((r._s + this._s) === 0) {
             r = ba.sub(r.abs());
@@ -801,7 +801,8 @@ var Mbn = (function () {
          return mbnSetReturn(this, r, m);
       };
 
-      var fnReduce = {set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1, add: 2, mul: 2, min: 2, max: 2};
+      var fnReduce = {set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1,
+         sqrt: 1, round: 1, sgn: 1, intp: 1, add: 2, mul: 2, min: 2, max: 2};
       /**
        * run function on each element, returns single value for 2 argument function,
        * and array, for 1 argument
@@ -885,7 +886,8 @@ var Mbn = (function () {
          "*": [4, true, "mul"],
          "#": [4, true, "mod"],
          "/": [4, true, "div"],
-         "^": [5, false, "pow"]};
+         "^": [5, false, "pow"]
+      };
       var funPrx = 4;
       var rxs = {
          num: {rx: /^([0-9\.,]+)\s*/, next: ["bop", "pc", "pr"], end: true},
@@ -902,11 +904,11 @@ var Mbn = (function () {
       var wsRx3 = /^\s+/;
       /**
        * calc expression
-       * @param {string} expr
+       * @param {string} exp
        * @param {*=} vars
        */
-      Mbn.calc = function (expr, vars) {
-         expr = expr.replace(wsRx3, "");
+      Mbn.calc = function (exp, vars) {
+         var expr = exp.replace(wsRx3, "");
          var vnames = {};
          if (vars !== undefined) {
             for (var i in vars) {
@@ -1048,10 +1050,7 @@ var Mbn = (function () {
          }
          return rpn[0];
       };
-
-
       //SLIM_EXCLUDE_END
-
       return Mbn;
    };
    var Mbn = MbnCr();

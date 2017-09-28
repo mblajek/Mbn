@@ -33,16 +33,14 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.21';
+   protected static $MbnV = '1.22';
    //default precision
    protected static $MbnP = 2;
    //default separator
    protected static $MbnS = '.';
    //default truncate
    protected static $MbnT = false;
-   protected static $MbnX;
-   private $d = [
-       ];
+   private $d = [];
    private $s = 1;
 
    /**
@@ -128,8 +126,7 @@ class Mbn {
     * @param {string} ns
     */
    private function fromString($ns, $v) {
-      $np = [
-          ];
+      $np = [];
       preg_match('/([+=-]?)\\s*(.*)/', trim($ns), $np);
       $n0 = $np[1];
       $n = $np[2];
@@ -197,16 +194,6 @@ class Mbn {
    }
 
    /**
-    * Returns if object is not Mbn
-    */
-   private static function isNotMbn($a) {
-      if (!isset(static::$MbnX)) {
-         static::$MbnX = get_class(new static());
-      }
-      return (!is_object($a) || (get_class($a) !== static::$MbnX));
-   }
-
-   /**
     * Constructor of Mbn object
     * @export
     * @constructor
@@ -219,7 +206,7 @@ class Mbn {
       } elseif (is_string($n)) {
          $this->fromString($n, $v);
       } elseif (is_object($n)) {
-         if (static::isNotMbn($n)) {
+         if (!($n instanceof static)) {
             $this->fromString(strval($n), $v);
          } else {
             $this->set($n->toString());
@@ -249,7 +236,7 @@ class Mbn {
     * @param {*} b
     */
    public function set($b) {
-      if (static::isNotMbn($b)) {
+      if (!($b instanceof static)) {
          $this->mbnSetReturn(new static($b), true);
       } else {
          $this->d = $b->d;
@@ -303,7 +290,7 @@ class Mbn {
          $dm = new static($d);
       }
       if ($d === 0 || $dm->s === 0) {
-         if (static::isNotMbn($b)) {
+         if (!($b instanceof static)) {
             $b = new static($b);
          }
          if ($this->s !== $b->s) {
@@ -341,7 +328,7 @@ class Mbn {
     * @param {boolean=} m
     */
    public function add($b, $m = false) {
-      if (static::isNotMbn($b)) {
+      if (!($b instanceof static)) {
          $b = new static($b);
       }
       $r = new static($b);
@@ -379,7 +366,7 @@ class Mbn {
     * @param {boolean=} m
     */
    public function sub($b, $m = false) {
-      if (static::isNotMbn($b)) {
+      if (!($b instanceof static)) {
          $b = new static($b);
       }
       $r = new static($b);
@@ -423,12 +410,11 @@ class Mbn {
     * @param {boolean=} m
     */
    function mul($b, $m = false) {
-      if (static::isNotMbn($b)) {
+      if (!($b instanceof static)) {
          $b = new static($b);
       }
       $r = new static($b);
-      $r->d = [
-          ];
+      $r->d = [];
       $tc = count($this->d);
       $bc = count($b->d);
       for ($i = 0; $i < $tc; $i++) {
@@ -454,7 +440,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function div($b, $m = false) {
-      if (static::isNotMbn($b)) {
+      if (!($b instanceof static)) {
          $b = new static($b);
       }
       if ($b->s === 0) {
@@ -466,8 +452,7 @@ class Mbn {
       $x = $this->d;
       $y = $b->d;
       $p = 0;
-      $ra = [
-          0];
+      $ra = [0];
       while ($y[0] === 0) {
          array_shift($y);
       }
@@ -530,7 +515,7 @@ class Mbn {
     * @param {boolean=} m
     */
    function mod($b, $m = false) {
-      $ba = static::isNotMbn($b) ? (new static($b))->abs() : $b->abs();
+      $ba = ($b instanceof static) ? $b->abs() : (new static($b))->abs();
       $r = $this->sub($this->div($ba)->intp()->mul($ba));
       if (($r->s + $this->s) === 0) {
          $r = $ba->sub($r->abs());
@@ -544,8 +529,7 @@ class Mbn {
     * @param {array} ar
     */
    function split($ar = 2) {
-      $arr = [
-          ];
+      $arr = [];
       if (!is_array($ar)) {
          $mbn1 = new static(1);
          $asum = new static($ar);
@@ -575,11 +559,10 @@ class Mbn {
       }
       if ($n === 0) {
          return [
-             ];
+         ];
       }
       $a = new static($this);
-      $brr = [
-          ];
+      $brr = [];
       foreach ($arr as $k => &$v) {
          if ($v->s === 0) {
             $brr[$k] = $v;
@@ -645,6 +628,7 @@ class Mbn {
       }
       return $r;
    }
+
    /*
     * Returns absolute value from number
     * @param {boolean=} m
@@ -805,22 +789,9 @@ class Mbn {
       }
       return $this->mbnSetReturn($r, $m);
    }
-   protected static $fnReduce = [
-       'set' => 0,
-       'abs' => 1,
-       'inva' => 1,
-       'invm' => 1,
-       'ceil' => 1,
-       'floor' => 1,
-       'sqrt' => 1,
-       'round' => 1,
-       'sgn' => 1,
-       'intp' => 1,
-       'add' => 2,
-       'mul' => 2,
-       'min' => 2,
-       'max' => 2
-   ];
+
+   protected static $fnReduce = ['set' => 0, 'abs' => 1, 'inva' => 1, 'invm' => 1, 'ceil' => 1, 'floor' => 1,
+       'sqrt' => 1, 'round' => 1, 'sgn' => 1, 'intp' => 1, 'add' => 2, 'mul' => 2, 'min' => 2, 'max' => 2];
 
    /**
     * run function on each element, returns single value for 2 argument function,
@@ -849,8 +820,7 @@ class Mbn {
          }
          unset($v);
       } else {
-         $r = [
-             ];
+         $r = [];
          foreach ($arr as $k => &$v) {
             $e = new static($v);
             $r[$k] = ($mode === 1) ? $e->{$fn}(true) : $e;
@@ -859,11 +829,10 @@ class Mbn {
       }
       return $r;
    }
+
    protected static $MbnConst = [
-       '' => [
-           'PI' => "3.1415926535897932384626433832795028841972",
-           'E' => "2.7182818284590452353602874713526624977573",
-       ]
+       '' => ['PI' => "3.1415926535897932384626433832795028841972",
+           'E' => "2.7182818284590452353602874713526624977573",]
    ];
 
    //$cnRx = ;
@@ -873,9 +842,8 @@ class Mbn {
     * @param {*=} v
     */
    public static function def($n, $v = null) {
-      static::isNotMbn(0);
       $mc = &static::$MbnConst;
-      $mx = &static::$MbnX;
+      $mx = get_class(new static());
       if ($n === null) {
          return (isset($mc[$mx][$v]) || isset($mc[''][$v]));
       }
@@ -884,8 +852,7 @@ class Mbn {
       }
       if ($v === null) {
          if (!isset($mc[$mx])) {
-            $mc[$mx] = [
-                ];
+            $mc[$mx] = [];
          }
          if (!isset($mc[$mx][$n])) {
             if (isset($mc[''][$n])) {
@@ -907,106 +874,37 @@ class Mbn {
          }
       }
    }
-   protected static $fnEval = [
-       'abs' => true,
-       'inva' => false,
-       'ceil' => true,
-       'floor' => true,
-       'sqrt' => true,
-       'round' => true,
-       'sgn' => true,
-       'int' => 'intp'];
+
+   protected static $fnEval = ['abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true,
+       'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp'];
    protected static $states = [
-       'endBopPr' => [
-           'bop',
-           'pc',
-           'pr'],
-       'endBop' => [
-           'bop',
-           'pc'],
-       'uopVal' => [
-           'num',
-           'name',
-           'uop',
-           'po'],
-       'po' => [
-           'po']
+       'endBopPr' => ['bop', 'pc', 'pr'],
+       'endBop' => ['bop', 'pc'],
+       'uopVal' => ['num', 'name', 'uop', 'po'],
+       'po' => ['po']
    ];
-   protected static $endBop = [
-       'bop',
-       'pc'];
-   protected static $uopVal = [
-       'num',
-       "name",
-       "uop",
-       "po"];
+   protected static $endBop = ['bop', 'pc'];
+   protected static $uopVal = ['num', "name", "uop", "po"];
    protected static $bops = [
-       "|" => [
-           1,
-           true,
-           'max'],
-       "&" => [
-           2,
-           true,
-           'min'],
-       "+" => [
-           3,
-           true,
-           'add'],
-       "-" => [
-           3,
-           true,
-           'sub'],
-       "*" => [
-           4,
-           true,
-           'mul'],
-       "#" => [
-           4,
-           true,
-           'mod'],
-       "/" => [
-           4,
-           true,
-           'div'],
-       "^" => [
-           5,
-           false,
-           'pow']];
+       "|" => [1, true, 'max'],
+       "&" => [2, true, 'min'],
+       "+" => [3, true, 'add'],
+       "-" => [3, true, 'sub'],
+       "*" => [4, true, 'mul'],
+       "#" => [4, true, 'mod'],
+       "/" => [4, true, 'div'],
+       "^" => [5, false, 'pow']
+   ];
    protected static $funPrx = 4;
    protected static $rxs = [
-       'num' => [
-           'rx' => '/^([0-9\.,]+)\s*/',
-           'next' => 'endBopPr',
-           'end' => true],
-       'name' => [
-           'rx' => '/^([A-Za-z_]\w*)\s*/'],
-       'fn' => [
-           'next' => 'po',
-           'end' => false],
-       'vr' => [
-           'next' => 'endBop',
-           'end' => true],
-       'bop' => [
-           'rx' => '/^([-+\*\/#^&|])\s*/',
-           'next' => 'uopVal',
-           'end' => false],
-       'uop' => [
-           'rx' => '/^([-+])\s*/',
-           'next' => 'uopVal',
-           'end' => false],
-       'po' => [
-           'rx' => '/^(\()\s*/',
-           'next' => 'uopVal',
-           'end' => false],
-       'pc' => [
-           'rx' => '/^(\))\s*/',
-           'next' => 'endBop',
-           'end' => true],
-       'pr' => [
-           'rx' => '/^(%)\s*/',
-           'next' => 'endBop',
-           'end' => true]
+       'num' => ['rx' => '/^([0-9\.,]+)\s*/', 'next' => 'endBopPr', 'end' => true],
+       'name' => ['rx' => '/^([A-Za-z_]\w*)\s*/'], 'fn' => ['next' => 'po', 'end' => false],
+       'vr' => ['next' => 'endBop', 'end' => true],
+       'bop' => ['rx' => '/^([-+\*\/#^&|])\s*/', 'next' => 'uopVal', 'end' => false],
+       'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal', 'end' => false],
+       'po' => ['rx' => '/^(\()\s*/', 'next' => 'uopVal', 'end' => false],
+       'pc' => ['rx' => '/^(\))\s*/', 'next' => 'endBop', 'end' => true],
+       'pr' => ['rx' => '/^(%)\s*/', 'next' => 'endBop', 'end' => true]
    ];
 
    /**
@@ -1014,10 +912,9 @@ class Mbn {
     * @param {string} expr
     * @param {*=} vars
     */
-   public static function calc($expr, $vars = null) {
-      $expr = preg_replace('/^\s+/', '', $expr);
-      $vnames = [
-          ];
+   public static function calc($exp, $vars = null) {
+      $expr = preg_replace('/^\s+/', '', $exp);
+      $vnames = [];
       if ($vars !== null) {
          foreach ($vars as $k => &$v) {
             $vnames[$k] = new static($vars[$k]);
@@ -1026,20 +923,14 @@ class Mbn {
       $larr = &static::$states['uopVal'];
       $larl = count($larr);
       $lare = false;
-      $rpns = [
-          ];
-      $rpno = [
-          ];
+      $rpns = [      ];
+      $rpno = [      ];
       $neg = false;
       $t = null;
-      $invaUop = [
-          static::$funPrx,
-          true,
-          'inva'];
+      $invaUop = [          static::$funPrx,          true,          'inva'];
 
       while (strlen($expr) > 0) {
-         $mtch = [
-             ];
+         $mtch = [         ];
          foreach ($larr as $t) {
             if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch) == 1) {
                break;
@@ -1067,10 +958,7 @@ class Mbn {
             case 'name':
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
                   $t = "fn";
-                  $rpno [] = [
-                      static::$funPrx,
-                      true,
-                      $tok];
+                  $rpno [] = [                      static::$funPrx,                      true,                      $tok];
                } elseif (isset($vnames[$tok])) {
                   $t = "vr";
                   $rpns [] = new static($vnames[$tok]);
@@ -1142,10 +1030,10 @@ class Mbn {
          throw new MbnErr('.calc', 'unexpected', 'END');
       }
 
-      $rpn = array();
+      $rpn = [];
 
       foreach ($rpns as &$tn) {
-         if (!static::isNotMbn($tn)) {
+         if ($tn instanceof static) {
             $rpn[] = $tn;
          } elseif (isset(static::$fnEval[$tn])) {
             if (is_string(static::$fnEval[$tn])) {
@@ -1159,6 +1047,6 @@ class Mbn {
       }
       return $rpn[0];
    }
-//SLIM_EXCLUDE_END
 
+//SLIM_EXCLUDE_END
 }

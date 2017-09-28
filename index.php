@@ -221,13 +221,13 @@ if (file_exists('release/.LASTHASH')) {
 
       w("Class declarations in PHP", "title2");
 
-      w(['class Mbn0 extends Mbn{', '  //needed in each declaration', '  protected static $MbnX;', '  protected static $MbnP = 0;', '}'], "mono");
+      w(['class Mbn0 extends Mbn {', '  protected static $MbnP = 0;', '}'], "mono");
 
       w();
-      w(['class Mbn4c extends Mbn{', '  protected static $MbnX;', '  protected static $MbnP = 4;', "  protected static $MbnS = ',';", '}'], "mono");
+      w(['class Mbn4c extends Mbn{', '  protected static $MbnP = 4;', "  protected static $MbnS = ',';", '}'], "mono");
 
       w();
-      w(['class Mbn5t extends Mbn{', '  protected static $MbnX;', '  protected static $MbnP = 5;', "  protected static $MbnT = true;", '}'], "mono");
+      w(['class Mbn5t extends Mbn{', '  protected static $MbnP = 5;', "  protected static $MbnT = true;", '}'], "mono");
 
       w("Constructor calls", "title2");
 

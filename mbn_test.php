@@ -3,23 +3,17 @@
 require_once 'mbn.php';
 
 class Mbn0 extends Mbn {
-
-   protected static $MbnX;
    protected static $MbnP = 0;
 
 }
 
 class Mbn3c extends Mbn {
-
-   protected static $MbnX;
    protected static $MbnP = 3;
    protected static $MbnS = ',';
 
 }
 
 class Mbn20u extends Mbn {
-
-   protected static $MbnX;
    protected static $MbnP = 20;
    protected static $MbnS = ',';
    protected static $MbnT = true;
