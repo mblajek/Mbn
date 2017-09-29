@@ -176,7 +176,7 @@ if (file_exists('release/.LASTHASH')) {
       w("Mbn - Multi-Byte Number Librabry", "title1");
 
       w("About", "title2");
-      w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations.");
+      w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations. See <a href='https://mirkl.es/n'>calc examle</a>.");
 
       w('Tests and benchmark<span id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>', "title2");
       w('<strong id="resultJS">..</strong>', "mono");

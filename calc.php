@@ -8,6 +8,7 @@
 <body style="margin:2px;">
    <script src="release/mbn.min.js"></script>
    <div style="border:2px solid green; max-width:512px; margin-left:auto; margin-right:auto; padding:2px;">
+      <a href="https://mirkl.es"><img src="https://mirkl.es/favicon.ico" style="float:left; margin:-4px 2px 0px -4px"/></a>
       <div style="float:right; border: 1px solid black;">
          <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="pchange(0, true);" id="pst"></div>
          <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="pchange(-1);">&lt;</div>
@@ -59,16 +60,13 @@
             return;
          }
          Mbnx = Mbn.extend({MbnP: MbnP.toNumber(), MbnS: MbnST.charAt(0), MbnT: MbnST.charAt(1) === "_"});
-         document.getElementById("in").onkeyup();
          document.getElementById("op").innerText = MbnP;
          document.getElementById("pst").innerText = MbnST;
          document.getElementById("in").focus();
+         document.getElementById("in").onkeyup();
       };
       window.onload = function () {
          pchange(0);
       };
    </script>
-   <div style="text-align:center">
-      <a href="https://mirkl.es">mirkles</a>
-   </div>
 </body>
