@@ -16,7 +16,7 @@
  */
 class MbnErr extends Exception {
 
-   function __construct($fn, $msg, $val = null) {
+   public function __construct($fn, $msg, $val = null) {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
       if ($val !== null) {
          $val = (string) $val;
@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.22';
+   protected static $MbnV = '1.23';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -178,17 +178,17 @@ class Mbn {
       $ni = intval($nn);
       $nf = $nn - $ni;
       do {
-         $d = $ni % 10;
-         $ni -= $d;
+         $c = $ni % 10;
+         $ni -= $c;
          $ni /= 10;
-         array_unshift($this->d, $d);
+         array_unshift($this->d, $c);
       } while ($ni > 0);
       for ($n = 0; $n <= static::$MbnP; $n++) {
          $nf *= 10;
          $nfi = intval($nf);
-         $d = ($nfi === 10) ? 9 : $nfi;
-         $this->d[] = $d;
-         $nf -= $d;
+         $c = ($nfi === 10) ? 9 : $nfi;
+         $this->d[] = $c;
+         $nf -= $c;
       }
       $this->mbnRoundLast();
    }
@@ -246,8 +246,7 @@ class Mbn {
    }
 
    /**
-    * Returns string value of Mbn number, with seprator MbnS or s if is set
-    * @param {string=} s
+    * Returns string value of Mbn number
     */
    protected function toString() {
       $l = count($this->d) - static::$MbnP;
@@ -325,37 +324,36 @@ class Mbn {
    /**
     * Add b to Mbn number
     * @param {*} b
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
    public function add($b, $m = false) {
       if (!($b instanceof static)) {
          $b = new static($b);
       }
       $r = new static($b);
-      if ($this->s === 0) {
-         //r.set(b);
-      } else if ($b->s === 0) {
-         $r->set($this);
-      } else if ($b->s === $this->s) {
-         $ld = count($this->d) - count($b->d);
-         if ($ld < 0) {
-            //r.set(b);
-            $b = $this;
-            $ld = -$ld;
-         } else {
+      if ($this->s !== 0) {
+         if ($b->s === 0) {
             $r->set($this);
-         }
-         $rl = count($r->d);
-         for ($i = 0; $i < $rl; $i++) {
-            if ($i >= $ld) {
-               $r->d[$i] += $b->d[$i - $ld];
+         } else if ($b->s === $this->s) {
+            $ld = count($this->d) - count($b->d);
+            if ($ld < 0) {
+               $b = $this;
+               $ld = -$ld;
+            } else {
+               $r->set($this);
             }
+            $rl = count($r->d);
+            for ($i = 0; $i < $rl; $i++) {
+               if ($i >= $ld) {
+                  $r->d[$i] += $b->d[$i - $ld];
+               }
+            }
+            $r->mbnCarry();
+         } else {
+            $r->s = -$r->s;
+            $r->sub($this, true);
+            $r->s = -$r->s;
          }
-         $r->mbnCarry();
-      } else {
-         $r->s = -$r->s;
-         $r->sub($this, true);
-         $r->s = -$r->s;
       }
       return $this->mbnSetReturn($r, $m);
    }
@@ -363,7 +361,7 @@ class Mbn {
    /**
     * Substract b from value
     * @param {*} b
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
    public function sub($b, $m = false) {
       if (!($b instanceof static)) {
@@ -371,7 +369,6 @@ class Mbn {
       }
       $r = new static($b);
       if ($this->s === 0) {
-         //r.set(b);
          $r->s = -$r->s;
       } else if ($b->s === 0) {
          $r->set($this);
@@ -382,7 +379,6 @@ class Mbn {
             $r = new static('0');
          } else {
             if ($cmp === -1) {
-               //r.set(b);
                $b = $this;
                $ld = -$ld;
             } else {
@@ -407,9 +403,9 @@ class Mbn {
    /**
     * Multiple value by b
     * @param {*} b
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function mul($b, $m = false) {
+   public function mul($b, $m = false) {
       if (!($b instanceof static)) {
          $b = new static($b);
       }
@@ -437,9 +433,9 @@ class Mbn {
    /**
     * Divide value by b
     * @param {*} b
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function div($b, $m = false) {
+   public function div($b, $m = false) {
       if (!($b instanceof static)) {
          $b = new static($b);
       }
@@ -512,9 +508,9 @@ class Mbn {
    /**
     * Modulo from divide value by b
     * @param {*} b
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function mod($b, $m = false) {
+   public function mod($b, $m = false) {
       $ba = ($b instanceof static) ? $b->abs() : (new static($b))->abs();
       $r = $this->sub($this->div($ba)->intp()->mul($ba));
       if (($r->s + $this->s) === 0) {
@@ -528,7 +524,7 @@ class Mbn {
     * Split value to array of values, with same ratios as in given array
     * @param {array} ar
     */
-   function split($ar = 2) {
+   public function split($ar = 2) {
       $arr = [];
       if (!is_array($ar)) {
          $mbn1 = new static(1);
@@ -580,7 +576,7 @@ class Mbn {
    /**
     * Returns true if the number is integer
     */
-   function isInt() {
+   public function isInt() {
       $ct = count($this->d);
       for ($l = $ct - static::$MbnP; $l < $ct; $l++) {
          if ($this->d[$l] !== 0) {
@@ -592,9 +588,9 @@ class Mbn {
 
    /**
     * Returns bigest integer value not greater than number
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function floor($m = false) {
+   public function floor($m = false) {
       $r = ($m === true) ? $this : new static($this);
       if (static::$MbnP !== 0) {
          $ds = 0;
@@ -613,9 +609,9 @@ class Mbn {
 
    /**
     * Rounds number to closest integer value
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function round($m = false) {
+   public function round($m = false) {
       $r = ($m === true) ? $this : new static($this);
       if (static::$MbnP !== 0) {
          $ct = count($r->d);
@@ -631,10 +627,10 @@ class Mbn {
 
    /*
     * Returns absolute value from number
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
 
-   function abs($m = false) {
+   public function abs($m = false) {
       $r = ($m === true) ? $this : new static($this);
       $r->s *= $r->s;
       return $r;
@@ -642,9 +638,9 @@ class Mbn {
 
    /**
     * returns additional inverse of number
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function inva($m = false) {
+   public function inva($m = false) {
       $r = ($m === true) ? $this : new static($this);
       $r->s = -$r->s;
       return $r;
@@ -652,27 +648,27 @@ class Mbn {
 
    /**
     * returns multiplication inverse of number
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function invm($m = false) {
+   public function invm($m = false) {
       $r = (new static(1))->div($this);
       return $this->mbnSetReturn($r, $m);
    }
 
    /**
     * Returns lowest integer value not lower than number
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function ceil($m = false) {
+   public function ceil($m = false) {
       $r = ($m === true) ? $this : new static($this);
       return $r->inva(true)->floor(true)->inva(true);
    }
 
    /**
     * Returns integer part of number
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function intp($m = false) {
+   public function intp($m = false) {
       $r = ($m === true) ? $this : new static($this);
       return($r->s >= 0) ? $r->floor(true) : $r->ceil(true);
    }
@@ -682,33 +678,33 @@ class Mbn {
     * @param {*} b
     * @param {*} d
     */
-   function eq($b, $d = 0) {
+   public function eq($b, $d = 0) {
       return $this->cmp($b, $d) === 0;
    }
 
    /**
     * returns minimum from value and b
     * @param {*} b
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function min($b, $m = false) {
+   public function min($b, $m = false) {
       return $this->mbnSetReturn(new static((($this->cmp($b)) <= 0) ? $this : $b), $m);
    }
 
    /**
     * returns maximum from value and b
     * @param {*} b
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function max($b, $m = false) {
+   public function max($b, $m = false) {
       return $this->mbnSetReturn(new static((($this->cmp($b)) >= 0) ? $this : $b), $m);
    }
 
    /**
     * calculates square root of number
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function sqrt($m = false) {
+   public function sqrt($m = false) {
       $t = new static($this);
       $t->d[] = 0;
       $t->d[] = 0;
@@ -729,9 +725,9 @@ class Mbn {
 
    /**
     * returns sign from value
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function sgn($m = false) {
+   public function sgn($m = false) {
       return $this->mbnSetReturn(new static($this->s), $m);
    }
 
@@ -739,9 +735,9 @@ class Mbn {
    /**
     * Calculates n-th power of number, n must be integer
     * @param {number} nd
-    * @param {boolean=} m
+    * @param {boolean=} m Modify original variable
     */
-   function pow($nd, $m = false) {
+   public function pow($nd, $m = false) {
       $n = new static($nd);
       if (!$n->isInt()) {
          throw new MbnErr('.pow', 'only integer exponents supported', $n);
@@ -923,14 +919,14 @@ class Mbn {
       $larr = &static::$states['uopVal'];
       $larl = count($larr);
       $lare = false;
-      $rpns = [      ];
-      $rpno = [      ];
+      $rpns = [];
+      $rpno = [];
       $neg = false;
       $t = null;
-      $invaUop = [          static::$funPrx,          true,          'inva'];
+      $invaUop = [static::$funPrx, true, 'inva'];
 
       while (strlen($expr) > 0) {
-         $mtch = [         ];
+         $mtch = [];
          foreach ($larr as $t) {
             if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch) == 1) {
                break;
@@ -958,7 +954,7 @@ class Mbn {
             case 'name':
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
                   $t = "fn";
-                  $rpno [] = [                      static::$funPrx,                      true,                      $tok];
+                  $rpno [] = [static::$funPrx, true, $tok];
                } elseif (isset($vnames[$tok])) {
                   $t = "vr";
                   $rpns [] = new static($vnames[$tok]);

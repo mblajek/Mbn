@@ -184,7 +184,7 @@ if (file_exists('release/.LASTHASH')) {
 
       w("Downloads", "title2");
 
-      w("//slim version are made by cutting out some code from source", "mono");
+      w("//slim versions are made by cutting out some code from source", "mono");
       w("//don't have a.pow(), Mbn.calc(), Mbn.reduce() and constants functionality", "mono");
       w("//minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a>", "mono");
       w("//minified PHP is made with php_strip_whitespace() and text replacements", "mono");

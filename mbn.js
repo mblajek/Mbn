@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.22";
+   var MbnV = "1.23";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -113,7 +113,7 @@ var Mbn = (function () {
        * Private function, if m is true, sets value of a to b and return a, otherwise returns b
        * @param {Mbn} a
        * @param {Mbn} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       var mbnSetReturn = function (a, b, m) {
          if (m === true) {
@@ -198,19 +198,19 @@ var Mbn = (function () {
          }
          var ni = Math.floor(nn);
          var nf = nn - ni;
-         var nfi, d, i;
+         var nfi, c, i;
          do {
-            d = ni % 10;
-            ni -= d;
+            c = ni % 10;
+            ni -= c;
             ni /= 10;
-            a._d.unshift(d);
+            a._d.unshift(c);
          } while (ni > 0);
          for (i = 0; i <= MbnP; i++) {
             nf *= 10;
             nfi = Math.floor(nf);
-            d = (nfi === 10) ? 9 : nfi;
-            a._d.push(d);
-            nf -= d;
+            c = (nfi === 10) ? 9 : nfi;
+            a._d.push(c);
+            nf -= c;
          }
          mbnRoundLast(a);
       };
@@ -343,36 +343,35 @@ var Mbn = (function () {
       /**
        * Add b to Mbn number
        * @param {*} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.add = function (b, m) {
          if (!(b instanceof Mbn)) {
             b = new Mbn(b);
          }
          var r = new Mbn(b);
-         if (this._s === 0) {
-            //r.set(b);
-         } else if (b._s === 0) {
-            r.set(this);
-         } else if (b._s === this._s) {
-            var ld = this._d.length - b._d.length;
-            if (ld < 0) {
-               //r.set(b);
-               b = this;
-               ld = -ld;
-            } else {
+         if (this._s !== 0) {
+            if (b._s === 0) {
                r.set(this);
-            }
-            for (var i = 0; i < r._d.length; i++) {
-               if (i >= ld) {
-                  r._d[i] += b._d[i - ld];
+            } else if (b._s === this._s) {
+               var ld = this._d.length - b._d.length;
+               if (ld < 0) {
+                  b = this;
+                  ld = -ld;
+               } else {
+                  r.set(this);
                }
+               for (var i = 0; i < r._d.length; i++) {
+                  if (i >= ld) {
+                     r._d[i] += b._d[i - ld];
+                  }
+               }
+               mbnCarry(r);
+            } else {
+               r._s = -r._s;
+               r.sub(this, true);
+               r._s = -r._s;
             }
-            mbnCarry(r);
-         } else {
-            r._s = -r._s;
-            r.sub(this, true);
-            r._s = -r._s;
          }
          return mbnSetReturn(this, r, m);
       };
@@ -380,7 +379,7 @@ var Mbn = (function () {
       /**
        * Substract b from value
        * @param {*} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.sub = function (b, m) {
          if (!(b instanceof Mbn)) {
@@ -388,7 +387,6 @@ var Mbn = (function () {
          }
          var r = new Mbn(b);
          if (this._s === 0) {
-            //r.set(b);
             r._s = -r._s;
          } else if (b._s === 0) {
             r.set(this);
@@ -399,7 +397,6 @@ var Mbn = (function () {
                r = new Mbn('0');
             } else {
                if (cmp === -1) {
-                  //r.set(b);
                   b = this;
                   ld = -ld;
                } else {
@@ -423,7 +420,7 @@ var Mbn = (function () {
       /**
        * Multiple value by b
        * @param {*} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.mul = function (b, m) {
          if (!(b instanceof Mbn)) {
@@ -450,7 +447,7 @@ var Mbn = (function () {
       /**
        * Devide value by b
        * @param {*} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.div = function (b, m) {
          if (!(b instanceof Mbn)) {
@@ -527,7 +524,7 @@ var Mbn = (function () {
       /**
        * Modulo from divide value by b
        * @param {*} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.mod = function (b, m) {
          var ba = (b instanceof Mbn) ? b.abs() : (new Mbn(b)).abs();
@@ -608,7 +605,7 @@ var Mbn = (function () {
 
       /**
        * Returns bigest integer value not greater than number
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.floor = function (m) {
          var r = (m === true) ? this : new Mbn(this);
@@ -628,7 +625,7 @@ var Mbn = (function () {
 
       /**
        * Rounds number to closest integer value
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.round = function (m) {
          var r = (m === true) ? this : new Mbn(this);
@@ -645,7 +642,7 @@ var Mbn = (function () {
 
       /**
        * Returns absolute value from number
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.abs = function (m) {
          var r = (m === true) ? this : new Mbn(this);
@@ -655,7 +652,7 @@ var Mbn = (function () {
 
       /**
        * returns additional inverse of number
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.inva = function (m) {
          var r = (m === true) ? this : new Mbn(this);
@@ -665,7 +662,7 @@ var Mbn = (function () {
 
       /**
        * returns multiplication inverse of number
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.invm = function (m) {
          return mbnSetReturn(this, (new Mbn(1)).div(this), m);
@@ -673,7 +670,7 @@ var Mbn = (function () {
 
       /**
        * Returns lowest integer value not lower than number
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.ceil = function (m) {
          var r = (m === true) ? this : new Mbn(this);
@@ -682,7 +679,7 @@ var Mbn = (function () {
 
       /**
        * Returns integer part of number
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.intp = function (m) {
          var r = (m === true) ? this : new Mbn(this);
@@ -701,7 +698,7 @@ var Mbn = (function () {
       /**
        * returns minimum from value and b
        * @param {*} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.min = function (b, m) {
          return mbnSetReturn(this, new Mbn(((this.cmp(b)) <= 0) ? this : b), m);
@@ -710,7 +707,7 @@ var Mbn = (function () {
       /**
        * returns maximum from value and b
        * @param {*} b
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.max = function (b, m) {
          return mbnSetReturn(this, new Mbn(((this.cmp(b)) >= 0) ? this : b), m);
@@ -718,7 +715,7 @@ var Mbn = (function () {
 
       /**
        * calculates square root of number
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.sqrt = function (m) {
          var t = new Mbn(this);
@@ -741,7 +738,7 @@ var Mbn = (function () {
 
       /**
        * returns sign from value
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.sgn = function (m) {
          return mbnSetReturn(this, new Mbn(this._s), m);
@@ -752,7 +749,7 @@ var Mbn = (function () {
       /**
        * Calculates n-th power of number, n must be integer
        * @param {*} nd
-       * @param {boolean=} m
+       * @param {boolean=} m Modify original variable
        */
       Mbn.prototype.pow = function (nd, m) {
          var n = new Mbn(nd);
