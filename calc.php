@@ -1,4 +1,16 @@
-<!DOCTYPE html>
+<?php
+set_time_limit(1);
+$q = (filter_input(INPUT_GET, 'text') !== null) ? filter_input(INPUT_GET, 'text') : filter_input(INPUT_POST, 'text');
+if ($q !== null) {
+   header('Content-Type: text/plain');
+   require_once 'release/mbn.min.php';
+   try {
+      die(Mbn::calc($q ?: '0'));
+   } catch (Exception $e) {
+      die($e->getMessage());
+   }
+}
+?><!DOCTYPE html>
 <head>
    <title>MbnCalc</title>
    <link rel="icon" href="index.php?gf=icon" type="image/bmp" />
