@@ -91,9 +91,13 @@ if (file_exists('release/.LASTHASH')) {
          border: 1px solid gray;
          white-space: pre-wrap;
       }
-      .mono>span:after{
+      .mono>span.lb:after{
          color: gray;
          content: ">| ";
+      }
+      .mono span.it{
+         font-style: italic;
+         color: gray;
       }
       .result{
          font-family: "Consolas", monospace;
@@ -126,13 +130,14 @@ if (file_exists('release/.LASTHASH')) {
             var al = a.length;
             if (c === 'mono') {
                for (var i = 0; i < al; i++) {
-                  a[i] = "<span></span>" + a[i];
+                  a[i] = "<span class=\"lb\"></span>" + a[i];
                }
             }
             a = a.join("<br>");
          } else if (c === 'mono') {
-            a = "<span></span>" + a;
+            a = "<span class=\"lb\"></span>" + a;
          }
+         a = a.replace(/((\()|(, ))(modify)(\))/g, "$2<span class=\"it\">$3$4</span>$5");
          document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + ">" + a + "</div>");
       }
 
@@ -144,7 +149,7 @@ if (file_exists('release/.LASTHASH')) {
             w(String(e), "result");
             w(typeof e, "label");
          } catch (er) {
-            w(er, "result");
+            w(String(er), "result");
             w("error", "label");
          }
 
@@ -211,7 +216,7 @@ if (file_exists('release/.LASTHASH')) {
 
       w();
       var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});
-      w(['//precission 4, coma separator', 'var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});'], "mono");
+      w(['//precission 4, coma output separator', 'var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});'], "mono");
       we('new Mbn4c("12.1");');
 
       w();
@@ -280,7 +285,7 @@ if (file_exists('release/.LASTHASH')) {
       w();
       we(['//correct', '(new Mbn4c("1,2")).toNumber();']);
 
-      w('Operator precedence difference between JS and PHP', "title2");
+      w('Hint: operator precedence difference between JS and PHP', "title2");
 
       w(['//correct in JS', 'new Mbn("1.12").toNumber();'], "mono");
 
@@ -299,8 +304,8 @@ if (file_exists('release/.LASTHASH')) {
 
       w();
       we(['//all numeric arguments converted to Mbn', 'new Mbn("1.125").add("1.125");']);
-      we(['//because', 'new Mbn("1.13").add(new Mbn("1.13"));'], "mono");
-      we(['//needed precission should be used', 'new Mbn(new Mbn3("1.125").add("1.125"));'], "mono");
+      we(['//because', 'new Mbn("1.13").add(new Mbn("1.13"));']);
+      we(['//expected precission should be used', 'new Mbn(new Mbn3("1.125").add("1.125"));']);
 
       w();
       we(['//by default original value remains unchanged', 'var a = new Mbn("1.12");', 'a.add("1.12");', 'a;']);
@@ -309,7 +314,7 @@ if (file_exists('release/.LASTHASH')) {
       we(['//last argument (=== true) triggers modification of original variable', 'var a = new Mbn("1.12");', 'a.add("1.12", true);', 'a;']);
 
       w();
-      we(['//returned values are Mbn objects, which allows method chaining', 'new Mbn("1.12").add("1.12").add("9");']);
+      we(['//returned values are Mbn objects, what enables method chaining', 'new Mbn("1.12").add("1.12").add("9");']);
 
       w();
       we(['var a = new Mbn("1.12");', 'a.add("1.12", true).add("9", true);', 'a;']);
@@ -436,22 +441,23 @@ if (file_exists('release/.LASTHASH')) {
 
       w();
       we(["//variables can be passed as second argument", 'Mbn.calc("a / b", {a: 7, b: 3});']);
+      w(["//php", "Mbn::calc('a / b', ['a' => 7, 'b' => 3]);"], "mono");
 
       w();
-      we(["//calc() is called when constructor is called with string begnning with =", 'new Mbn("=x*x", {x: 2});'])
+      we(["//calc() is called when constructor is called with string begnning with =", 'new Mbn("=x*x", {x: 2});']);
 
       w("Defining constants", "title2");
 
-      we(['//constants can be get by name', 'Mbn.def("PI");'])
+      we(['//constants can be get by name', 'Mbn.def("PI");']);
 
       w();
-      we(['//constants can be defined, have to start from capital letter', 'Mbn.def("Q", "2");', 'Mbn.def("Q");'])
+      we(['//constants can be defined, have to start from capital letter', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
 
       w();
-      we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");'])
+      we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");']);
 
       w();
-      we(['//constant can be checked if is defined', 'Mbn.def(null, "Q");'])
+      we(['//constant can be checked if is defined', 'Mbn.def(null, "Q");']);
 
       w("Examples of calculations, that give wrong results, and can be easily corrected with Mbn", "title2");
 
