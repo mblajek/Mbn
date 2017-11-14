@@ -1,50 +1,41 @@
 <?php
 $relFiles = array(
-    array(
-        'mbn.js',
+    'mbn.js' => array(
         'Library in JS'
     ),
-    array(
-        'mbn.php',
+    'mbn.php' => array(
         'Library in PHP'
     ),
-    array(
-        'mbn.min.js',
+    'mbn.min.js' => array(
         'Minified library in JS'
     ),
-    array(
-        'mbn.min.php',
+    'mbn.min.php' => array(
         'Minified library in PHP'
     ),
-    array(
-        'mbn.slim.js',
+    'mbn.slim.js' => array(
         'Slim library version in JS - without pow(), calc(), reduce() and constants'
     ),
-    array(
-        'mbn.slim.php',
+    'mbn.slim.php' => array(
         'Slim library version in PHP - without pow(), calc(), reduce() and constants'
     ),
-    array(
-        'mbn.slim.min.js',
+    'mbn.slim.min.js' => array(
         'Minified slim library version in JS'
     ),
-    array(
-        'mbn.slim.min.php',
+    'mbn.slim.min.php' => array(
         'Minified slim library version in PHP'
     ),
 );
-foreach ($relFiles as &$relFile) {
-   $relFile[] = filesize('release/' . $relFile[0]);
+foreach ($relFiles as $n => &$relFile) {
+   $relFile[] = filesize('release/' . $n);
 }
 unset($relFile);
 
 $getFile = filter_input(INPUT_GET, 'gf');
 if ($getFile != null && isset($relFiles[$getFile])) {
-   $fn = $relFiles[$getFile][0];
-   $ext = pathinfo($fn, PATHINFO_EXTENSION);
+   $ext = pathinfo($getFile, PATHINFO_EXTENSION);
    header('Content-Type: text/plain');
-   header('Content-Disposition: inline; filename="' . $fn . '"');
-   readfile('release/' . $fn);
+   header('Content-Disposition: inline; filename="' . $getFile . '"');
+   readfile('release/' . $getFile);
    die;
 } elseif ($getFile === 'icon') {
    header('Content-Type: image/bmp');
@@ -59,7 +50,6 @@ if (file_exists('release/.LASTHASH')) {
       $hashChanged = 0;
    }
 }
-
 ?><!DOCTYPE html>
 <head>
    <title>Mbn Librabry</title>
@@ -195,9 +185,13 @@ if (file_exists('release/.LASTHASH')) {
       w("//minified PHP is made with php_strip_whitespace() and text replacements", "mono");
 
       var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
-      relFiles.forEach(function (f, i) {
-         w(['<a href="?gf=' + i + '">' + f[0] + "</a> (" + (new Mbn(f[2])).div(1024) + " kB)", f[1]], "mono");
-      });
+      for (var i in relFiles) {
+         if (relFiles.hasOwnProperty(i)) {
+            var f = relFiles[i];
+            w(['<a href="?gf=' + i + '">' + i + "</a> (" + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
+         }
+      }
+      ;
 
       w("Class declarations in JS", "title2");
 

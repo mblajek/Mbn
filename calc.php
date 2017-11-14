@@ -22,14 +22,14 @@ if ($q !== null) {
    <div style="border:2px solid green; max-width:512px; margin-left:auto; margin-right:auto; padding:2px;">
       <a href="https://mirkl.es"><img src="https://mirkl.es/favicon.ico" style="float:left; margin:-4px 2px 0px -4px"/></a>
       <div style="float:right; border: 1px solid black;">
-         <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="pchange(0, true);" id="pst"></div>
-         <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="pchange(-1);">&lt;</div>
-         <div style="display:inline-block; width:30px; text-align: center;" id="op"></div>
-         <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="pchange(+1);">&gt;</div>
-         <div style="display:inline-block; background-color:lightgray; cursor:pointer;" onclick="window.open(location.href, 'w' + (new Date()), 'width=320,height=128,resizable=yes,toolbar=no,scrollbars=no');">+</div>
+         <button style="background-color:lightgray; cursor:pointer; border:none; padding:1px; font-size:1em;" onclick="pchange(0, true);" id="mbnst"></button>
+         <button style="background-color:lightgray; cursor:pointer; border:none; padding:1px; font-size:1em;" onclick="pchange(-1);" >&lt;</button>
+         <button style="background-color:white; border:none; padding:1px; font-size:1em; width:30px;" id="mbnp" disabled></button>
+         <button style="background-color:lightgray; cursor:pointer; border:none; padding:1px; font-size:1em;" onclick="pchange(1);">&gt;</button>
+         <button style="background-color:lightgray; cursor:pointer; border: none; padding:1px; font-size:1em;" onclick="newcalc()">+</button>
       </div>
-      <div style="padding:1px;">constants: PI, E, <a href="index.php" style="color:black">Mbn</a>P</div>
-      <div>functions: abs, ceil, floor, round, sqrt, sgn, int</div>
+      <div style="margin:2px;">constants: PI, E, <a href="index.php" style="color:black">Mbn</a>P</div>
+      <div style="margin:2px;">functions: abs, ceil, floor, round, sqrt, sgn, int</div>
       <input onkeyup="inchange(this);" id="in" style="display: block; width:100%; box-sizing: border-box">
       =>
       <input readonly id="out" style="display: block; width:100%; box-sizing: border-box" onfocus="this.select();">
@@ -72,10 +72,13 @@ if ($q !== null) {
             return;
          }
          Mbnx = Mbn.extend({MbnP: MbnP.toNumber(), MbnS: MbnST.charAt(0), MbnT: MbnST.charAt(1) === "_"});
-         document.getElementById("op").innerText = MbnP;
-         document.getElementById("pst").innerText = MbnST;
+         document.getElementById("mbnp").innerText = MbnP;
+         document.getElementById("mbnst").innerText = MbnST;
          document.getElementById("in").focus();
          document.getElementById("in").onkeyup();
+      };
+      var newcalc = function () {
+         window.open(location.href, 'w' + (new Date()), 'width=320,height=128,resizable=yes,toolbar=no,scrollbars=no');
       };
       window.onload = function () {
          pchange(0);
