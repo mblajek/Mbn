@@ -47,12 +47,17 @@ function releaseMbn() {
       $postfieldsStr = implode('&', $postfields);
 
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, 'http://closure-compiler.appspot.com/compile');
+      curl_setopt($ch, CURLOPT_URL, 'https://closure-compiler.appspot.com/compile');
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       curl_setopt($ch, CURLOPT_POST, 1);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $postfieldsStr);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
       $resp = json_decode(curl_exec($ch), true);
+      $curlErr = curl_error($ch);
       curl_close($ch);
+      if (empty($resp)) {
+         throw new Exception('empty closure-compiler response ' . $curlErr);
+      }
 
       if (!empty($resp['errors'])) {
          foreach ($resp['errors'] as $err) {
@@ -103,11 +108,16 @@ function releaseMbn() {
       } while ($mbn_min_phpLenNew < $mbn_min_phpLen);
       return $mbn_min_php;
    }
+
    $errorsJS = array();
 
    $mbn_slim_js = getSlim($mbn_js);
-   $mbn_min_js = checkMinifyJS($errorsJS, 'mbn.js', $mbn_js);
-   $mbn_slim_min_js = checkMinifyJS($errorsJS, 'mbn.slim.js', $mbn_slim_js);
+   try {
+      $mbn_min_js = checkMinifyJS($errorsJS, 'mbn.js', $mbn_js);
+      $mbn_slim_min_js = checkMinifyJS($errorsJS, 'mbn.slim.js', $mbn_slim_js);
+   } catch (Exception $e) {
+      return $e->getMessage();
+   }
 
    if (!empty($errorsJS)) {
       $errJsStr = '';
@@ -140,4 +150,5 @@ function releaseMbn() {
 
    return 'update finished';
 }
+
 echo releaseMbn();
