@@ -112,6 +112,15 @@ if (file_exists('release/.LASTHASH')) {
       }
    </style>
    <script>
+/* https://github.com/douglascrockford/JSON-js  - To check compatibility with ES3 */ "object"!==typeof JSON&&(JSON={});
+(function(){function m(a){return 10>a?"0"+a:a}function q(){return this.valueOf()}function r(a){t.lastIndex=0;return t.test(a)?'"'+a.replace(t,function(a){var c=w[a];return"string"===typeof c?c:"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+a+'"'}function n(a,k){var c,d=e,b=k[a];b&&"object"===typeof b&&"function"===typeof b.toJSON&&(b=b.toJSON(a));"function"===typeof h&&(b=h.call(k,a,b));switch(typeof b){case "string":return r(b);case "number":return isFinite(b)?String(b):"null";case "boolean":case "null":return String(b);
+case "object":if(!b)return"null";e+=p;var g=[];if("[object Array]"===Object.prototype.toString.apply(b)){var u=b.length;for(c=0;c<u;c+=1)g[c]=n(c,b)||"null";var f=0===g.length?"[]":e?"[\n"+e+g.join(",\n"+e)+"\n"+d+"]":"["+g.join(",")+"]";e=d;return f}if(h&&"object"===typeof h)for(u=h.length,c=0;c<u;c+=1){if("string"===typeof h[c]){var l=h[c];(f=n(l,b))&&g.push(r(l)+(e?": ":":")+f)}}else for(l in b)Object.prototype.hasOwnProperty.call(b,l)&&(f=n(l,b))&&g.push(r(l)+(e?": ":":")+f);f=0===g.length?"{}":
+e?"{\n"+e+g.join(",\n"+e)+"\n"+d+"}":"{"+g.join(",")+"}";e=d;return f}}var x=/^[\],:{}\s]*$/,y=/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,z=/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,A=/(?:^|:|,)(?:\s*\[)+/g,t=/[\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,v=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;"function"!==typeof Date.prototype.toJSON&&
+(Date.prototype.toJSON=function(){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+m(this.getUTCMonth()+1)+"-"+m(this.getUTCDate())+"T"+m(this.getUTCHours())+":"+m(this.getUTCMinutes())+":"+m(this.getUTCSeconds())+"Z":null},Boolean.prototype.toJSON=q,Number.prototype.toJSON=q,String.prototype.toJSON=q);var e,p,h;if("function"!==typeof JSON.stringify){var w={"\b":"\\b","\t":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};JSON.stringify=function(a,k,c){var d;p=e="";if("number"===
+typeof c)for(d=0;d<c;d+=1)p+=" ";else"string"===typeof c&&(p=c);if((h=k)&&"function"!==typeof k&&("object"!==typeof k||"number"!==typeof k.length))throw Error("JSON.stringify");return n("",{"":a})}}"function"!==typeof JSON.parse&&(JSON.parse=function(a,e){function c(b,a){var d,f=b[a];if(f&&"object"===typeof f)for(d in f)if(Object.prototype.hasOwnProperty.call(f,d)){var g=c(f,d);void 0!==g?f[d]=g:delete f[d]}return e.call(b,a,f)}a=String(a);v.lastIndex=0;v.test(a)&&(a=a.replace(v,function(a){return"\\u"+
+("0000"+a.charCodeAt(0).toString(16)).slice(-4)}));if(x.test(a.replace(y,"@").replace(z,"]").replace(A,""))){var d=eval("("+a+")");return"function"===typeof e?c({"":d},""):d}throw new SyntaxError("JSON.parse");})})();
+   </script>
+   <script>
       function w(a, c) {
          if (a === undefined) {
             a = "";
@@ -172,6 +181,7 @@ if (file_exists('release/.LASTHASH')) {
 
       w("About", "title2");
       w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations. See <a href='https://mirkl.es/n'>calc examle</a>.");
+      w("<a href='https://github.com/mblajek/Mbn'>Github page</a>. Comatibitity: PHP 5.4+, JS ES2+");
 
       w('Tests and benchmark<span id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>', "title2");
       w('<strong id="resultJS">..</strong>', "mono");
