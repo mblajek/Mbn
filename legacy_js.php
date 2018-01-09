@@ -1,10 +1,12 @@
-<script src="mbn.js"></script>
 <script>
+<?php readfile('mbn.js'); ?>
+
    var Mbn0 = Mbn.extend(0);
    var Mbn3c = Mbn.extend({MbnP: 3, MbnS: ','});
    var Mbn20u = Mbn.extend({MbnP: 20, MbnS: ',', MbnT: true});
 
-   if (typeof JSON === "undefined")
+   //partial JSON support for envirment without JSON
+   if (typeof JSON === "undefined") {
       JSON = {parse: function (s) {
             return eval("(" + s + ")");
          }, stringify: function (o) {
@@ -21,7 +23,9 @@
                default:
                   throw"invalid type " + typeof o;
             }
-         }};
+         }
+      };
+   }
 
    var runTestMbn = function (tests) {
       var ret = [];
@@ -54,7 +58,7 @@
       return {status: (ret.length === 0) ? 'OK' : 'ERR', count: tl, errors: ret};
    };
 
-   var testsAll = <?= readfile('mbn_test_set.json'); ?>;
+   var testsAll = <?php readfile('mbn_test_set.json'); ?>;
    var tests = testsAll.both.concat(testsAll.js);
    var testsl = tests.length;
    for (var i = 0; i < testsl; i++) {
