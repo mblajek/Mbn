@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.23";
+   var MbnV = "1.24";
    //default precision
    var MbnDP = 2;
    //default separator
