@@ -130,12 +130,11 @@ class Mbn {
       preg_match('/([+=-]?)\\s*(.*)/', trim($ns), $np);
       $n0 = $np[1];
       $n = $np[2];
-      if ($n0 === '-' || $n0 === '+' || $n0 === '=') {
-         $this->s = ($n0 === '-') ? -1 : 1;
-         if ($n0 === '=' && method_exists(get_class(), 'calc')) {
-            $this->set(static::calc($n, $v));
-            return;
-         }
+      if ($n0 === '-') {
+         $this->s = -1;
+      } elseif ($n0 === '=' && method_exists(get_class(), 'calc')) {
+         $this->set(static::calc($n, $v));
+         return;
       }
       $ln = strpos($n, '.');
       if ($ln === false) {
@@ -156,6 +155,8 @@ class Mbn {
          $c = ($i < $nl) ? (ord($n[$i]) - 48) : 0;
          if ($c >= 0 && $c <= 9) {
             $this->d[] = $c;
+         } elseif ($c === -16 && ($i + 1) < $ln && $n0 !== '=') {
+            continue;
          } else {
             throw new MbnErr('', 'invalid format', $ns);
          }
@@ -266,6 +267,15 @@ class Mbn {
          $r .= static::$MbnS . implode(array_slice($this->d, $l, $l0 + 1 - $l), '');
       }
       return $r;
+   }
+
+   /**
+    * Returns string value with thousand grouping
+    */
+   public function format() {
+      $sa = explode(static::$MbnS, str_replace('-', '', $this->toString()));
+      $sa[0] = trim(preg_replace('/(...)/', ' $1', substr('  ' . $sa[0], (strlen($sa[0]) + 2) % 3)));
+      return (($this->s < 0) ? '-' : '') . implode(static::$MbnS, $sa);
    }
 
    public function __toString() {

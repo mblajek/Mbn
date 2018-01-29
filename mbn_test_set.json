@@ -382,6 +382,12 @@
       ["new Mbn('=2a',{a:0.1})", "0.20"],
       ["new Mbn('=a(a+1)',{a:0.5})", "0.75"],
       ["new Mbn('=a(-a+1)',{a:0.6})", "0.24"],
-      ["Mbn::calc('dsfsda(558)')", "Mbn.calc error*"]
+      ["Mbn::calc('dsfsda(558)')", "Mbn.calc error*"],
+      ["(new Mbn(123.12))->format()", "123.12"],
+      ["(new Mbn(1234))->format()", "1 234.00"],
+      ["(new Mbn(-1234))->format()", "-1 234.00"],
+      ["(new Mbn(1234567.12))->format()", "1 234 567.12"],
+      ["(new Mbn('-12 345.13'))", "-12345.13"],
+      ["(new Mbn('-12 345.1 3'))", "Mbn error*"]
    ]
 }

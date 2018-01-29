@@ -377,7 +377,8 @@ if (file_exists('release/.LASTHASH')) {
 
       we(['//standard set, using =, sets reference to existing object', 'var a = new Mbn(2);', 'var b = new Mbn();', 'var c = new Mbn();', 'b = a;', 'c.set(a);', 'a.add(3, true);', 'b + " " + c;']);
 
-      w();
+      w("Other methods - cmp, eq", "title2");
+
       we(['//compare with other number, returns number', '//1 if number is greater than other value, 0 if equals, -1 if is lower', 'new Mbn(0.5).cmp(4);']);
 
       w();
@@ -386,7 +387,8 @@ if (file_exists('release/.LASTHASH')) {
       w();
       we(['//check if numbers are equal, also maximum difference can be passed', 'new Mbn(1.9).eq(1.7, 0.2);']);
 
-      w();
+      w("Other methods - split", "title2");
+
       we(['//split value to numbers, which sum correctly to it', '//returns array of Mbn objects', '//number of parts (default 2) or array with ratios can be given', 'new Mbn(3).split();']);
 
       we('new Mbn(3).split().join(" ");');
@@ -397,6 +399,11 @@ if (file_exists('release/.LASTHASH')) {
 
       w();
       w(['//in PHP works with assocjative arrays', "(new Mbn(2.02))->split(['a' => 1, 'c' => 1, 'b' => 2])", "//gives array ['a' => 0.51, 'c' => 0.50, 'b' => 1.01]"], 'mono');
+
+      w("Other methods - format", "title2");
+
+      we(["//output can be formatted, with thousands grouping", "Mbn('12345678').format();"], "mono");
+      we(["//input can contain some spaces in integer part", "Mbn('123 45 678.12');"], "mono");
 
       w("Other methods - reduce", "title2");
       we(['//reduce array to value or invoke single argument function on each element (typically called map)', '//2-argument functions: add, mul, min, max', 'Mbn.reduce("add", [2.5, 1.5, 3.4, -4.4]);']);
@@ -410,7 +417,6 @@ if (file_exists('release/.LASTHASH')) {
 
       w("Other methods - calc", "title2");
 
-      w();
       we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);
 
       w();

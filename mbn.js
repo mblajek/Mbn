@@ -153,12 +153,11 @@ var Mbn = (function () {
          var np = ns.replace(wsRx1, "").match(wsRx2);
          var n0 = np[1];
          var n = np[2];
-         if (n0 === "-" || n0 === "+" || n0 === "=") {
-            a._s = (n0 === "-") ? -1 : 1;
-            if (n0 === "=" && (typeof Mbn.calc === "function")) {
-               a.set(Mbn.calc(n, v));
-               return;
-            }
+         if (n0 === "-") {
+            a._s = -1;
+         } else if (n0 === "=" && typeof Mbn.calc === "function") {
+            a.set(Mbn.calc(n, v));
+            return;
          }
          var ln = ((n.indexOf(".") + 1) || (n.indexOf(",") + 1)) - 1;
          if (ln === -1) {
@@ -176,6 +175,8 @@ var Mbn = (function () {
             c = (i < nl) ? (n.charCodeAt(i) - 48) : 0;
             if (c >= 0 && c <= 9) {
                a._d.push(c);
+            } else if (c === -16 && (i + 1) < ln && n0 !== "=") {
+               continue;
             } else {
                throw new MbnErr("", "invalid format", ns);
             }
@@ -292,6 +293,15 @@ var Mbn = (function () {
             r += MbnS + this._d.slice(l, l0 + 1).join("");
          }
          return r;
+      };
+
+      /**
+       * Returns string value with thousand grouping
+       */
+      Mbn.prototype.format = function () {
+         var sa = this.toString().replace("-", "").split(MbnS);
+         sa[0] = ("  " + sa[0]).substring((sa[0].length + 2) % 3).replace(/(...)/g, " $1").replace(/^ +/, "");
+         return ((this._s < 0) ? "-" : "") + sa.join(MbnS);
       };
 
       /**
