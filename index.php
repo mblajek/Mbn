@@ -55,7 +55,7 @@ if (file_exists('release/.LASTHASH')) {
 <head>
    <title>Mbn Librabry</title>
    <meta charset="UTF-8">
-   <link rel="icon" href="index.php?gf=icon" type="image/bmp" />
+   <link rel="icon" href="lib?gf=icon" type="image/bmp" />
 </head><body>
    <script src="mbn.js"></script>
 
@@ -172,7 +172,7 @@ if (file_exists('release/.LASTHASH')) {
       w("Mbn - Multi-Byte Number Librabry", "title1");
 
       w("About", "title2");
-      w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations. See <a href='https://mirkl.es/n'>calc examle</a>.");
+      w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations. See <a href='calc'>calc examle</a>.");
       w("<a href='https://github.com/mblajek/Mbn'>Github page</a>. Comatibitity: PHP 5.4+, JS ES3+ (IE6+)");
 
       w('Tests and benchmark<span id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>', "title2");

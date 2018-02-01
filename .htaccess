@@ -1,0 +1,5 @@
+DirectoryIndex calc.php
+RewriteEngine On
+RewriteRule ^lib$ index.php
+RewriteRule ^calc$ calc.php
+RewriteRule ^$ /n/calc [R]

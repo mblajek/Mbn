@@ -4,7 +4,7 @@ Library for PHP and JS to do calculations with any precission and correct (half-
 Author: Mikołaj Błajek
 mblajek_mbn(at)mailplus.pl
 
-project page: https://mirkl.es/n/index.php - library files avalaible there
+project page: https://mirkl.es/n/lib - library files avalaible there
 
    Pages:
       index.php - Main page - destription of library with examples, also runs unit tests
