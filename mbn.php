@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.24';
+   protected static $MbnV = '1.25';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -155,7 +155,7 @@ class Mbn {
          $c = ($i < $nl) ? (ord($n[$i]) - 48) : 0;
          if ($c >= 0 && $c <= 9) {
             $this->d[] = $c;
-         } elseif ($c === -16 && ($i + 1) < $ln && $n0 !== '=') {
+         } elseif ($c === -16 && ($i + 1) < $ln) {
             continue;
          } else {
             throw new MbnErr('', 'invalid format', $ns);
@@ -903,7 +903,7 @@ class Mbn {
    ];
    protected static $funPrx = 4;
    protected static $rxs = [
-       'num' => ['rx' => '/^([0-9\.,]+)\s*/', 'next' => 'endBopPr', 'end' => true],
+       'num' => ['rx' => '/^([0-9\., ]+)\s*/', 'next' => 'endBopPr', 'end' => true],
        'name' => ['rx' => '/^([A-Za-z_]\w*)\s*/'], 'fn' => ['next' => 'po', 'end' => false],
        'vr' => ['next' => 'endBop', 'end' => true],
        'bop' => ['rx' => '/^([-+\*\/#^&|])\s*/', 'next' => 'uopVal', 'end' => false],

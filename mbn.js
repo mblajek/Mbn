@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.24";
+   var MbnV = "1.25";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -175,7 +175,7 @@ var Mbn = (function () {
             c = (i < nl) ? (n.charCodeAt(i) - 48) : 0;
             if (c >= 0 && c <= 9) {
                a._d.push(c);
-            } else if (c === -16 && (i + 1) < ln && n0 !== "=") {
+            } else if (c === -16 && (i + 1) < ln) {
                continue;
             } else {
                throw new MbnErr("", "invalid format", ns);
@@ -897,7 +897,7 @@ var Mbn = (function () {
       };
       var funPrx = 4;
       var rxs = {
-         num: {rx: /^([0-9\.,]+)\s*/, next: ["bop", "pc", "pr"], end: true},
+         num: {rx: /^([0-9\., ]+)\s*/, next: ["bop", "pc", "pr"], end: true},
          name: {rx: /^([A-Za-z_]\w*)\s*/},
          fn: {next: ["po"], end: false},
          vr: {next: endBop, end: true},
