@@ -55,7 +55,7 @@ if (file_exists('release/.LASTHASH')) {
 <head>
    <title>Mbn Librabry</title>
    <meta charset="UTF-8">
-   <link rel="icon" href="lib?gf=icon" type="image/bmp" />
+   <link rel="icon" href="lib/icon" type="image/bmp" />
 </head><body>
    <script src="mbn.js"></script>
 
@@ -190,7 +190,7 @@ if (file_exists('release/.LASTHASH')) {
       for (var i in relFiles) {
          if (relFiles.hasOwnProperty(i)) {
             var f = relFiles[i];
-            w(['<a href="?gf=' + i + '">' + i + "</a> (" + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
+            w(['<a href="lib/' + i + '">' + i + "</a> (" + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
          }
       }
       ;

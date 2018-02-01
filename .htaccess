@@ -1,5 +1,4 @@
-DirectoryIndex calc.php
 RewriteEngine On
-RewriteRule ^lib$ index.php
-RewriteRule ^calc$ calc.php
 RewriteRule ^$ /n/calc [R]
+RewriteRule ^lib(\/(.*))?$ index.php?gf=$2
+RewriteRule ^calc$ calc.php
