@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.25';
+   protected static $MbnV = '1.26';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -757,12 +757,11 @@ class Mbn {
 
       $mbn1 = new static(1);
       $mbn2 = new static(2);
-
+      $rx = new static($this);
       if ($ns === -1 && $this->abs()->cmp($mbn1) === -1) {
-         $this->invm(true);
+         $rx->invm(true);
          $ns = -$ns;
       }
-      $rx = new static($this);
       $dd = 0;
       $cdd = 0;
       $r = new static($mbn1);
