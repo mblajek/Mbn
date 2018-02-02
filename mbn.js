@@ -772,7 +772,7 @@ var Mbn = (function () {
          var mbn2 = new Mbn(2);
          var rx = new Mbn(this);
          if (ns === -1 && rx.abs().cmp(mbn1) === -1) {
-            rx.invm(rx);
+            rx.invm(true);
             ns = -ns;
          }
          var dd = 0;
