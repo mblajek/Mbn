@@ -18,7 +18,7 @@ project page: https://mirkl.es/n/lib - library files avalaible there
       mbn_test.js - Unit tests for JS version
       mbn_test.php - Unit tests for PHP version
       mbn_test_set.json - Common set of tests
-      mbn_release.php - Generate slim and minified versions to /release/ folder
+      mbn_release.php - Generate minified versions to /release/ folder
       legacy_js.php - runs JS tests in ES3 enviorment
 
 Code is optimized for speed and size; not for readability.

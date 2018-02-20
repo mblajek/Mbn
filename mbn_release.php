@@ -22,10 +22,6 @@ function releaseMbn() {
       return 'already up-to-date';
    }
 
-   function getSlim($code) {
-      return preg_replace('/SLIM_EXCLUDE_START.*SLIM_EXCLUDE_END/s', 'SLIM_EXCLUDED', $code);
-   }
-
    function checkMinifyJS(&$errorsJS, $file, $code = null) {
       if ($code === null) {
          $code = file_get_contents($file);
@@ -111,10 +107,8 @@ function releaseMbn() {
 
    $errorsJS = array();
 
-   $mbn_slim_js = getSlim($mbn_js);
    try {
       $mbn_min_js = checkMinifyJS($errorsJS, 'mbn.js', $mbn_js);
-      $mbn_slim_min_js = checkMinifyJS($errorsJS, 'mbn.slim.js', $mbn_slim_js);
    } catch (Exception $e) {
       return $e->getMessage();
    }
@@ -130,21 +124,12 @@ function releaseMbn() {
       return $errJsStr;
    }
 
-   $mbn_slim_php = getSlim($mbn_php);
-
    file_put_contents('release/mbn.php', $mbn_php);
-   file_put_contents('release/mbn.slim.php', $mbn_slim_php);
-
    $mbn_min_php = minifyPHP('release/mbn.php');
-   $mbn_slim_min_php = minifyPHP('release/mbn.slim.php');
-
    file_put_contents('release/mbn.min.php', $mbn_min_php);
-   file_put_contents('release/mbn.slim.min.php', $mbn_slim_min_php);
 
    file_put_contents('release/mbn.js', $mbn_js);
-   file_put_contents('release/mbn.slim.js', $mbn_slim_js);
    file_put_contents('release/mbn.min.js', $mbn_min_js);
-   file_put_contents('release/mbn.slim.min.js', $mbn_slim_min_js);
 
    file_put_contents('release/.LASTHASH', $newHash);
 

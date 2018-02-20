@@ -12,18 +12,6 @@ $relFiles = array(
     'mbn.min.php' => array(
         'Minified library in PHP'
     ),
-    'mbn.slim.js' => array(
-        'Slim library version in JS - without pow(), calc(), reduce() and constants'
-    ),
-    'mbn.slim.php' => array(
-        'Slim library version in PHP - without pow(), calc(), reduce() and constants'
-    ),
-    'mbn.slim.min.js' => array(
-        'Minified slim library version in JS'
-    ),
-    'mbn.slim.min.php' => array(
-        'Minified slim library version in PHP'
-    ),
 );
 foreach ($relFiles as $n => &$relFile) {
    $relFile[] = filesize('release/' . $n);
@@ -181,8 +169,6 @@ if (file_exists('release/.LASTHASH')) {
 
       w("Downloads", "title2");
 
-      w("//slim versions are made by cutting out some code from source", "mono");
-      w("//don't have a.pow(), Mbn.calc(), Mbn.reduce() and constants functionality", "mono");
       w("//minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a>", "mono");
       w("//minified PHP is made with php_strip_whitespace() and text replacements", "mono");
 

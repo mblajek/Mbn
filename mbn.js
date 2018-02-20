@@ -27,13 +27,17 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.26";
+   var MbnV = "1.27";
    //default precision
    var MbnDP = 2;
    //default separator
    var MbnDS = ".";
    //default truncate
    var MbnDT = false;
+   //default extension
+   var MbnDE = true;
+   //default format
+   var MbnDF = false;
 
    /**
     * Function returns function, which is constructor of Mbn objects
@@ -48,19 +52,31 @@ var Mbn = (function () {
       //actual precision for Mbn class
       var MbnP = (opt.MbnP === undefined) ? MbnDP : Number(opt.MbnP);
       if (!isFinite(MbnP) || Math.round(MbnP) !== MbnP || MbnP < 0) {
-         throw new MbnErr(".extend", "invalid precision", MbnP);
+         throw new MbnErr(".extend", "invalid precision (non-negative int)", MbnP);
       }
 
       //actual separator for Mbn class
       var MbnS = (opt.MbnS === undefined) ? MbnDS : opt.MbnS;
       if (MbnS !== "." && MbnS !== ",") {
-         throw new MbnErr(".extend", "invalid separator", MbnS);
+         throw new MbnErr(".extend", "invalid separator (dot, comma)", MbnS);
       }
 
       //actual truncate for Mbn class
       var MbnT = (opt.MbnT === undefined) ? MbnDT : opt.MbnT;
       if (MbnT !== true && MbnT !== false) {
-         throw new MbnErr(".extend", "invalid truncate", MbnT);
+         throw new MbnErr(".extend", "invalid truncate (bool)", MbnT);
+      }
+
+      //actual extension for Mbn class
+      var MbnE = (opt.MbnE === undefined) ? MbnDE : opt.MbnE;
+      if (MbnE !== true && MbnE !== false) {
+         throw new MbnErr(".extend", "invalid extension (bool)", MbnT);
+      }
+
+      //actual format for Mbn class
+      var MbnF = (opt.MbnF === undefined) ? MbnDF : opt.MbnF;
+      if (MbnF !== true && MbnF !== false) {
+         throw new MbnErr(".extend", "invalid format (bool)", MbnF);
       }
 
       /**
@@ -144,7 +160,7 @@ var Mbn = (function () {
       var wsRx1 = /^\s+|\s+$/g;
       var wsRx2 = /([+=-]?)\s*(.*)/;
       /**
-       * Private function, sets value of a to string value n
+       * Private function, sets value of Mbn a to string value n
        * @param {Mbn} a
        * @param {string} ns
        * @param {*=} v
@@ -155,7 +171,7 @@ var Mbn = (function () {
          var n = np[2];
          if (n0 === "-") {
             a._s = -1;
-         } else if (n0 === "=" && typeof Mbn.calc === "function") {
+         } else if (n0 === "=" && MbnE) {
             a.set(Mbn.calc(n, v));
             return;
          }
@@ -185,7 +201,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Private function, returns string from number, with MbnP + 1 digits
+       * Private function, sets value of Mbn a to number value n
        * @param {Mbn} a
        * @param {number} nn
        */
@@ -214,6 +230,37 @@ var Mbn = (function () {
             nf -= c;
          }
          mbnRoundLast(a);
+      };
+
+      /**
+       * Private function, returns string value from Mbn a
+       * @param {Mbn} a
+       * @param {boolean} f
+       */
+      var mbnToString = function (a, f) {
+         var l = a._d.length - MbnP;
+         var l0;
+         if (MbnT) {
+            l0 = l - 1;
+            for (var i = l; i < a._d.length; i++) {
+               if (a._d[i] !== 0) {
+                  l0 = i;
+               }
+            }
+         } else {
+            l0 = l + MbnP;
+         }
+         var d = a._d.slice(0, l);
+         if (f === true) {
+            for (var i = 3; i < d.length; i += 4) {
+               d.splice(-i, 0, " ");
+            }
+         }
+         var r = ((a._s < 0) ? "-" : "") + d.join("");
+         if (MbnP !== 0 && l0 >= l) {
+            r += MbnS + a._d.slice(l, l0 + 1).join("");
+         }
+         return r;
       };
 
       /**
@@ -255,7 +302,7 @@ var Mbn = (function () {
        * Returns properties of Mbn class
        */
       Mbn.prop = function () {
-         return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: (typeof Mbn.calc === "function")};
+         return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF};
       };
 
       /**
@@ -276,32 +323,15 @@ var Mbn = (function () {
        * Returns string value of Mbn number
        */
       Mbn.prototype.toString = function () {
-         var l = this._d.length - MbnP;
-         var l0;
-         if (MbnT) {
-            l0 = l - 1;
-            for (var i = l; i < this._d.length; i++) {
-               if (this._d[i] !== 0) {
-                  l0 = i;
-               }
-            }
-         } else {
-            l0 = l + MbnP;
-         }
-         var r = ((this._s < 0) ? "-" : "") + this._d.slice(0, l).join("");
-         if (MbnP !== 0 && l0 >= l) {
-            r += MbnS + this._d.slice(l, l0 + 1).join("");
-         }
-         return r;
+         return mbnToString(this, MbnF);
       };
 
       /**
        * Returns string value with thousand grouping
+       * @param {boolean=} f
        */
-      Mbn.prototype.format = function () {
-         var sa = this.toString().replace("-", "").split(MbnS);
-         sa[0] = ("  " + sa[0]).substring((sa[0].length + 2) % 3).replace(/(...)/g, " $1").replace(/^ +/, "");
-         return ((this._s < 0) ? "-" : "") + sa.join(MbnS);
+      Mbn.prototype.format = function (f) {
+         return mbnToString(this, (f === undefined) ? true : f);
       };
 
       /**
@@ -754,8 +784,6 @@ var Mbn = (function () {
          return mbnSetReturn(this, new Mbn(this._s), m);
       };
 
-      //SLIM_EXCLUDE_START
-
       /**
        * Calculates n-th power of number, n must be integer
        * @param {*} nd
@@ -1057,7 +1085,6 @@ var Mbn = (function () {
          }
          return rpn[0];
       };
-      //SLIM_EXCLUDE_END
       return Mbn;
    };
    var Mbn = MbnCr();

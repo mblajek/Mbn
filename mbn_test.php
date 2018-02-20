@@ -20,6 +20,12 @@ class Mbn20u extends Mbn {
 
 }
 
+class Mbn2nef extends Mbn {
+   protected static $MbnE = false;
+   protected static $MbnF = true;
+
+}
+
 function testMbn() {
 
    function runTestMbn($tests) {

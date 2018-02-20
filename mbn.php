@@ -33,13 +33,17 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.26';
+   protected static $MbnV = '1.27';
    //default precision
    protected static $MbnP = 2;
    //default separator
    protected static $MbnS = '.';
    //default truncate
    protected static $MbnT = false;
+   //default truncate
+   protected static $MbnE = true;
+   //default truncate
+   protected static $MbnF = false;
    private $d = [];
    private $s = 1;
 
@@ -121,7 +125,7 @@ class Mbn {
    }
 
    /**
-    * Private function, sets value of a to string value n
+    * Private function, sets value of Mbn to string value n
     * @param {Mbn} a
     * @param {string} ns
     */
@@ -132,7 +136,7 @@ class Mbn {
       $n = $np[2];
       if ($n0 === '-') {
          $this->s = -1;
-      } elseif ($n0 === '=' && method_exists(get_class(), 'calc')) {
+      } elseif ($n0 === '=' && static::$MbnE) {
          $this->set(static::calc($n, $v));
          return;
       }
@@ -165,7 +169,7 @@ class Mbn {
    }
 
    /**
-    * Private function, returns string from number, with MbnP + 1 digits
+    * Private function, sets value of Mbn to number value n
     * @param {number} nn
     */
    private function mbnFromNumber($nn) {
@@ -192,6 +196,36 @@ class Mbn {
          $nf -= $c;
       }
       $this->mbnRoundLast();
+   }
+
+   /**
+    * Private function, returns string value from Mbn a
+    * @param {boolean} f
+    */
+   private function mbnToString($f) {
+      $l = count($this->d) - static::$MbnP;
+      if (static::$MbnT) {
+         $l0 = $l - 1;
+         $cd = count($this->d);
+         for ($i = $l; $i < $cd; $i++) {
+            if ($this->d[$i] !== 0) {
+               $l0 = $i;
+            }
+         }
+      } else {
+         $l0 = $l + static::$MbnP;
+      }
+      $d = array_slice($this->d, 0, $l);
+      if ($f === true) {
+         for ($i = 3; $i < count($d); $i += 4) {
+            array_splice($d, -$i, 0, ' ');
+         }
+      }
+      $r = (($this->s < 0) ? '-' : '') . implode($d, '');
+      if (static::$MbnP !== 0 && $l0 >= $l) {
+         $r .= static::$MbnS . implode(array_slice($this->d, $l, $l0 + 1 - $l), '');
+      }
+      return $r;
    }
 
    /**
@@ -228,7 +262,8 @@ class Mbn {
           'MbnP' => static::$MbnP,
           'MbnS' => static::$MbnS,
           'MbnT' => static::$MbnT,
-          'MbnE' => method_exists(get_class(), 'calc'),
+          'MbnE' => static::$MbnE,
+          'MbnF' => static::$MbnF,
       ];
    }
 
@@ -250,32 +285,15 @@ class Mbn {
     * Returns string value of Mbn number
     */
    protected function toString() {
-      $l = count($this->d) - static::$MbnP;
-      if (static::$MbnT) {
-         $l0 = $l - 1;
-         $cd = count($this->d);
-         for ($i = $l; $i < $cd; $i++) {
-            if ($this->d[$i] !== 0) {
-               $l0 = $i;
-            }
-         }
-      } else {
-         $l0 = $l + static::$MbnP;
-      }
-      $r = (($this->s < 0) ? '-' : '') . implode(array_slice($this->d, 0, $l), '');
-      if (static::$MbnP !== 0 && $l0 >= $l) {
-         $r .= static::$MbnS . implode(array_slice($this->d, $l, $l0 + 1 - $l), '');
-      }
-      return $r;
+      return $this->mbnToString(static::$MbnF);
    }
 
    /**
     * Returns string value with thousand grouping
+    * @param {boolean=} f
     */
-   public function format() {
-      $sa = explode(static::$MbnS, str_replace('-', '', $this->toString()));
-      $sa[0] = trim(preg_replace('/(...)/', ' $1', substr('  ' . $sa[0], (strlen($sa[0]) + 2) % 3)));
-      return (($this->s < 0) ? '-' : '') . implode(static::$MbnS, $sa);
+   public function format($f = true) {
+      return $this->mbnToString($f);
    }
 
    public function __toString() {
@@ -741,7 +759,6 @@ class Mbn {
       return $this->mbnSetReturn(new static($this->s), $m);
    }
 
-//SLIM_EXCLUDE_START
    /**
     * Calculates n-th power of number, n must be integer
     * @param {number} nd
@@ -1053,5 +1070,4 @@ class Mbn {
       return $rpn[0];
    }
 
-//SLIM_EXCLUDE_END
 }

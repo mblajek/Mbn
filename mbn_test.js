@@ -32,6 +32,7 @@ var testMbn = function (displayResp) {
    var Mbn0 = Mbn.extend(0);
    var Mbn3c = Mbn.extend({MbnP: 3, MbnS: ','});
    var Mbn20u = Mbn.extend({MbnP: 20, MbnS: ',', MbnT: true});
+   var Mbn2nef  = Mbn.extend({MbnE: false, MbnF: true});
 
    var xmlhttp = new XMLHttpRequest();
    xmlhttp.onreadystatechange = function () {
