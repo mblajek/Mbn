@@ -396,6 +396,7 @@
       ["(new Mbn2nef('=10*10'))", "Mbn error*"],
       ["(Mbn2nef::calc('10*10'))", "100.00"],
       ["(Mbn2nef::calc('123*456'))", "56 088.00"],
-      ["(Mbn2nef::calc('123*456'))->format(false)", "56088.00"]
+      ["(Mbn2nef::calc('123*456'))->format(false)", "56088.00"],
+      ["(Mbn2nef::calc('123*456'))->toNumber()", "56088"]
    ]
 }

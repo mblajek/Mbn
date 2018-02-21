@@ -19,7 +19,7 @@ var Mbn = (function () {
          var ret = "Mbn" + fn + " error: " + msg;
          if (val !== undefined) {
             val = String(val);
-            ret += ": " + ((val.length > 10) ? (val.slice(0, 8) + '..') : val);
+            ret += ": " + ((val.length > 10) ? (val.slice(0, 8) + "..") : val);
          }
          return ret;
       };
@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.27";
+   var MbnV = "1.28";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -200,6 +200,7 @@ var Mbn = (function () {
          mbnRoundLast(a);
       };
 
+
       /**
        * Private function, sets value of Mbn a to number value n
        * @param {Mbn} a
@@ -235,9 +236,10 @@ var Mbn = (function () {
       /**
        * Private function, returns string value from Mbn a
        * @param {Mbn} a
+       * @param {string} s
        * @param {boolean} f
        */
-      var mbnToString = function (a, f) {
+      var mbnToString = function (a, s, f) {
          var l = a._d.length - MbnP;
          var l0;
          if (MbnT) {
@@ -258,7 +260,7 @@ var Mbn = (function () {
          }
          var r = ((a._s < 0) ? "-" : "") + d.join("");
          if (MbnP !== 0 && l0 >= l) {
-            r += MbnS + a._d.slice(l, l0 + 1).join("");
+            r += s + a._d.slice(l, l0 + 1).join("");
          }
          return r;
       };
@@ -323,7 +325,7 @@ var Mbn = (function () {
        * Returns string value of Mbn number
        */
       Mbn.prototype.toString = function () {
-         return mbnToString(this, MbnF);
+         return mbnToString(this, MbnS, MbnF);
       };
 
       /**
@@ -331,14 +333,14 @@ var Mbn = (function () {
        * @param {boolean=} f
        */
       Mbn.prototype.format = function (f) {
-         return mbnToString(this, (f === undefined) ? true : f);
+         return mbnToString(this, MbnS, (f === undefined) ? true : f);
       };
 
       /**
        * Returns number value of Mbn number
        */
       Mbn.prototype.toNumber = function () {
-         return Number(String(this).replace(",", "."));
+         return Number(mbnToString(this, ".", false));
       };
 
       /**
@@ -434,7 +436,7 @@ var Mbn = (function () {
             var ld = this._d.length - b._d.length;
             var cmp = this.cmp(b) * this._s;
             if (cmp === 0) {
-               r = new Mbn('0');
+               r = new Mbn(0);
             } else {
                if (cmp === -1) {
                   b = this;
@@ -607,7 +609,7 @@ var Mbn = (function () {
             for (var i = 0; i < n; i++) {
                var ai = (new Mbn(ar[i])).mul(mulp);
                if (ai._s === -1) {
-                  throw new MbnErr('.split', 'only non-negative ratio values supported');
+                  throw new MbnErr(".split", "only non-negative ratio values supported");
                }
                arr.push(ai);
                asum.add(ai, true);

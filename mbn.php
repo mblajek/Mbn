@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.27';
+   protected static $MbnV = '1.28';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -200,9 +200,10 @@ class Mbn {
 
    /**
     * Private function, returns string value from Mbn a
+    * @param {string} s
     * @param {boolean} f
     */
-   private function mbnToString($f) {
+   private function mbnToString($s, $f) {
       $l = count($this->d) - static::$MbnP;
       if (static::$MbnT) {
          $l0 = $l - 1;
@@ -223,7 +224,7 @@ class Mbn {
       }
       $r = (($this->s < 0) ? '-' : '') . implode($d, '');
       if (static::$MbnP !== 0 && $l0 >= $l) {
-         $r .= static::$MbnS . implode(array_slice($this->d, $l, $l0 + 1 - $l), '');
+         $r .= $s . implode(array_slice($this->d, $l, $l0 + 1 - $l), '');
       }
       return $r;
    }
@@ -285,7 +286,7 @@ class Mbn {
     * Returns string value of Mbn number
     */
    protected function toString() {
-      return $this->mbnToString(static::$MbnF);
+      return $this->mbnToString(static::$MbnS, static::$MbnF);
    }
 
    /**
@@ -293,7 +294,7 @@ class Mbn {
     * @param {boolean=} f
     */
    public function format($f = true) {
-      return $this->mbnToString($f);
+      return $this->mbnToString(static::$MbnS, $f);
    }
 
    public function __toString() {
@@ -304,7 +305,7 @@ class Mbn {
     * Returns number value of Mbn number
     */
    public function toNumber() {
-      $v = str_replace(',', '.', $this->toString());
+      $v = $this->mbnToString('.', false);
       return ($this->isInt()) ? intval($v) : floatval($v);
    }
 
@@ -404,7 +405,7 @@ class Mbn {
          $ld = count($this->d) - count($b->d);
          $cmp = $this->cmp($b) * $this->s;
          if ($cmp === 0) {
-            $r = new static('0');
+            $r = new static(0);
          } else {
             if ($cmp === -1) {
                $b = $this;
@@ -823,10 +824,10 @@ class Mbn {
     */
    public static function reduce($fn, $arr) {
       if (!isset(static::$fnReduce[$fn])) {
-         throw new MbnErr(".reduce", "invalid function name", $fn);
+         throw new MbnErr('.reduce', 'invalid function name', $fn);
       }
       if (!is_array($arr)) {
-         throw new MbnErr(".reduce", "argument is not array", $arr);
+         throw new MbnErr('.reduce', 'argument is not array', $arr);
       }
       $mode = static::$fnReduce[$fn];
       if ($mode === 2) {
@@ -853,8 +854,8 @@ class Mbn {
    }
 
    protected static $MbnConst = [
-       '' => ['PI' => "3.1415926535897932384626433832795028841972",
-           'E' => "2.7182818284590452353602874713526624977573",]
+       '' => ['PI' => '3.1415926535897932384626433832795028841972',
+           'E' => '2.7182818284590452353602874713526624977573',]
    ];
 
    //$cnRx = ;
@@ -870,7 +871,7 @@ class Mbn {
          return (isset($mc[$mx][$v]) || isset($mc[''][$v]));
       }
       if (preg_match('/^[A-Z]\\w*$/', $n) !== 1) {
-         throw new MbnErr(".def", "incorrect name", $n);
+         throw new MbnErr('.def', 'incorrect name', $n);
       }
       if ($v === null) {
          if (!isset($mc[$mx])) {
@@ -882,13 +883,13 @@ class Mbn {
             } elseif ($n === 'MbnP') {
                $mc[$mx][$n] = new static(static::$MbnP);
             } else {
-               throw new MbnErr(".def", "undefined constant", $n);
+               throw new MbnErr('.def', 'undefined constant', $n);
             }
          }
          return new static($mc[$mx][$n]);
       } else {
          if (isset($mc[$mx][$n]) || isset($mc[''][$n])) {
-            throw new MbnErr(".def", "constant allready set", $n);
+            throw new MbnErr('.def', 'constant allready set', $n);
          } else {
             $v = new static($v);
             $mc[$mx][$n] = $v;
@@ -906,16 +907,16 @@ class Mbn {
        'po' => ['po']
    ];
    protected static $endBop = ['bop', 'pc'];
-   protected static $uopVal = ['num', "name", "uop", "po"];
+   protected static $uopVal = ['num', 'name', 'uop', 'po'];
    protected static $bops = [
-       "|" => [1, true, 'max'],
-       "&" => [2, true, 'min'],
-       "+" => [3, true, 'add'],
-       "-" => [3, true, 'sub'],
-       "*" => [4, true, 'mul'],
-       "#" => [4, true, 'mod'],
-       "/" => [4, true, 'div'],
-       "^" => [5, false, 'pow']
+       '|' => [1, true, 'max'],
+       '&' => [2, true, 'min'],
+       '+' => [3, true, 'add'],
+       '-' => [3, true, 'sub'],
+       '*' => [4, true, 'mul'],
+       '#' => [4, true, 'mod'],
+       '/' => [4, true, 'div'],
+       '^' => [5, false, 'pow']
    ];
    protected static $funPrx = 4;
    protected static $rxs = [
@@ -959,17 +960,17 @@ class Mbn {
             }
          }
          if (empty($mtch)) {
-            if ($larr[0] === "bop") {
-               $tok = "*";
-               $t = "bop";
+            if ($larr[0] === 'bop') {
+               $tok = '*';
+               $t = 'bop';
             } else {
-               throw new MbnErr(".calc", "unexpected", $expr);
+               throw new MbnErr('.calc', 'unexpected', $expr);
             }
          } else {
             $tok = $mtch[1];
             $expr = substr($expr, strlen($mtch[0]));
          }
-         if ($t !== "uop" && $neg) {
+         if ($t !== 'uop' && $neg) {
             $rpno[] = &$invaUop;
             $neg = false;
          }
@@ -979,13 +980,13 @@ class Mbn {
                break;
             case 'name':
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
-                  $t = "fn";
+                  $t = 'fn';
                   $rpno [] = [static::$funPrx, true, $tok];
                } elseif (isset($vnames[$tok])) {
-                  $t = "vr";
+                  $t = 'vr';
                   $rpns [] = new static($vnames[$tok]);
                } elseif (static::def(null, $tok)) {
-                  $t = "vr";
+                  $t = 'vr';
                   $rpns [] = static::def($tok);
                } else {
                   throw new MbnErr('.calc', 'undefined', $tok);
@@ -1042,7 +1043,7 @@ class Mbn {
       }
       while (count($rpno) !== 0) {
          $v = array_pop($rpno);
-         if ($v !== "(") {
+         if ($v !== '(') {
             $rpns[] = $v[2];
          } else {
             throw new MbnErr('.calc', 'unexpected', '(');
