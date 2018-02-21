@@ -22,3 +22,7 @@ project page: https://mirkl.es/n/lib - library files avalaible there
       legacy_js.php - runs JS tests in ES3 enviorment
 
 Code is optimized for speed and size; not for readability.
+
+TODO:
+reduce with vector operations
+describe MbnF and MbnE in specification
