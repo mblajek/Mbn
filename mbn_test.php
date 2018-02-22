@@ -39,9 +39,9 @@ function testMbn() {
             eval($exp);
             if ($o === true) {
                $o = 'true';
-            } else if ($o === false) {
+            } elseif ($o === false) {
                $o = 'false';
-            } else if (is_array($o)) {
+            } elseif (is_array($o)) {
                $o = implode(',', $o);
             }
             $evv = strval($o);
@@ -76,12 +76,12 @@ function testMbn() {
    $tests = array_merge($testsAll->both, $testsAll->php);
    foreach ($tests as &$test) {
       $tst = $test[0];
-      while (($jsonStart = strpos($tst, '{')) !== false) {
-         $jsonLen = strpos($tst, '}', $jsonStart) - $jsonStart + 1;
-         $json =  substr($tst, $jsonStart, $jsonLen);
-         $jsonCor = preg_replace('/[a-z]+/i', '\'$0\'',$json);
-         $jsonArr = str_replace(explode('|', '{|}|:'), explode('|', '[|]|=>'), $jsonCor);
-         $tst = str_replace($json,$jsonArr , $tst);
+      $jsonA = [];
+      while (preg_match('/{[^}]*}/', $tst, $jsonA) === 1) {
+         $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[0]);
+         $jsonArr = var_export(json_decode($json, true), true);
+         $tst = str_replace($jsonA[0],$jsonArr , $tst);
+         break;
       }
       $expArr = explode('; ', $tst);
       $expArr[count($expArr) - 1] = '$o = ' . $expArr[count($expArr) - 1] . ';';

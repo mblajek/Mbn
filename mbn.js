@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.28";
+   var MbnV = "1.29";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -571,7 +571,7 @@ var Mbn = (function () {
       Mbn.prototype.mod = function (b, m) {
          var ba = (b instanceof Mbn) ? b.abs() : (new Mbn(b)).abs();
          var r = this.sub(this.div(ba).intp().mul(ba));
-         if ((r._s + this._s) === 0) {
+         if ((r._s * this._s) === -1) {
             r = ba.sub(r.abs());
             r._s = this._s;
          }
@@ -616,7 +616,7 @@ var Mbn = (function () {
             }
          }
          if (arr.length === 0) {
-            return [];
+            throw new MbnErr(".split", "cannot split to zero parts");
          }
          var a = new Mbn(this);
          var brr = [];
@@ -839,14 +839,15 @@ var Mbn = (function () {
       };
 
       var fnReduce = {set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1,
-         sqrt: 1, round: 1, sgn: 1, intp: 1, add: 2, mul: 2, min: 2, max: 2};
+         sqrt: 1, round: 1, sgn: 1, intp: 1, add: 2, mul: 2, min: 2, max: 2, pow: 2};
       /**
        * run function on each element, returns single value for 2 argument function,
        * and array, for 1 argument
        * @param {string} fn
        * @param {Array} arr
+       * @param {*=} b
        */
-      Mbn.reduce = function (fn, arr) {
+      Mbn.reduce = function (fn, arr, b) {
          if (!fnReduce.hasOwnProperty(fn)) {
             throw new MbnErr(".reduce", "invalid function name", fn);
          }
@@ -856,15 +857,26 @@ var Mbn = (function () {
          var r;
          var arrl = arr.length;
          var mode = fnReduce[fn];
-         if (mode === 2) {
+         var bmode = ((b !== undefined) ? ((b instanceof Array) ? 2 : 1) : 0);
+         if (mode !== 2 && bmode !== 0) {
+            throw new MbnErr(".reduce", "two agruments can be used with two-argument functions");
+         }
+         if (mode === 2 && bmode === 0) {
             r = new Mbn((arrl > 0) ? arr[0] : 0);
             for (var i = 1; i < arrl; i++) {
                r[fn](arr[i], true);
             }
          } else {
             r = [];
+            if (bmode === 2 && arrl !== b.length) {
+               throw new MbnErr(".reduce", "arrays have different length", b);
+            }
+            var bv = (bmode === 1) ? (new Mbn(b)) : null;
             for (var i = 0; i < arrl; i++) {
                var e = new Mbn(arr[i]);
+               if (bmode !== 0) {
+                  e[fn]((bmode === 2) ? (new Mbn(b[i])) : bv, true);
+               }
                r.push((mode === 1) ? e[fn](true) : e);
             }
          }

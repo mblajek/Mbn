@@ -19,7 +19,7 @@ class MbnErr extends Exception {
    public function __construct($fn, $msg, $val = null) {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
       if ($val !== null) {
-         $val = (string) $val;
+         $val = is_array($val) ? implode(",", $val) : strval($val);
          $ret .= ': ' . ((strlen($val) > 10) ? (substr($val, 0, 8) . '..') : $val);
       }
       parent::__construct($ret);
@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.28';
+   protected static $MbnV = '1.29';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -258,14 +258,8 @@ class Mbn {
     * Returns properties of Mbn class
     */
    public static function prop() {
-      return [
-          'MbnV' => static::$MbnV,
-          'MbnP' => static::$MbnP,
-          'MbnS' => static::$MbnS,
-          'MbnT' => static::$MbnT,
-          'MbnE' => static::$MbnE,
-          'MbnF' => static::$MbnF,
-      ];
+      return ['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS,
+          'MbnT' => static::$MbnT, 'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF];
    }
 
    /**
@@ -542,7 +536,7 @@ class Mbn {
    public function mod($b, $m = false) {
       $ba = ($b instanceof static) ? $b->abs() : (new static($b))->abs();
       $r = $this->sub($this->div($ba)->intp()->mul($ba));
-      if (($r->s + $this->s) === 0) {
+      if (($r->s * $this->s) === -1) {
          $r = $ba->sub($r->abs());
          $r->s = $this->s;
       }
@@ -583,8 +577,7 @@ class Mbn {
          unset($v);
       }
       if ($n === 0) {
-         return [
-         ];
+         throw new MbnErr('.split', 'cannot split to zero parts');
       }
       $a = new static($this);
       $brr = [];
@@ -654,11 +647,10 @@ class Mbn {
       return $r;
    }
 
-   /*
+   /**
     * Returns absolute value from number
     * @param {boolean=} m Modify original variable
     */
-
    public function abs($m = false) {
       $r = ($m === true) ? $this : new static($this);
       $r->s *= $r->s;
@@ -812,17 +804,17 @@ class Mbn {
       }
       return $this->mbnSetReturn($r, $m);
    }
-
    protected static $fnReduce = ['set' => 0, 'abs' => 1, 'inva' => 1, 'invm' => 1, 'ceil' => 1, 'floor' => 1,
-       'sqrt' => 1, 'round' => 1, 'sgn' => 1, 'intp' => 1, 'add' => 2, 'mul' => 2, 'min' => 2, 'max' => 2];
+       'sqrt' => 1, 'round' => 1, 'sgn' => 1, 'intp' => 1, 'add' => 2, 'mul' => 2, 'min' => 2, 'max' => 2, 'pow' => 2];
 
    /**
     * run function on each element, returns single value for 2 argument function,
     * and array, for 1 argument
     * @param {string} fn
     * @param {Array} arr
+    * @param {*=} b
     */
-   public static function reduce($fn, $arr) {
+   public static function reduce($fn, $arr, $b = null) {
       if (!isset(static::$fnReduce[$fn])) {
          throw new MbnErr('.reduce', 'invalid function name', $fn);
       }
@@ -830,7 +822,11 @@ class Mbn {
          throw new MbnErr('.reduce', 'argument is not array', $arr);
       }
       $mode = static::$fnReduce[$fn];
-      if ($mode === 2) {
+      $bmode = (($b !== null) ? (is_array($b) ? 2 : 1) : 0);
+      if ($mode !== 2 && $bmode !== 0) {
+         throw new MbnErr('.reduce', 'two agruments can be used with two-argument functions');
+      }
+      if ($mode === 2 && $bmode === 0) {
          $r = new static(0);
          $fst = true;
          foreach ($arr as $k => &$v) {
@@ -844,18 +840,23 @@ class Mbn {
          unset($v);
       } else {
          $r = [];
+         if ($bmode === 2 && array_keys($arr) !== array_keys($b)) {
+            throw new MbnErr('.reduce', 'arrays have different length', $b);
+         }
+         $bv = ($bmode === 1) ? (new static($b)) : null;
          foreach ($arr as $k => &$v) {
             $e = new static($v);
+            if ($bmode !== 0) {
+               $e->{$fn}(($bmode === 2) ? (new static($b[$k])) : $bv, true);
+            }
             $r[$k] = ($mode === 1) ? $e->{$fn}(true) : $e;
          }
          unset($v);
       }
       return $r;
    }
-
    protected static $MbnConst = [
-       '' => ['PI' => '3.1415926535897932384626433832795028841972',
-           'E' => '2.7182818284590452353602874713526624977573',]
+       '' => ['PI' => '3.1415926535897932384626433832795028841972', 'E' => '2.7182818284590452353602874713526624977573']
    ];
 
    //$cnRx = ;
@@ -897,7 +898,6 @@ class Mbn {
          }
       }
    }
-
    protected static $fnEval = ['abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true,
        'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp'];
    protected static $states = [
@@ -940,8 +940,9 @@ class Mbn {
       $vnames = [];
       if ($vars !== null) {
          foreach ($vars as $k => &$v) {
-            $vnames[$k] = new static($vars[$k]);
+            $vnames[$k] = new static($v);
          }
+         unset($v);
       }
       $larr = &static::$states['uopVal'];
       $larl = count($larr);
