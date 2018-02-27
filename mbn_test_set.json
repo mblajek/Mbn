@@ -413,6 +413,8 @@
       ["Mbn::reduce('add', [5, 7, 10], [1.1, 1.2, 1.3])", "6.10,8.20,11.30"],
       ["Mbn::reduce('add', [5, 7, 10], [1.1, 1.2])", "Mbn.reduce error*"],
       ["Mbn::reduce('add', [1.1, 1.2], [5, 7, 10])", "Mbn.reduce error*"],
+      ["(new Mbn('55.555x'))", "Mbn error*"],
+      ["new Mbn('=50+10%')", "50.10"],
       ["0", "0"]
    ]
 }

@@ -33,7 +33,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.29';
+   protected static $MbnV = '1.30';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -155,10 +155,13 @@ class Mbn {
       }
       $c = '';
       $nl = strlen($n);
-      for ($i = 0; $i <= $ln + static::$MbnP; $i++) {
+      $l = max($ln + static::$MbnP, $nl);
+      for ($i = 0; $i <= $l; $i++) {
          $c = ($i < $nl) ? (ord($n[$i]) - 48) : 0;
          if ($c >= 0 && $c <= 9) {
-            $this->d[] = $c;
+            if ($i <= $ln + static::$MbnP) {
+               $this->d[] = $c;
+            }
          } elseif ($c === -16 && ($i + 1) < $ln) {
             continue;
          } else {
@@ -804,6 +807,7 @@ class Mbn {
       }
       return $this->mbnSetReturn($r, $m);
    }
+
    protected static $fnReduce = ['set' => 0, 'abs' => 1, 'inva' => 1, 'invm' => 1, 'ceil' => 1, 'floor' => 1,
        'sqrt' => 1, 'round' => 1, 'sgn' => 1, 'intp' => 1, 'add' => 2, 'mul' => 2, 'min' => 2, 'max' => 2, 'pow' => 2];
 
@@ -855,6 +859,7 @@ class Mbn {
       }
       return $r;
    }
+
    protected static $MbnConst = [
        '' => ['PI' => '3.1415926535897932384626433832795028841972', 'E' => '2.7182818284590452353602874713526624977573']
    ];
@@ -898,6 +903,7 @@ class Mbn {
          }
       }
    }
+
    protected static $fnEval = ['abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true,
        'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp'];
    protected static $states = [

@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.29";
+   var MbnV = "1.30";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -187,10 +187,13 @@ var Mbn = (function () {
          }
          var c;
          var nl = n.length;
-         for (var i = 0; i <= ln + MbnP; i++) {
+         var l = Math.max(ln + MbnP, nl);
+         for (var i = 0; i <= l; i++) {
             c = (i < nl) ? (n.charCodeAt(i) - 48) : 0;
             if (c >= 0 && c <= 9) {
-               a._d.push(c);
+               if (i <= ln + MbnP) {
+                  a._d.push(c);
+               }
             } else if (c === -16 && (i + 1) < ln) {
                continue;
             } else {
