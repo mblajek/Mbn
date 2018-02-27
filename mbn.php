@@ -3,7 +3,7 @@
 /**
  * MultiByteNumber
  * Mikołaj Błajek
- * mblajek_mbn(at)mailplus.pl
+ * https://github.com/mblajek/Mbn/
  */
 
 /**
