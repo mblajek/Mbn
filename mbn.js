@@ -19,7 +19,7 @@ var Mbn = (function () {
          var ret = "Mbn" + fn + " error: " + msg;
          if (val !== undefined) {
             val = String(val);
-            ret += ": " + ((val.length > 10) ? (val.slice(0, 8) + "..") : val);
+            ret += ": " + ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
          }
          return ret;
       };
@@ -27,7 +27,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.30";
+   var MbnV = "1.31";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -164,7 +164,7 @@ var Mbn = (function () {
       var wsRx1 = /^\s+|\s+$/g;
       var wsRx2 = /([+=-]?)\s*(.*)/;
       /**
-       * Private function, sets value of Mbn a to string value ns
+       * Private function, sets value from string
        * @param {Mbn} a
        * @param {string} ns
        * @param {*=} v
@@ -209,7 +209,7 @@ var Mbn = (function () {
 
 
       /**
-       * Private function, sets value of Mbn a to number value n
+       * Private function, sets value from number
        * @param {Mbn} a
        * @param {number} nn
        */
@@ -241,7 +241,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Private function, returns string value from Mbn a
+       * Private function, returns string value
        * @param {Mbn} a
        * @param {string} s Separator
        * @param {boolean} f Format thousands
@@ -315,7 +315,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Sets value to b
+       * Sets value from b
        * @param {*} b
        */
       Mbn.prototype.set = function (b) {
@@ -690,7 +690,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Returns modulus of value
+       * Returns absolute value
        * @param {boolean=} m Modify original variable, default false
        */
       Mbn.prototype.abs = function (m) {
@@ -736,7 +736,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Returns if value equals to b
+       * Returns if value equals b
        * @param {*} b
        * @param {boolean=} d Maximum difference treated as equality, default 0
        */
@@ -763,7 +763,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Returns square root of number
+       * Returns square root of value
        * @param {boolean=} m Modify original variable, default false
        */
       Mbn.prototype.sqrt = function (m) {
@@ -794,19 +794,19 @@ var Mbn = (function () {
       };
 
       /**
-       * Returns n-th power of number, n must be integer
-       * @param {*} nd
+       * Returns value to the power of b, b must be integer
+       * @param {*} b
        * @param {boolean=} m Modify original variable, default false
        */
-      Mbn.prototype.pow = function (nd, m) {
-         var n = new Mbn(nd);
+      Mbn.prototype.pow = function (b, m) {
+         var n = new Mbn(b);
          if (!n.isInt()) {
             throw new MbnErr(".pow", "only integer exponents supported", n);
          }
          var ns = n._s;
          n._s *= n._s;
+         var ni = n.toNumber();
          var mbn1 = new Mbn(1);
-         var mbn2 = new Mbn(2);
          var rx = new Mbn(this);
          if (ns === -1 && rx.abs().cmp(mbn1) === -1) {
             rx.invm(true);
@@ -820,14 +820,13 @@ var Mbn = (function () {
             mbnCarry(rx);
             dd++;
          }
-         while (n._s === 1) {
-            if (n._d[n._d.length - MbnP - 1] % 2) {
+         while (true) {
+            if (ni % 2 === 1) {
                r.mul(rx, true);
-               n.sub(mbn1, true);
                cdd += dd;
             }
-            n.div(mbn2, true).intp(true);
-            if (n._s !== 1) {
+            ni = Math.floor(ni / 2);
+            if (ni === 0) {
                break;
             }
             rx.mul(rx, true);

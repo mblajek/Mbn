@@ -419,7 +419,7 @@ if (file_exists('release/.LASTHASH')) {
       we(['//min and max use & and | symbols, and therefore work like logical operators or/and on 0/1 values', 'Mbn.calc("(1 | 0) & 0");']);
 
       w();
-      w(['//operator priorities high to low (in partenthesis with the same priority): ^, (*, /, #), (+, -), &, |'], "mono");
+      w(['//operator priorities high to low (in partenthesis with the same priority): ^, (*, /, #), (+, -), &amp;, |'], "mono");
 
       w();
       we(['//single argument functions abs, ceil, floor, round, sqrt, sgn, int (=intp) are accesible', 'Mbn.calc("((sqrt(5) + 1) / 2)^2");']);
