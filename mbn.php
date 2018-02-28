@@ -125,9 +125,9 @@ class Mbn {
    }
 
    /**
-    * Private function, sets value of Mbn to string value n
-    * @param {Mbn} a
-    * @param {string} ns
+    * Private function, sets value of Mbn to string value ns,
+    * @param {string} $ns
+    * @param {string} $v
     */
    private function fromString($ns, $v) {
       $np = [];
