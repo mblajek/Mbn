@@ -2,3 +2,6 @@ RewriteEngine On
 RewriteRule ^$ /n/calc [R]
 RewriteRule ^lib(\/(.*))?$ index.php?gf=$2
 RewriteRule ^calc$ calc.php
+
+Redirect /n/mbn.js /n/lib/mbn.js
+Redirect /n/mbn.php /n/lib/mbn.php
