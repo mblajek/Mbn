@@ -140,12 +140,12 @@ function releaseMbn() {
    $licenseJs = str_replace('{V}', $versionJs, $license);
    $licensePhp = '<?php ' . str_replace('{V}', $versionPhp, $license);
 
-   file_put_contents('release/mbn.php', preg_replace('/^\<\?php\W+/i', $licensePhp, $mbn_php));
+   file_put_contents('release/mbn.php', preg_replace('/^\<\?php\s+/i', $licensePhp, $mbn_php));
    $mbn_min_php = minifyPHP('release/mbn.php');
-   file_put_contents('release/mbn.min.php', preg_replace('/^\<\?php\W+/i', $licensePhp, $mbn_min_php));
+   file_put_contents('release/mbn.min.php', preg_replace('/^\<\?php\s+/i', $licensePhp, $mbn_min_php));
 
-   file_put_contents('release/mbn.js', preg_replace('/^\W+/i', $licenseJs, $mbn_js));
-   file_put_contents('release/mbn.min.js', preg_replace('/^\W+/i', $licenseJs, $mbn_min_js));
+   file_put_contents('release/mbn.js', preg_replace('/^\s+/i', $licenseJs, $mbn_js));
+   file_put_contents('release/mbn.min.js', preg_replace('/^\s+/i', $licenseJs, $mbn_min_js));
 
    file_put_contents('release/.LASTHASH', $newHash);
 
