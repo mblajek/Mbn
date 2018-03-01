@@ -161,7 +161,7 @@ if (file_exists('release/.LASTHASH')) {
 
       w("About", "title2");
       w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations. See <a href='calc'>calc examle</a>.");
-      w("Mbn is distributed under the <a href='https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'>MIT License</a>, see <a href='https://github.com/mblajek/Mbn'>Github page</a>");
+      w("Mbn is distributed under the <a href='https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'>MIT License</a>, see <a href='https://github.com/mblajek/Mbn'>Github page</a>.");
       w("Comatibitity: PHP 5.4+, JS ES3+ (IE6+)");
 
       w('Tests and benchmark<span id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>', "title2");

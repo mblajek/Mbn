@@ -1,8 +1,3 @@
-/**
- * MultiByteNumber
- * Mikołaj Błajek
- * https://github.com/mblajek/Mbn/
- */
 
 "use strict";
 var Mbn = (function () {
