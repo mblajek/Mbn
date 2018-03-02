@@ -27,7 +27,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of MultiByteNumber library
-   protected static $MbnV = '1.31';
+   protected static $MbnV = '1.32';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -809,15 +809,21 @@ class Mbn {
     * array of products for 2 argument function and when b is same size array or single value
     * [arr[0].fn(b[0]), arr[1].fn(b[1]), ..] or [arr[0].fn(b), arr[1].fn(b), ..]
     * @param {string} $fn
-    * @param {array} $arr
+    * @param {*} $arr
     * @param {*=} $b
     */
    public static function reduce($fn, $arr, $b = null) {
+      $inv = false;
       if (!isset(static::$fnReduce[$fn])) {
          throw new MbnErr('.reduce', 'invalid function name', $fn);
       }
       if (!is_array($arr)) {
-         throw new MbnErr('.reduce', 'argument is not array', $arr);
+         if (!is_array($b)) {
+            throw new MbnErr('.reduce', 'argument is not array', $arr);
+         }
+         $inv = $b;
+         $b = $arr;
+         $arr = $inv;
       }
       $mode = static::$fnReduce[$fn];
       $bmode = (($b !== null) ? (is_array($b) ? 2 : 1) : 0);
@@ -845,7 +851,8 @@ class Mbn {
          foreach ($arr as $k => &$v) {
             $e = new static($v);
             if ($bmode !== 0) {
-               $e->{$fn}(($bmode === 2) ? (new static($b[$k])) : $bv, true);
+               $bi = (($bmode === 2) ? (new static($b[$k])) : $bv);
+               $e->set(($inv === false) ? $e->{$fn}($bi) : $bi->{$fn}($e));
             }
             $r[$k] = ($mode === 1) ? $e->{$fn}(true) : $e;
          }

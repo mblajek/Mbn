@@ -22,7 +22,7 @@ var Mbn = (function () {
    };
 
    //version of MultiByteNumber library
-   var MbnV = "1.31";
+   var MbnV = "1.32";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -848,15 +848,21 @@ var Mbn = (function () {
        * array of products for 2 argument function and when b is same size array or single value
        * [arr[0].fn(b[0]), arr[1].fn(b[1]), ..] or [arr[0].fn(b), arr[1].fn(b), ..]
        * @param {string} fn
-       * @param {Array} arr
+       * @param {*} arr
        * @param {*=} b
        */
       Mbn.reduce = function (fn, arr, b) {
+         var inv = false;
          if (!fnReduce.hasOwnProperty(fn)) {
             throw new MbnErr(".reduce", "invalid function name", fn);
          }
          if (!(arr instanceof Array)) {
-            throw new MbnErr(".reduce", "argument is not array", arr);
+            if (!(b instanceof Array)) {
+               throw new MbnErr(".reduce", "argument is not array", arr);
+            }
+            inv = b;
+            b = arr;
+            arr = inv;
          }
          var r;
          var arrl = arr.length;
@@ -879,7 +885,8 @@ var Mbn = (function () {
             for (var i = 0; i < arrl; i++) {
                var e = new Mbn(arr[i]);
                if (bmode !== 0) {
-                  e[fn]((bmode === 2) ? (new Mbn(b[i])) : bv, true);
+                  var bi = ((bmode === 2) ? (new Mbn(b[i])) : bv);
+                  e.set((inv === false) ? e[fn](bi) : bi[fn](e));
                }
                r.push((mode === 1) ? e[fn](true) : e);
             }
