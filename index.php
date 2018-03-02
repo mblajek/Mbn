@@ -45,7 +45,7 @@ if (file_exists('release/.LASTHASH')) {
    <meta charset="UTF-8">
    <link rel="icon" href="lib/icon" type="image/bmp" />
 </head><body>
-   <script src="mbn.js"></script>
+   <script><?php readfile('mbn.js') ?></script>
 
    <style>
       div{
