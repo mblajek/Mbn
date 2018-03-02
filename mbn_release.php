@@ -131,7 +131,7 @@ function releaseMbn() {
    }
 
    require_once 'mbn.php';
-   $license = '/* MultiByteNumber v{V} | Copyright (c) 2016-' . date('Y')
+   $license = '/* Mbn v{V} | Copyright (c) 2016-' . date('Y')
            . ' Mikołaj Błajek | https://github.com/mblajek/Mbn/blob/master/LICENSE.txt */' . PHP_EOL;
 
    $versionJs = getVersion($mbn_js);

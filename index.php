@@ -157,7 +157,7 @@ if (file_exists('release/.LASTHASH')) {
 
       var modify = false;
 
-      w("Mbn - Multi-Byte Number Librabry", "title1");
+      w("Mbn (Multi-byte number) Librabry", "title1");
 
       w("About", "title2");
       w("Library for PHP and JS to do calculations with any precission and correct (half-up) approximations. See <a href='calc'>calc examle</a>.");
@@ -212,10 +212,10 @@ if (file_exists('release/.LASTHASH')) {
       w(['class Mbn0 extends Mbn {', '  protected static $MbnP = 0;', '}'], "mono");
 
       w();
-      w(['class Mbn4c extends Mbn{', '  protected static $MbnP = 4;', "  protected static $MbnS = ',';", '}'], "mono");
+      w(['class Mbn4c extends Mbn {', '  protected static $MbnP = 4;', "  protected static $MbnS = ',';", '}'], "mono");
 
       w();
-      w(['class Mbn5t extends Mbn{', '  protected static $MbnP = 5;', "  protected static $MbnT = true;", '}'], "mono");
+      w(['class Mbn5t extends Mbn {', '  protected static $MbnP = 5;', "  protected static $MbnT = true;", '}'], "mono");
 
       w("Constructor calls", "title2");
 

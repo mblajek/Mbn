@@ -1,4 +1,4 @@
-MultiByteNumber
+Mbn (Multi-byte number) Librabry
 Library for PHP and JS to do calculations with any precission and correct (half-up) approximations
 
 Author: Mikołaj Błajek

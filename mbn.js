@@ -21,8 +21,8 @@ var Mbn = (function () {
       this.message = String(this);
    };
 
-   //version of MultiByteNumber library
-   var MbnV = "1.32";
+   //version of Mbn library
+   var MbnV = "1.33";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -292,6 +292,8 @@ var Mbn = (function () {
                if (n instanceof Mbn) {
                   this.set(n);
                   return;
+               } else if (n instanceof Array) {
+                  n = "[" + n + "]";
                }
                n = (n !== null) ? n.toString() : "0";
             case "string":
@@ -969,14 +971,10 @@ var Mbn = (function () {
        */
       Mbn.calc = function (exp, vars) {
          var expr = exp.replace(wsRx3, "");
-         var vnames = {};
-         if (vars !== undefined) {
-            for (var i in vars) {
-               if (vars.hasOwnProperty(i)) {
-                  vnames[i] = new Mbn(vars[i]);
-               }
-            }
+         if (vars === undefined) {
+            vars = {};
          }
+         var vnames = {};
          var larr = uopVal;
          var larl = larr.length;
          var lare = false;
@@ -1017,8 +1015,11 @@ var Mbn = (function () {
                   if (fnEval.hasOwnProperty(tok) && fnEval[tok] !== false) {
                      t = "fn";
                      rpno.push([funPrx, true, tok]);
-                  } else if (vnames.hasOwnProperty(tok)) {
+                  } else if (vars.hasOwnProperty(tok)) {
                      t = "vr";
+                     if (!vnames.hasOwnProperty(tok)) {
+                        vnames[tok] = new Mbn(vars[tok]);
+                     }
                      rpns.push(new Mbn(vnames[tok]));
                   } else if (Mbn.def(null, tok)) {
                      t = "vr";

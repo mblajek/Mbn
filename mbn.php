@@ -13,7 +13,7 @@ class MbnErr extends Exception {
    public function __construct($fn, $msg, $val = null) {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
       if ($val !== null) {
-         $val = is_array($val) ? implode(",", $val) : strval($val);
+         $val = is_array($val) ? ('[' . implode(",", $val) . ']') : strval($val);
          $ret .= ': ' . ((strlen($val) > 20) ? (substr($val, 0, 18) . '..') : $val);
       }
       parent::__construct($ret);
@@ -26,8 +26,8 @@ class MbnErr extends Exception {
  */
 class Mbn {
 
-   //version of MultiByteNumber library
-   protected static $MbnV = '1.32';
+   //version of Mbn library
+   protected static $MbnV = '1.33';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -233,14 +233,12 @@ class Mbn {
    public function __construct($n = 0, $v = null) {
       if (is_float($n) || is_int($n)) {
          $this->mbnFromNumber($n);
-      } elseif (is_string($n)) {
-         $this->fromString($n, $v);
-      } elseif (is_object($n)) {
-         if (!($n instanceof static)) {
-            $this->fromString(strval($n), $v);
-         } else {
-            $this->set($n->toString());
+      } elseif (is_object($n) || is_string($n)) {
+         if ($n instanceof static) {
+            $this->set($n);
+            return;
          }
+         $this->fromString($n, $v);
       } elseif (is_bool($n) || is_null($n)) {
          $n = $this->mbnFromNumber(intval($n));
       } else {
@@ -942,15 +940,9 @@ class Mbn {
     * @param {string} $exp Evaluation formula
     * @param {array=} $vars Object with vars for evaluation
     */
-   public static function calc($exp, $vars = null) {
+   public static function calc($exp, $vars = []) {
       $expr = preg_replace('/^\s+/', '', $exp);
       $vnames = [];
-      if ($vars !== null) {
-         foreach ($vars as $k => &$v) {
-            $vnames[$k] = new static($v);
-         }
-         unset($v);
-      }
       $larr = &static::$states['uopVal'];
       $larl = count($larr);
       $lare = false;
@@ -990,8 +982,11 @@ class Mbn {
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
                   $t = 'fn';
                   $rpno [] = [static::$funPrx, true, $tok];
-               } elseif (isset($vnames[$tok])) {
+               } elseif (isset($vars[$tok]) || array_key_exists($tok, $vars)) {
                   $t = 'vr';
+                  if (!isset($vnames[$tok])) {
+                     $vnames[$tok] = new static($vars[$tok]);
+                  }
                   $rpns [] = new static($vnames[$tok]);
                } elseif (static::def(null, $tok)) {
                   $t = 'vr';
