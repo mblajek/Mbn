@@ -22,7 +22,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.33";
+   var MbnV = "1.34";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -899,7 +899,7 @@ var Mbn = (function () {
       var MbnConst = {
          PI: "3.1415926535897932384626433832795028841972",
          E: "2.7182818284590452353602874713526624977573",
-         MbnP: MbnP
+         eps: "=10^-mbnP"
       };
 
       var cnRx = /^[A-Z]\w*$/;
@@ -912,14 +912,11 @@ var Mbn = (function () {
          if (n === null) {
             return MbnConst.hasOwnProperty(v);
          }
-         if (!cnRx.test(n)) {
-            throw new MbnErr(".def", "incorrect name", n);
-         }
          if (v === undefined) {
             if (MbnConst.hasOwnProperty(n)) {
                v = MbnConst[n];
                if (!(v instanceof Mbn)) {
-                  v = new Mbn(v);
+                  v = new Mbn(v, {mbnP: MbnP});
                   MbnConst[n] = v;
                }
                return new Mbn(v);
@@ -930,6 +927,9 @@ var Mbn = (function () {
             if (MbnConst.hasOwnProperty(n)) {
                throw new MbnErr(".def", "constant allready set", n);
             } else {
+               if (!cnRx.test(n)) {
+                  throw new MbnErr(".def", "incorrect name", n);
+               }
                v = new Mbn(v);
                MbnConst[n] = v;
                return new Mbn(v);

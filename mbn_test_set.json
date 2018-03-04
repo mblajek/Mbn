@@ -317,8 +317,8 @@
       ["Mbn0::def('PI')", "3"],
       ["Mbn3c::def('PI')", "3,142"],
       ["Mbn20u::def('PI')", "3,14159265358979323846"],
-      ["Mbn::def('MbnP')", "2.00"],
-      ["Mbn3c::def('MbnP')", "3,000"],
+      ["Mbn::def('MbnP')", "Mbn.def error*"],
+      ["Mbn3c::def('MbnP')", "Mbn.def error*"],
       ["Mbn::def('X')", "Mbn.def error*"],
       ["Mbn::def(null, 'X')", "false"],
       ["Mbn::def('X', 4.2)", "4.20"],
@@ -427,6 +427,11 @@
       ["new Mbn0('=190%')", "2"],
       ["new Mbn([5, 7])", "Mbn error*"],
       ["new Mbn('=a * b', {a:0.1})", "Mbn.calc error*"],
+      ["Mbn0::def(null, 'MbnP')", "false"],
+      ["Mbn0::def(null, 'eps')", "true"],
+      ["Mbn::def('eps')", "0.01"],
+      ["Mbn3c::def('eps')", "0,001"],
+      ["Mbn0::def('eps')", "1"],
       ["0", "0"]
    ]
 }

@@ -425,8 +425,8 @@ if (file_exists('release/.LASTHASH')) {
       we(['//single argument functions abs, ceil, floor, round, sqrt, sgn, int (=intp) are accesible', 'Mbn.calc("((sqrt(5) + 1) / 2)^2");']);
 
       w();
-      we(['//there are 3 standard constants: PI, E (with 40 digits precission) and MbnP', 'Mbn5t.calc("PI");']);
-      we(['Mbn5t.calc("10^-MbnP");']);
+      we(['//there are 3 standard constants: PI, E (with 40 digits precission) and eps (epsilon, distance to next number)', 'Mbn5t.calc("PI");']);
+      we(['Mbn5t.calc("eps");']);
 
       w();
       we(["//variables can be passed as second argument", 'Mbn.calc("a / b", {a: 7, b: 3});']);
@@ -440,7 +440,7 @@ if (file_exists('release/.LASTHASH')) {
       we(['//constants can be get by name', 'Mbn.def("PI");']);
 
       w();
-      we(['//constants can be defined, have to start from capital letter', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
+      we(['//constants can be defined, have to start from upper-case letter', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
 
       w();
       we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");']);

@@ -28,7 +28,7 @@ if ($q !== null) {
          <button style="background-color:lightgray; cursor:pointer; border:none; padding:1px; font-size:1em;" onclick="pchange(1);">&gt;</button>
          <button style="background-color:lightgray; cursor:pointer; border: none; padding:1px; font-size:1em;" onclick="newcalc()">+</button>
       </div>
-      <div style="margin:2px;">constants: PI, E, <a href="lib" style="color:black">Mbn</a>P</div>
+      <div style="margin:2px;"><a href="lib" style="color:black">Mbn</a>.calc / constants: PI, E, eps</div>
       <div style="margin:2px;">functions: abs, ceil, floor, round, sqrt, sgn, int</div>
       <input onkeyup="inchange(this);" id="in" style="display: block; width:100%; box-sizing: border-box">
       =>
