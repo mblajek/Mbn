@@ -3,17 +3,20 @@
 require_once 'mbn.php';
 
 class Mbn0 extends Mbn {
+
    protected static $MbnP = 0;
 
 }
 
 class Mbn3c extends Mbn {
+
    protected static $MbnP = 3;
    protected static $MbnS = ',';
 
 }
 
 class Mbn20u extends Mbn {
+
    protected static $MbnP = 20;
    protected static $MbnS = ',';
    protected static $MbnT = true;
@@ -21,6 +24,7 @@ class Mbn20u extends Mbn {
 }
 
 class Mbn2nef extends Mbn {
+
    protected static $MbnE = false;
    protected static $MbnF = true;
 
@@ -33,7 +37,6 @@ function testMbn() {
       $i = 0;
       foreach ($tests as $test) {
          list($raw, $req, $exp) = $test;
-         $i++;
          try {
             $o = '';
             eval($exp);
@@ -65,6 +68,7 @@ function testMbn() {
                 'incorrect' => $evv
             );
          }
+         $i++;
       }
       return array(
           'status' => (count($ret) === 0) ? 'OK' : 'ERR',
@@ -72,6 +76,7 @@ function testMbn() {
           'errors' => $ret
       );
    }
+
    $testsAll = json_decode(file_get_contents('mbn_test_set.json'));
    $tests = array_merge($testsAll->both, $testsAll->php);
    foreach ($tests as &$test) {
@@ -80,7 +85,7 @@ function testMbn() {
       while (preg_match('/{[^}]*}/', $tst, $jsonA) === 1) {
          $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[0]);
          $jsonArr = var_export(json_decode($json, true), true);
-         $tst = str_replace($jsonA[0],$jsonArr , $tst);
+         $tst = str_replace($jsonA[0], $jsonArr, $tst);
          break;
       }
       $expArr = explode('; ', $tst);
@@ -96,4 +101,5 @@ function testMbn() {
 
    return json_encode($testPHP);
 }
+
 echo testMbn();

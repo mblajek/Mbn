@@ -22,7 +22,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.35";
+   var MbnV = "1.36";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -170,8 +170,8 @@ var Mbn = (function () {
          var n = np[2];
          if (n0 === "-") {
             a._s = -1;
-         } else if (n0 === "=" && MbnE) {
-            a.set(Mbn.calc(n, v));
+         } else if (n0 === "=") {
+            a.set(MbnE ? Mbn.calc(n, v) : n);
             return;
          }
          var ln = ((n.indexOf(".") + 1) || (n.indexOf(",") + 1)) - 1;
@@ -899,7 +899,7 @@ var Mbn = (function () {
       var MbnConst = {
          PI: "3.1415926535897932384626433832795028841972",
          E: "2.7182818284590452353602874713526624977573",
-         eps: "=10^-mbnP"
+         eps: true
       };
 
       var cnRx = /^[A-Z]\w*$/;
@@ -913,16 +913,13 @@ var Mbn = (function () {
             return MbnConst.hasOwnProperty(v);
          }
          if (v === undefined) {
-            if (MbnConst.hasOwnProperty(n)) {
-               v = MbnConst[n];
-               if (!(v instanceof Mbn)) {
-                  v = new Mbn(v, {mbnP: MbnP});
-                  MbnConst[n] = v;
-               }
-               return new Mbn(v);
-            } else {
+            if (!MbnConst.hasOwnProperty(n)) {
                throw new MbnErr(".def", "undefined constant", n);
             }
+            if (!(MbnConst[n] instanceof Mbn)) {
+               MbnConst[n] = (n === "eps") ? ((new Mbn(10)).pow(-MbnP)) : (new Mbn(MbnConst[n]));
+            }
+            return new Mbn(MbnConst[n]);
          } else {
             if (MbnConst.hasOwnProperty(n)) {
                throw new MbnErr(".def", "constant allready set", n);

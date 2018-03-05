@@ -27,7 +27,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.35';
+   protected static $MbnV = '1.36';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -118,17 +118,17 @@ class Mbn {
    /**
     * Private function, sets value from string
     * @param {string} $ns
-    * @param {string} $v
+    * @param {array=} $v
     */
-   private function fromString($ns, $v) {
+   private function fromString($ns, $v = null) {
       $np = [];
       preg_match('/([+=-]?)\\s*(.*)/', trim($ns), $np);
       $n0 = $np[1];
       $n = $np[2];
       if ($n0 === '-') {
          $this->s = -1;
-      } elseif ($n0 === '=' && static::$MbnE) {
-         $this->set(static::calc($n, $v));
+      } elseif ($n0 === '=') {
+         $this->set(static::$MbnE ? static::calc($n, $v) : $n);
          return;
       }
       $ln = strpos($n, '.');
@@ -862,7 +862,7 @@ class Mbn {
    protected static $MbnConst = [
        '' => ['PI' => '3.1415926535897932384626433832795028841972',
            'E' => '2.7182818284590452353602874713526624977573',
-           'eps' => '=10^-mbnP']
+           'eps' => true]
    ];
 
    /**
@@ -881,11 +881,10 @@ class Mbn {
             $mc[$mx] = [];
          }
          if (!isset($mc[$mx][$n])) {
-            if (isset($mc[''][$n])) {
-               $mc[$mx][$n] = new static($mc[''][$n], ['mbnP' => static::$MbnP]);
-            } else {
+            if (!isset($mc[''][$n])) {
                throw new MbnErr('.def', 'undefined constant', $n);
             }
+            $mc[$mx][$n] = ($n === "eps") ? ((new static(10))->pow(-static::$MbnP)) : (new static($mc[''][$n]));
          }
          return new static($mc[$mx][$n]);
       } else {
