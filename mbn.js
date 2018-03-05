@@ -22,7 +22,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.34";
+   var MbnV = "1.35";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -162,7 +162,7 @@ var Mbn = (function () {
        * Private function, sets value from string
        * @param {Mbn} a
        * @param {string} ns
-       * @param {*=} v
+       * @param {Object=} v
        */
       var mbnFromString = function (a, ns, v) {
          var np = ns.replace(wsRx1, "").match(wsRx2);
@@ -967,11 +967,11 @@ var Mbn = (function () {
       /**
        * Evaluate expression
        * @param {string} exp Evaluation formula
-       * @param {*=} vars Object with vars for evaluation
+       * @param {Object=} vars Object with vars for evaluation
        */
       Mbn.calc = function (exp, vars) {
-         var expr = exp.replace(wsRx3, "");
-         if (vars === undefined) {
+         var expr = String(exp).replace(wsRx3, "");
+         if (!(vars instanceof Object)) {
             vars = {};
          }
          var vnames = {};

@@ -27,7 +27,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.34';
+   protected static $MbnV = '1.35';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -939,8 +939,11 @@ class Mbn {
     * @param {string} $exp Evaluation formula
     * @param {array=} $vars Object with vars for evaluation
     */
-   public static function calc($exp, $vars = []) {
+   public static function calc($exp, $vars = null) {
       $expr = preg_replace('/^\s+/', '', $exp);
+      if (!is_array($vars)) {
+         $vars = [];
+      }
       $vnames = [];
       $larr = &static::$states['uopVal'];
       $larl = count($larr);
