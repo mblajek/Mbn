@@ -97,8 +97,8 @@ function releaseMbn() {
 
       $mbn_min_phpLenNew = strlen($mbn_min_php);
       do {
-         $mbn_min_php0 = preg_replace('/([^ ]) ([^\\w\\$\' ])/', '$1$2', $mbn_min_php);
-         $mbn_min_php = preg_replace('/([^\\w\\$\': ]) ([^ ])/', '$1$2', $mbn_min_php0);
+         $mbn_min_php0 = preg_replace('/([^ ]) ([^\\w\\$\' \\]])/', '$1$2', $mbn_min_php);
+         $mbn_min_php = preg_replace('/([^\\w\\$\': ,]) ([^ ])/', '$1$2', $mbn_min_php0);
          $mbn_min_phpLen = $mbn_min_phpLenNew;
          $mbn_min_phpLenNew = strlen($mbn_min_php);
       } while ($mbn_min_phpLenNew < $mbn_min_phpLen);
