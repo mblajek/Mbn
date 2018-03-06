@@ -1,7 +1,7 @@
 RewriteEngine On
 RewriteRule ^$ /n/calc [R]
+RewriteRule ^(release\/)?(v|mbn(\.min)?\.(js|php))$ /n/lib/$2 [R]
+RewriteRule ^(.*)\/$ /n/$1 [R]
+
 RewriteRule ^lib(\/(.*))?$ index.php?gf=$2
 RewriteRule ^calc$ calc.php
-
-Redirect /n/mbn.js /n/lib/mbn.js
-Redirect /n/mbn.php /n/lib/mbn.php

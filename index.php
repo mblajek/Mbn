@@ -18,27 +18,34 @@ foreach ($relFiles as $n => &$relFile) {
 }
 unset($relFile);
 
-$getFile = filter_input(INPUT_GET, 'gf');
-if ($getFile != null && isset($relFiles[$getFile])) {
-   $ext = pathinfo($getFile, PATHINFO_EXTENSION);
-   header('Content-Type: text/plain');
-   header('Content-Disposition: inline; filename="' . $getFile . '"');
-   readfile('release/' . $getFile);
-   die;
-} elseif ($getFile === 'icon') {
-   header('Content-Type: image/bmp');
-   echo gzinflate(base64_decode('c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDAwNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
+$vString = null;
+if (file_exists('release/v')) {
+   $vString = file_get_contents('release/v');
 }
 
+$getFile = filter_input(INPUT_GET, 'gf');
+if (!empty($getFile)) {
+   if (isset($relFiles[$getFile])) {
+      header('Content-Type: text/plain');
+      header('Content-Disposition: inline; filename="' . $getFile . '"');
+      readfile('release/' . $getFile);
+   } elseif ($getFile === 'icon') {
+      header('Content-Type: image/bmp');
+      echo gzinflate(base64_decode('c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDAwNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
+   } elseif ($getFile === 'v') {
+      header('Content-Type: text/json');
+      echo $vString;
+   }
+   die;
+}
 $hashChanged = 1;
-if (file_exists('release/.LASTHASH')) {
-   $oldHash = file_get_contents('release/.LASTHASH');
+if ($vString !== null) {
+   $oldHash = json_decode($vString)->hash;
    $newHash = hash('sha256', file_get_contents('mbn.js') . file_get_contents('mbn.php'));
    if ($oldHash === $newHash) {
       $hashChanged = 0;
    }
 }
-
 ?><!DOCTYPE html>
 <head>
    <title>Mbn Librabry</title>

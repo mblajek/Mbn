@@ -1,7 +1,7 @@
 <?php
 
 function releaseMbn() {
-   $err = array();
+   $err = [];
 
    if (!is_dir('release')) {
       if (!mkdir('release')) {
@@ -9,8 +9,8 @@ function releaseMbn() {
       }
    }
    $oldHash = null;
-   if (file_exists('release/.LASTHASH')) {
-      $oldHash = file_get_contents('release/.LASTHASH');
+   if (file_exists('release/v')) {
+      $oldHash = json_decode(file_get_contents('release/v'))->hash;
    }
 
    $mbn_js = file_get_contents('mbn.js');
@@ -26,7 +26,7 @@ function releaseMbn() {
       if ($code === null) {
          $code = file_get_contents($file);
       }
-      $postfields = array(
+      $postfields = [
           'js_code' => $code,
           'compilation_level' => 'SIMPLE_OPTIMIZATIONS',
           'output_format' => 'json',
@@ -34,7 +34,7 @@ function releaseMbn() {
           'output_info[2]' => 'warnings',
           'output_info[3]' => 'errors',
           'warning_level' => 'verbose',
-      );
+      ];
 
       foreach ($postfields as $field => &$postfield) {
          $postfield = preg_replace('/\\[\d+\\]$/', '', $field) . '=' . rawurlencode($postfield);
@@ -57,22 +57,22 @@ function releaseMbn() {
 
       if (!empty($resp['errors'])) {
          foreach ($resp['errors'] as $err) {
-            $errorsJS [] = array(
+            $errorsJS [] = [
                 'place' => $file . ':' . $err['lineno'] . ':' . $err['charno'],
                 'line' => $err['line'],
                 'type' => $err['type'],
                 'message' => $err['error']
-            );
+            ];
          }
       }
       if (!empty($resp['warnings'])) {
          foreach ($resp['warnings'] as $err) {
-            $errorsJS [] = array(
+            $errorsJS [] = [
                 'type' => $err['type'],
                 'line' => $err['line'],
                 'place' => $file . ':' . $err['lineno'] . ':' . $err['charno'],
                 'message' => $err['warning']
-            );
+            ];
          }
       }
 
@@ -105,7 +105,7 @@ function releaseMbn() {
       return $mbn_min_php;
    }
 
-   $errorsJS = array();
+   $errorsJS = [];
 
    try {
       $mbn_min_js = checkMinifyJS($errorsJS, 'mbn.js', $mbn_js);
@@ -127,11 +127,11 @@ function releaseMbn() {
    function getVersion($code) {
       $varr = [];
       preg_match('/MbnV = [\'"]([\d\.]+)[\'"];/', $code, $varr);
-      return isset($varr[1]) ? $varr[1] : '';
+      return 'v' . (isset($varr[1]) ? $varr[1] : '');
    }
 
    require_once 'mbn.php';
-   $license = '/* Mbn v{V} | Copyright (c) 2016-' . date('Y')
+   $license = '/* Mbn {V} | https://mirkl.es/n/lib | Copyright (c) 2016-' . date('Y')
            . ' Mikołaj Błajek | https://github.com/mblajek/Mbn/blob/master/LICENSE.txt */' . PHP_EOL;
 
    $versionJs = getVersion($mbn_js);
@@ -140,16 +140,20 @@ function releaseMbn() {
    $licenseJs = str_replace('{V}', $versionJs, $license);
    $licensePhp = '<?php ' . str_replace('{V}', $versionPhp, $license);
 
-   file_put_contents('release/mbn.php', preg_replace('/^\<\?php\s+/i', $licensePhp, $mbn_php));
+   file_put_contents('release/mbn.php', preg_replace('/^\<\?php\s*/i', $licensePhp, $mbn_php));
    $mbn_min_php = minifyPHP('release/mbn.php');
-   file_put_contents('release/mbn.min.php', preg_replace('/^\<\?php\s+/i', $licensePhp, $mbn_min_php));
+   file_put_contents('release/mbn.min.php', preg_replace('/^\<\?php\s*/i', $licensePhp, $mbn_min_php));
 
-   file_put_contents('release/mbn.js', preg_replace('/^\s+/i', $licenseJs, $mbn_js));
-   file_put_contents('release/mbn.min.js', preg_replace('/^\s+/i', $licenseJs, $mbn_min_js));
+   file_put_contents('release/mbn.js', preg_replace('/^\s*/i', $licenseJs, $mbn_js));
+   file_put_contents('release/mbn.min.js', preg_replace('/^\s*/i', $licenseJs, $mbn_min_js));
 
-   file_put_contents('release/.LASTHASH', $newHash);
+   file_put_contents('release/v', json_encode([
+       'mbn_js' => $versionJs,
+       'mbn_php' => $versionPhp,
+       'hash' => $newHash
+   ]));
 
-   return 'update finished: JS v' . $versionJs . ', PHP v' . $versionPhp;
+   return 'update finished: JS ' . $versionJs . ', PHP ' . $versionPhp;
 }
 
 echo releaseMbn();
