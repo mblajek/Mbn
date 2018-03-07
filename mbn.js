@@ -949,7 +949,7 @@ var Mbn = (function () {
       };
       var funPrx = 4;
       var rxs = {
-         num: {rx: /^([ 0-9\.,]+)\s*/, next: ["bop", "pc", "pr"], end: true},
+         num: {rx: /^([0-9\., ]+)\s*/, next: ["bop", "pc", "pr"], end: true},
          name: {rx: /^([A-Za-z_]\w*)\s*/},
          fn: {next: ["po"], end: false},
          vr: {next: endBop, end: true},

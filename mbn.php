@@ -923,7 +923,7 @@ class Mbn {
    ];
    protected static $funPrx = 4;
    protected static $rxs = [
-       'num' => ['rx' => '/^([ 0-9\.,]+)\s*/', 'next' => 'endBopPr', 'end' => true],
+       'num' => ['rx' => '/^([0-9\., ]+)\s*/', 'next' => 'endBopPr', 'end' => true],
        'name' => ['rx' => '/^([A-Za-z_]\w*)\s*/'], 'fn' => ['next' => 'po', 'end' => false],
        'vr' => ['next' => 'endBop', 'end' => true],
        'bop' => ['rx' => '/^([-+\*\/#^&|])\s*/', 'next' => 'uopVal', 'end' => false],

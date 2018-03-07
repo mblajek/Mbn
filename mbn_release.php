@@ -94,15 +94,40 @@ function releaseMbn() {
          }
          $mbn_min_php[$o] = PHP_EOL;
       }
+      $mbn_min_php_out = '';
+      $len = strlen($mbn_min_php);
+      $stString = false;
+      $stBack = false;
+      $stSpace = false;
+      $c0 = '';
+      for ($i = 0; $i < $len; $i++) {
+         $c = $mbn_min_php[$i];
+         if ($stString && ($c === '\\') && !$stBack) {
+            $stBack = true;
+         } else {
+            if ($c === '\'') {
+               $stString = !$stString || $stBack;
+            }
+            $stBack = false;
+         }
+         if ($c === ' ') {
+            if ($stString) {
+               $mbn_min_php_out .= $c;
+            } else {
+               $stSpace = true;
+            }
+            continue;
+         }
+         if ($stSpace && preg_match('/\\w\\w/', $c0 . $c)) {
+            $mbn_min_php_out .= ' ';
+         }
+         $mbn_min_php_out .= $c;
 
-      $mbn_min_phpLenNew = strlen($mbn_min_php);
-      do {
-         $mbn_min_php0 = preg_replace('/([^ ]) ([^\\w\\$\'0 ])/', '$1$2', $mbn_min_php);
-         $mbn_min_php = preg_replace('/([^\\w\\$\':\\[ ]) ([^ ])/', '$1$2', $mbn_min_php0);
-         $mbn_min_phpLen = $mbn_min_phpLenNew;
-         $mbn_min_phpLenNew = strlen($mbn_min_php);
-      } while ($mbn_min_phpLenNew < $mbn_min_phpLen);
-      return $mbn_min_php;
+         //  $mbn_min_php_out .=PHP_EOL. $c0.intval($stSpace) .$c . PHP_EOL;
+         $c0 = $c;
+         $stSpace = false;
+      }
+      return $mbn_min_php_out;
    }
 
    $errorsJS = [];
