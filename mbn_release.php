@@ -22,10 +22,7 @@ function releaseMbn() {
       return 'already up-to-date';
    }
 
-   function checkMinifyJS(&$errorsJS, $file, $code = null) {
-      if ($code === null) {
-         $code = file_get_contents($file);
-      }
+   function checkMinifyJS(&$errors, $code) {
       $postfields = [
           'js_code' => $code,
           'compilation_level' => 'SIMPLE_OPTIMIZATIONS',
@@ -48,52 +45,35 @@ function releaseMbn() {
       curl_setopt($ch, CURLOPT_POST, 1);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $postfieldsStr);
       curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-      $resp = json_decode(curl_exec($ch), true);
+      $resp = json_decode(curl_exec($ch));
       $curlErr = curl_error($ch);
       curl_close($ch);
       if (empty($resp)) {
          throw new Exception('empty closure-compiler response ' . $curlErr);
       }
-
-      if (!empty($resp['errors'])) {
-         foreach ($resp['errors'] as $err) {
-            $errorsJS [] = [
-                'place' => $file . ':' . $err['lineno'] . ':' . $err['charno'],
-                'line' => $err['line'],
-                'type' => $err['type'],
-                'message' => $err['error']
-            ];
-         }
+      $jsErrors = [];
+      if (!empty($resp->errors)) {
+         $jsErrors = array_merge($jsErrors, $resp->errors);
       }
-      if (!empty($resp['warnings'])) {
-         foreach ($resp['warnings'] as $err) {
-            $errorsJS [] = [
-                'type' => $err['type'],
-                'line' => $err['line'],
-                'place' => $file . ':' . $err['lineno'] . ':' . $err['charno'],
-                'message' => $err['warning']
-            ];
-         }
+      if (!empty($resp->warnings)) {
+         $jsErrors = array_merge($jsErrors, $resp->warnings);
+      }
+      foreach ($jsErrors as $err) {
+         $errors [] = [
+             'place' => 'mbn.js:' . $err->lineno . ':' . $err->charno,
+             'line' => $err->line,
+             'type' => $err->type,
+             'message' => isset($err->error) ? $err->error : $err->warning
+         ];
       }
 
-      if (!empty($resp['compiledCode'])) {
-         return $resp['compiledCode'];
-      }
-      return '';
+      return empty($resp->compiledCode) ? '' : $resp->compiledCode;
    }
 
-   function minifyPHP($file) {
-      $mbn_min_php = php_strip_whitespace($file);
-      $ll = 600;
-      $mbn_min_phpLen = strlen($mbn_min_php);
-      $o = $ll;
-      for (; $o < $mbn_min_phpLen; $o += $ll) {
-         $o = strpos($mbn_min_php, ' ', $o);
-         if ($o === false) {
-            break;
-         }
-         $mbn_min_php[$o] = PHP_EOL;
-      }
+   function minifyCheckPHP(&$errors) {
+      $mbn_min_php = php_strip_whitespace('mbn.php');
+      $ll = 500;
+      $lineLen = 0;
       $mbn_min_php_out = '';
       $len = strlen($mbn_min_php);
       $stString = false;
@@ -113,38 +93,67 @@ function releaseMbn() {
          if ($c === ' ') {
             if ($stString) {
                $mbn_min_php_out .= $c;
+               $lineLen++;
             } else {
-               $stSpace = true;
+               if ($lineLen > $ll) {
+                  $mbn_min_php_out .= PHP_EOL;
+                  $lineLen = 0;
+               } else {
+                  $stSpace = true;
+               }
             }
             continue;
          }
          if ($stSpace && preg_match('/\\w\\w/', $c0 . $c)) {
-            $mbn_min_php_out .= ' ';
+            if ($lineLen > $ll) {
+               $mbn_min_php_out .= PHP_EOL;
+               $lineLen = 0;
+            } else {
+               $mbn_min_php_out .= ' ';
+               $lineLen++;
+            }
          }
          $mbn_min_php_out .= $c;
+         $lineLen++;
          $c0 = $c;
          $stSpace = false;
+      }
+      $tempFile = 'release/mbn.min.php.temp';
+      file_put_contents($tempFile, $mbn_min_php_out);
+      //test mbn.min.php
+      require_once $tempFile;
+      unlink($tempFile);
+      ob_start();
+      require_once 'mbn_test.php';
+      $minPhpObj = json_decode(ob_get_clean());
+      if ($minPhpObj->status !== 'OK') {
+         foreach ($minPhpObj->errors as $error) {
+            $errors[] = [$error->id . ') ' => $error->raw,
+                '!) ' => $error->correct,
+                '=) ' => $error->incorrect];
+         }
       }
       return $mbn_min_php_out;
    }
 
-   $errorsJS = [];
+   $errors = [];
 
    try {
-      $mbn_min_js = checkMinifyJS($errorsJS, 'mbn.js', $mbn_js);
+      $mbn_min_js = checkMinifyJS($errors, $mbn_js);
+      $mbn_min_php = minifyCheckPHP($errors);
    } catch (Exception $e) {
       return $e->getMessage();
    }
 
-   if (!empty($errorsJS)) {
-      $errJsStr = '';
-      foreach ($errorsJS as $err) {
+   if (!empty($errors)) {
+      $errStr = '';
+      foreach ($errors as $err) {
          foreach ($err as $errc => $errl) {
-            $errJsStr .= $errc . ' => ' . trim($errl) . PHP_EOL;
+            $errStr .= $errc . ' => ' . trim($errl) . PHP_EOL;
          }
-         $errJsStr .= PHP_EOL;
+         $errStr .= PHP_EOL;
       }
-      return $errJsStr;
+      return $errStr;
    }
 
    function getVersion($code) {
@@ -163,7 +172,6 @@ function releaseMbn() {
    $licensePhp = '<?php ' . str_replace('{V}', $versionPhp, $license);
 
    file_put_contents('release/mbn.php', preg_replace('/^\<\?php\s*/i', $licensePhp, $mbn_php));
-   $mbn_min_php = minifyPHP('release/mbn.php');
    file_put_contents('release/mbn.min.php', preg_replace('/^\<\?php\s*/i', $licensePhp, $mbn_min_php));
 
    file_put_contents('release/mbn.js', preg_replace('/^\s*/i', $licenseJs, $mbn_js));
@@ -175,21 +183,7 @@ function releaseMbn() {
        'hash' => $newHash
    ]));
 
-   //test mbn.min.php
-   require_once 'release/mbn.min.php';
-   ob_start();
-   require_once 'mbn_test.php';
-   $minPhpObj = json_decode(ob_get_clean());
-   $minPhpSt = '';
-   if ($minPhpObj->status !== 'OK') {
-      $minPhpSt = PHP_EOL . PHP_EOL . 'mbn.min.php: ' . $minPhpObj->status;
-      foreach ($minPhpObj->errors as $error) {
-         $minPhpSt .= PHP_EOL . PHP_EOL . $error->id . ') ' . $error->raw . PHP_EOL
-             . '!) ' . $error->correct . PHP_EOL . '=) ' . $error->incorrect;
-      }
-      file_put_contents('release/mbn.min.php', $licensePhp . '// minified with errors');
-   }
-   return 'update finished: JS ' . $versionJs . ', PHP ' . $versionPhp . $minPhpSt;
+   return 'update finished: JS ' . $versionJs . ', PHP ' . $versionPhp;
 }
 
 echo releaseMbn();
