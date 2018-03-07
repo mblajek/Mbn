@@ -1,6 +1,8 @@
 <?php
 
-require_once 'mbn.php';
+if (!class_exists('Mbn')) {
+   require_once 'mbn.php';
+}
 
 class Mbn0 extends Mbn {
 

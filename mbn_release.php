@@ -97,8 +97,8 @@ function releaseMbn() {
 
       $mbn_min_phpLenNew = strlen($mbn_min_php);
       do {
-         $mbn_min_php0 = preg_replace('/([^ ]) ([^\\w\\$\' \\]])/', '$1$2', $mbn_min_php);
-         $mbn_min_php = preg_replace('/([^\\w\\$\': ,]) ([^ ])/', '$1$2', $mbn_min_php0);
+         $mbn_min_php0 = preg_replace('/([^ ]) ([^\\w\\$\'0 ])/', '$1$2', $mbn_min_php);
+         $mbn_min_php = preg_replace('/([^\\w\\$\':\\[ ]) ([^ ])/', '$1$2', $mbn_min_php0);
          $mbn_min_phpLen = $mbn_min_phpLenNew;
          $mbn_min_phpLenNew = strlen($mbn_min_php);
       } while ($mbn_min_phpLenNew < $mbn_min_phpLen);
@@ -130,7 +130,6 @@ function releaseMbn() {
       return 'v' . (isset($varr[1]) ? $varr[1] : '');
    }
 
-   require_once 'mbn.php';
    $license = '/* Mbn {V} | https://mirkl.es/n/lib | Copyright (c) 2016-' . date('Y')
            . ' Mikołaj Błajek | https://github.com/mblajek/Mbn/blob/master/LICENSE.txt */' . PHP_EOL;
 
@@ -153,7 +152,21 @@ function releaseMbn() {
        'hash' => $newHash
    ]));
 
-   return 'update finished: JS ' . $versionJs . ', PHP ' . $versionPhp;
+   //test mbn.min.php
+   require_once 'release/mbn.min.php';
+   ob_start();
+   require_once 'mbn_test.php';
+   $minPhpObj = json_decode(ob_get_clean());
+   $minPhpSt = '';
+   if ($minPhpObj->status !== 'OK') {
+      $minPhpSt = PHP_EOL . PHP_EOL . 'mbn.min.php: ' . $minPhpObj->status;
+      foreach ($minPhpObj->errors as $error) {
+         $minPhpSt .= PHP_EOL . PHP_EOL . $error->id . ') ' . $error->raw . PHP_EOL
+             . '!) ' . $error->correct . PHP_EOL . '=) ' . $error->incorrect;
+      }
+      file_put_contents('release/mbn.min.php', $licensePhp . '// minified with errors');
+   }
+   return 'update finished: JS ' . $versionJs . ', PHP ' . $versionPhp . $minPhpSt;
 }
 
 echo releaseMbn();

@@ -178,7 +178,7 @@ if ($vString !== null) {
       w("Downloads", "title2");
 
       w("//minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a>", "mono");
-      w("//minified PHP is made with php_strip_whitespace() and text replacements, don't trust it", "mono");
+      w(["//minified PHP is made with php_strip_whitespace() and text replacements", "//dont't trust it to much, mostly recommended for testing in online PHP sandboxes"], "mono");
 
       var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
       for (var i in relFiles) {
