@@ -22,7 +22,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.36";
+   var MbnV = "1.37";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -960,7 +960,7 @@ var Mbn = (function () {
          pr: {rx: /^(%)\s*/, next: endBop, end: true}
       };
 
-      var wsRx3 = /^\s+/;
+      var wsRx3 = /^[\s=]+/;
       /**
        * Evaluate expression
        * @param {string} exp Evaluation formula

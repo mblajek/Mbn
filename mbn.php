@@ -27,7 +27,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.36';
+   protected static $MbnV = '1.37';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -923,14 +923,14 @@ class Mbn {
    ];
    protected static $funPrx = 4;
    protected static $rxs = [
-       'num' => ['rx' => '/^([0-9\., ]+)\s*/', 'next' => 'endBopPr', 'end' => true],
-       'name' => ['rx' => '/^([A-Za-z_]\w*)\s*/'], 'fn' => ['next' => 'po', 'end' => false],
+       'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBopPr', 'end' => true],
+       'name' => ['rx' => '/^([A-Za-z_]\\w*)\\s*/'], 'fn' => ['next' => 'po', 'end' => false],
        'vr' => ['next' => 'endBop', 'end' => true],
-       'bop' => ['rx' => '/^([-+\*\/#^&|])\s*/', 'next' => 'uopVal', 'end' => false],
+       'bop' => ['rx' => '/^([-+\\*\\/#^&|])\\s*/', 'next' => 'uopVal', 'end' => false],
        'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal', 'end' => false],
-       'po' => ['rx' => '/^(\()\s*/', 'next' => 'uopVal', 'end' => false],
-       'pc' => ['rx' => '/^(\))\s*/', 'next' => 'endBop', 'end' => true],
-       'pr' => ['rx' => '/^(%)\s*/', 'next' => 'endBop', 'end' => true]
+       'po' => ['rx' => '/^(\\()\\s*/', 'next' => 'uopVal', 'end' => false],
+       'pc' => ['rx' => '/^(\\))\\s*/', 'next' => 'endBop', 'end' => true],
+       'pr' => ['rx' => '/^(%)\\s*/', 'next' => 'endBop', 'end' => true]
    ];
 
    /**
@@ -939,7 +939,7 @@ class Mbn {
     * @param {array=} $vars Object with vars for evaluation
     */
    public static function calc($exp, $vars = null) {
-      $expr = preg_replace('/^\s+/', '', $exp);
+      $expr = preg_replace('/^[\\s=]+/', '', $exp);
       if (!is_array($vars)) {
          $vars = [];
       }
