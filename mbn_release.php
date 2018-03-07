@@ -122,8 +122,6 @@ function releaseMbn() {
             $mbn_min_php_out .= ' ';
          }
          $mbn_min_php_out .= $c;
-
-         //  $mbn_min_php_out .=PHP_EOL. $c0.intval($stSpace) .$c . PHP_EOL;
          $c0 = $c;
          $stSpace = false;
       }
