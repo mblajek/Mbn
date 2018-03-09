@@ -22,7 +22,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.37";
+   var MbnV = "1.38";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -30,7 +30,7 @@ var Mbn = (function () {
    //default truncate
    var MbnDT = false;
    //default extension
-   var MbnDE = true;
+   var MbnDE = null;
    //default format
    var MbnDF = false;
 
@@ -40,7 +40,7 @@ var Mbn = (function () {
     * MbnS - output separator(".", ","), default "."
     * MbnT - trim insignifficant zeros in output string ("0.20" to "0.2"), default false (no trimming)
     * MbnF - format thousands in output string ("1234" to "1 234"), default false
-    * MbnE - evauate strings starting with "=", default true
+    * MbnE - evauate strings, true - allways, null - starting with "=", false - never,  default null
     * @export
     * @param {number|Object=} opt precission or object with params
     */
@@ -68,7 +68,7 @@ var Mbn = (function () {
 
       //actual extension for Mbn class
       var MbnE = (opt.MbnE === undefined) ? MbnDE : opt.MbnE;
-      if (MbnE !== true && MbnE !== false) {
+      if (MbnE !== true && MbnE !== false && MbnE !== null) {
          throw new MbnErr(".extend", "invalid extension (bool)", MbnT);
       }
 
@@ -156,48 +156,46 @@ var Mbn = (function () {
          mbnCarry(a);
       };
 
-      var wsRx1 = /^\s+|\s+$/g;
-      var wsRx2 = /([+=-]?)\s*(.*)/;
+      var wsRx2 = /^\s*(=)?[\s=]*(\+|-)?\s*((.*\S)?)/;
       /**
        * Private function, sets value from string
        * @param {Mbn} a
        * @param {string} ns
-       * @param {Object=} v
+       * @param {Object|boolean=} v
        */
       var mbnFromString = function (a, ns, v) {
-         var np = ns.replace(wsRx1, "").match(wsRx2);
-         var n0 = np[1];
+         var np = ns.match(wsRx2).slice(1);
          var n = np[2];
-         if (n0 === "-") {
+         if (np[1] === "-") {
             a._s = -1;
-         } else if (n0 === "=") {
-            a.set(MbnE ? Mbn.calc(n, v) : n);
-            return;
          }
          var ln = ((n.indexOf(".") + 1) || (n.indexOf(",") + 1)) - 1;
-         if (ln === -1) {
-            ln = n.length;
-         } else {
-            n = n.slice(0, ln) + n.slice(ln + 1);
-         }
-         if (ln === 0) {
-            ln = 1;
-            n = "0" + ((n !== "") ? n : np[2]);
-         }
-         var c;
          var nl = n.length;
-         var l = Math.max(ln + MbnP, nl);
+         var al = nl;
+         if (ln === -1) {
+            ln = nl;
+         } else {
+            al = ln + 1;
+         }
+         var l = Math.max(al + MbnP, nl);
+         var c;
          for (var i = 0; i <= l; i++) {
             c = (i < nl) ? (n.charCodeAt(i) - 48) : 0;
             if (c >= 0 && c <= 9) {
-               if (i <= ln + MbnP) {
+               if (i <= al + MbnP) {
                   a._d.push(c);
                }
-            } else if (c === -16 && (i + 1) < ln) {
-               continue;
-            } else {
+            } else if ((i !== ln || nl === 1) && (c !== -16 || (i + 1) >= ln)) {
+               if ((v instanceof Object) || v === true || MbnE === true
+                       || (v !== false && MbnE !== false && np[0] === "=")) {
+                  a.set(mbnCalc(ns, v));
+                  return;
+               }
                throw new MbnErr("", "invalid format", ns);
             }
+         }
+         if (n.charAt(nl - 1) === "%") {
+            a.div(100, true);
          }
          mbnRoundLast(a);
       };
@@ -272,7 +270,7 @@ var Mbn = (function () {
        * @export
        * @constructor
        * @param {*=} n Value
-       * @param {Object=} v Object with vars for evaluation
+       * @param {Object|boolean=} v Object with vars for evaluation or boolean
        */
       var Mbn = function (n, v) {
          if (!(this instanceof Mbn)) {
@@ -964,13 +962,20 @@ var Mbn = (function () {
       /**
        * Evaluate expression
        * @param {string} exp Evaluation formula
-       * @param {Object=} vars Object with vars for evaluation
+       * @param {Object|boolean=} vars Object with vars for evaluation
        */
       Mbn.calc = function (exp, vars) {
-         var expr = String(exp).replace(wsRx3, "");
+         if (vars !== true && !(vars instanceof Object)) {
+            vars = {};
+         }
+         return new Mbn(exp, vars);
+      };
+
+      var mbnCalc = function (exp, vars) {
          if (!(vars instanceof Object)) {
             vars = {};
          }
+         var expr = String(exp).replace(wsRx3, "");
          var vnames = {};
          var larr = uopVal;
          var larl = larr.length;

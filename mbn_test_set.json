@@ -1,5 +1,6 @@
 {
    "php": [
+      ["0", "0"],
       ["array_values((new Mbn('42'))->split(5))", "8.40,8.40,8.40,8.40,8.40"],
       ["array_keys((new Mbn('42'))->split(5))", "0,1,2,3,4"],
       ["array_values((new Mbn('42'))->split(['a'=>2,0=>3,'c'=>5]))", "8.40,12.60,21.00"],
@@ -12,17 +13,32 @@
       ["array_values(Mbn::reduce('add', ['a'=>5, 0=>7, 'c'=>10], ['a'=>1.1, 0=>1.2, 'x'=>1.3]))", "Mbn.reduce error*"],
       ["gettype((new Mbn(1.2))->toNumber())", "double"],
       ["gettype((new Mbn(1))->toNumber())", "double"],
-      ["gettype((new Mbn0(1.2))->toNumber())", "integer"]
+      ["gettype((new Mbn0(1.2))->toNumber())", "integer"],
+      ["Mbn::prop()['MbnE']", "true"],
+      ["0", "0"]
    ],
    "js": [
+      ["0", "0"],
       ["typeof ((new Mbn(1))->toNumber())", "number"],
-      ["typeof ((new Mbn0(1.2))->toNumber())", "number"]
+      ["typeof ((new Mbn0(1.2))->toNumber())", "number"],
+      ["new Mbn('=1', false)", "1.00"],
+      ["new Mbn('1/2', {})", "0.50"],
+      ["new Mbn('1/3', true)", "0.33"],
+      ["new Mbn('=1/4', false)", "Mbn error*"],
+      ["new Mbn('==1', true)", "1.00"],
+      ["new Mbn('==1', false)", "1.00"],
+      ["new Mbn('==1+1/5', true)", "1.20"],
+      ["new Mbn('==1+1/6', false)", "Mbn error*"],
+      ["Mbn::prop()['MbnE']", "null"],
+      ["new Mbn4yec('7/3', false)", "2,3333"],
+      ["new Mbn4yec('=7/4', false)", "1,7500"],
+      ["new Mbn4yec('==7/5', false)", "1,4000"],
+      ["0", "0"]
    ],
    "both": [
       ["0", "0"],
       ["Mbn::def('V', 4)", "4.00"],
       ["Mbn0::def('V', 4)", "4"],
-      ["Mbn::prop()['MbnE']", "true"],
       ["new Mbn(null)", "0.00"],
       ["new Mbn(true)", "1.00"],
       ["new Mbn(false)", "0.00"],
