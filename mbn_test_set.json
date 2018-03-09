@@ -30,9 +30,11 @@
       ["new Mbn('==1+1/5', true)", "1.20"],
       ["new Mbn('==1+1/6', false)", "Mbn error*"],
       ["Mbn::prop()['MbnE']", "null"],
-      ["new Mbn4yec('7/3', false)", "2,3333"],
-      ["new Mbn4yec('=7/4', false)", "1,7500"],
-      ["new Mbn4yec('==7/5', false)", "1,4000"],
+      ["new Mbn4yec('7/3', false)", "Mbn error:*"],
+      ["new Mbn4yec('=7/4', false)", "Mbn error*"],
+      ["new Mbn4yec('==7/5', false)", "Mbn error*"],
+      ["new Mbn4yec('==7..5', true)", "Mbn error*"],
+      ["new Mbn('==7..5', true)", "Mbn error*"],
       ["0", "0"]
    ],
    "both": [

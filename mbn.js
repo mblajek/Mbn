@@ -186,16 +186,13 @@ var Mbn = (function () {
                   a._d.push(c);
                }
             } else if ((i !== ln || nl === 1) && (c !== -16 || (i + 1) >= ln)) {
-               if ((v instanceof Object) || v === true || MbnE === true
-                       || (v !== false && MbnE !== false && np[0] === "=")) {
+               if (v !== false && ((v instanceof Object) || v === true || MbnE === true
+                       || (MbnE !== false && np[0] === "="))) {
                   a.set(mbnCalc(ns, v));
                   return;
                }
                throw new MbnErr("", "invalid format", ns);
             }
-         }
-         if (n.charAt(nl - 1) === "%") {
-            a.div(100, true);
          }
          mbnRoundLast(a);
       };
@@ -1011,7 +1008,7 @@ var Mbn = (function () {
             }
             switch (t) {
                case "num":
-                  rpns.push(new Mbn(tok));
+                  rpns.push(new Mbn(tok, false));
                   break;
                case "name":
                   if (fnEval.hasOwnProperty(tok) && fnEval[tok] !== false) {
