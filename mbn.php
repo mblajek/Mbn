@@ -808,7 +808,7 @@ class Mbn {
     */
    public static function reduce($fn, $arr, $b = null) {
       $inv = false;
-      if (!isset(static::$fnReduce[$fn])) {
+      if (!is_string($fn) || !isset(static::$fnReduce[$fn])) {
          throw new MbnErr('.reduce', 'invalid function name', $fn);
       }
       if (!is_array($arr)) {
