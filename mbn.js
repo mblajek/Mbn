@@ -13,7 +13,9 @@ var Mbn = (function () {
       this.toString = function () {
          var ret = "Mbn" + fn + " error: " + msg;
          if (val !== undefined) {
-            val = String(val);
+            if (val instanceof Array) {
+               val = "[" + val + "]";
+            }
             ret += ": " + ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
          }
          return ret;
@@ -164,9 +166,9 @@ var Mbn = (function () {
        * @param {Object|boolean=} v
        */
       var mbnFromString = function (a, ns, v) {
-         var np = ns.match(wsRx2).slice(1);
-         var n = np[2];
-         if (np[1] === "-") {
+         var np = ns.match(wsRx2);
+         var n = np[3];
+         if (np[2] === "-") {
             a._s = -1;
          }
          var ln = ((n.indexOf(".") + 1) || (n.indexOf(",") + 1)) - 1;
@@ -187,7 +189,7 @@ var Mbn = (function () {
                }
             } else if ((i !== ln || nl === 1) && (c !== -16 || (i + 1) >= ln)) {
                if (v !== false && ((v instanceof Object) || v === true || MbnE === true
-                       || (MbnE !== false && np[0] === "="))) {
+                       || (MbnE !== false && np[1] === "="))) {
                   a.set(mbnCalc(ns, v));
                   return;
                }

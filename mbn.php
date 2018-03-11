@@ -13,7 +13,9 @@ class MbnErr extends Exception {
    public function __construct($fn, $msg, $val = null) {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
       if ($val !== null) {
-         $val = is_array($val) ? ('[' . implode(",", $val) . ']') : strval($val);
+         if (is_array($val)) {
+            $val = '[' . implode(",", $val) . ']';
+         }
          $ret .= ': ' . ((strlen($val) > 20) ? (substr($val, 0, 18) . '..') : $val);
       }
       parent::__construct($ret);
@@ -27,7 +29,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.37';
+   protected static $MbnV = '1.38';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -35,7 +37,7 @@ class Mbn {
    //default truncate
    protected static $MbnT = false;
    //default truncate
-   protected static $MbnE = true;
+   protected static $MbnE = null;
    //default truncate
    protected static $MbnF = false;
    private $d = [];
@@ -118,44 +120,38 @@ class Mbn {
    /**
     * Private function, sets value from string
     * @param {string} $ns
-    * @param {array=} $v
+    * @param {array|boolean=} $v
     */
    private function fromString($ns, $v = null) {
       $np = [];
-      preg_match('/([+=-]?)\\s*(.*)/', trim($ns), $np);
-      $n0 = $np[1];
-      $n = $np[2];
-      if ($n0 === '-') {
+      preg_match('/^\s*(=)?[\s=]*(\+|-)?\s*((.*\S)?)/', $ns, $np);
+      $n = $np[3];
+      if ($np[2] === '-') {
          $this->s = -1;
-      } elseif ($n0 === '=') {
-         $this->set(static::$MbnE ? static::calc($n, $v) : $n);
-         return;
       }
       $ln = strpos($n, '.');
       if ($ln === false) {
          $ln = strpos($n, ',');
       }
-      if ($ln === false) {
-         $ln = strlen($n);
-      } else {
-         $n = substr($n, 0, $ln) . substr($n, $ln + 1);
-      }
-      if ($ln === 0) {
-         $ln = 1;
-         $n = '0' . (($n !== '') ? $n : $np[2]);
-      }
-      $c = '';
       $nl = strlen($n);
-      $l = max($ln + static::$MbnP, $nl);
+      $al = $nl;
+      if ($ln === false) {
+         $ln = $nl;
+      } else {
+         $al = $ln + 1;
+      }
+      $l = max($al + static::$MbnP, $nl);
       for ($i = 0; $i <= $l; $i++) {
          $c = ($i < $nl) ? (ord($n[$i]) - 48) : 0;
          if ($c >= 0 && $c <= 9) {
-            if ($i <= $ln + static::$MbnP) {
+            if ($i <= $al + static::$MbnP) {
                $this->d[] = $c;
             }
-         } elseif ($c === -16 && ($i + 1) < $ln) {
-            continue;
-         } else {
+         } elseif (($i !== $ln || $nl === 1) && ($c !== -16 || ($i + 1) >= $ln)) {
+            if ($v !== false && (is_array($v) || $v === true || static::$MbnE === true || (static::$MbnE !== false && $np[1] === "="))) {
+               $this->set(static::mbnCalc($ns, $v));
+               return;
+            }
             throw new MbnErr('', 'invalid format', $ns);
          }
       }
@@ -228,7 +224,7 @@ class Mbn {
     * @export
     * @constructor
     * @param {*=} $n Value
-    * @param {array=} v Array with vars for evaluation
+    * @param {array|boolean=} v Array with vars for evaluation
     */
    public function __construct($n = 0, $v = null) {
       if (is_float($n) || is_int($n)) {
@@ -936,9 +932,16 @@ class Mbn {
    /**
     * Evaluate expression
     * @param {string} $exp Evaluation formula
-    * @param {array=} $vars Object with vars for evaluation
+    * @param {array|boolean=} $vars Object with vars for evaluation
     */
    public static function calc($exp, $vars = null) {
+      if ($vars !== true && !is_array($vars)) {
+         $vars = [];
+      }
+      return new static($exp, $vars);
+   }
+
+   private static function mbnCalc($exp, $vars = null) {
       $expr = preg_replace('/^[\\s=]+/', '', $exp);
       if (!is_array($vars)) {
          $vars = [];
@@ -977,7 +980,7 @@ class Mbn {
          }
          switch ($t) {
             case 'num':
-               $rpns[] = new static($tok);
+               $rpns[] = new static($tok, false);
                break;
             case 'name':
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {

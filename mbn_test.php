@@ -32,6 +32,14 @@ class Mbn2nef extends Mbn {
 
 }
 
+class Mbn4yec extends Mbn {
+
+   protected static $MbnP = 4;
+   protected static $MbnE = true;
+   protected static $MbnS = ',';
+
+}
+
 function testMbn() {
 
    function runTestMbn($tests) {
@@ -40,12 +48,13 @@ function testMbn() {
       foreach ($tests as $test) {
          list($raw, $req, $exp) = $test;
          try {
-            $o = '';
-            eval($exp);
+            $o = eval($exp);
             if ($o === true) {
                $o = 'true';
             } elseif ($o === false) {
                $o = 'false';
+            } elseif ($o === null) {
+               $o = 'null';
             } elseif (is_array($o)) {
                $o = implode(',', $o);
             }
@@ -88,10 +97,9 @@ function testMbn() {
          $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[0]);
          $jsonArr = var_export(json_decode($json, true), true);
          $tst = str_replace($jsonA[0], $jsonArr, $tst);
-         break;
       }
       $expArr = explode('; ', $tst);
-      $expArr[count($expArr) - 1] = '$o = ' . $expArr[count($expArr) - 1] . ';';
+      $expArr[count($expArr) - 1] = 'return ' . $expArr[count($expArr) - 1] . ';';
       $test[2] = implode('; ', $expArr);
    }
    unset($test);
