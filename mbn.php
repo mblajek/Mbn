@@ -236,7 +236,7 @@ class Mbn {
          }
          $this->fromString($n, $v);
       } elseif (is_bool($n) || is_null($n)) {
-         $n = $this->mbnFromNumber(intval($n));
+         $this->mbnFromNumber(intval($n));
       } else {
          throw new MbnErr('', 'invalid argument', $n);
       }
