@@ -9,7 +9,7 @@ project page: https://mirkl.es/n/lib - library files avalaible there
 
    Pages:
       index.php - Main page - destription of library with examples, also runs unit tests
-      calc.php - Calculator based on library ( https://mirkl.es/n )
+      calc.php - Calculator based on library ( https://mirkl.es/n/calc )
 
    Library:
       mbn.js - JavaScript version
