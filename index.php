@@ -27,7 +27,8 @@ $getFile = filter_input(INPUT_GET, 'gf');
 if (!empty($getFile)) {
    if (isset($relFiles[$getFile])) {
       header('Content-Type: text/plain');
-      header('Content-Disposition: inline; filename="' . $getFile . '"');
+      $disposition = (filter_input(INPUT_GET, 'show') !== null) ? 'inline' : 'attachment';
+      header('Content-Disposition: ' . $disposition . '; filename="' . $getFile . '"');
       readfile('release/' . $getFile);
    } elseif ($getFile === 'icon') {
       header('Content-Type: image/bmp');
@@ -178,13 +179,13 @@ if ($vString !== null) {
       w("Downloads", "title2");
 
       w("//minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a>", "mono");
-      w(["//minified PHP is made with php_strip_whitespace() and text replacements", "//dont't trust it to much, mostly recommended for testing in online PHP sandboxes"], "mono");
+      w(["//minified PHP is made with php_strip_whitespace() and text replacements", "//dont't trust it to much, intended to use for testing in online PHP sandboxes"], "mono");
 
       var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
       for (var i in relFiles) {
          if (relFiles.hasOwnProperty(i)) {
             var f = relFiles[i];
-            w(['<a href="lib/' + i + '">' + i + "</a> (" + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
+            w(["<strong>" + i + '</strong> [ <a href="lib/' + i + '&amp;show">show</a> | <a href="lib/' + i + '">download</a> ] (' + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
          }
       }
       ;
