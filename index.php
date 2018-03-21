@@ -109,6 +109,7 @@ if ($vString !== null) {
       }
    </style>
    <script>
+      var titles2 = [];
       function w(a, c) {
          if (a === undefined) {
             a = "";
@@ -125,7 +126,13 @@ if ($vString !== null) {
             a = "<span class=\"lb\"></span>" + a;
          }
          a = a.replace(/((\()|(, ))(modify)(\))/g, "$2<span class=\"it\">$3$4</span>$5");
-         document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + ">" + a + "</div>");
+         var id = false;
+         if (c === "title2") {
+            var title = a.replace(/<.*/, "");
+            id = title.toLowerCase().replace(/[^0-9a-z]/g, "_");
+            titles2.push({id: id, title: title});
+         }
+         document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + (id ? (" id=\"" + id + "\"") : "") + ">" + a + "</div>");
       }
 
       function we(a) {
@@ -180,6 +187,7 @@ if ($vString !== null) {
 
       w("//minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a>", "mono");
       w(["//minified PHP is made with php_strip_whitespace() and text replacements", "//dont't trust it to much, intended to use for testing in online PHP sandboxes"], "mono");
+      w("//code is optimized for speed and size; not for readability", "mono");
 
       var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
       for (var i in relFiles) {
@@ -188,7 +196,6 @@ if ($vString !== null) {
             w(["<strong>" + i + '</strong> [ <a href="lib/' + i + '&amp;show">show</a> | <a href="lib/' + i + '">download</a> ] (' + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
          }
       }
-      ;
 
       w("Class declarations in JS", "title2");
 
