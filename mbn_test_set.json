@@ -457,6 +457,7 @@
       ["new Mbn4yec('==7..5', true)", "Mbn error*"],
       ["new Mbn('==7..5', true)", "Mbn error*"],
       ["Mbn::reduce([1, 2], [3, 4])", "Mbn.reduce error: invalid function name: [1,2]"],
+      ["(new Mbn(4))->toString()", "4.00"],
       ["0", "0"]
    ]
 }

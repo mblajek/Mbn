@@ -267,7 +267,7 @@ class Mbn {
    /**
     * Returns string value
     */
-   protected function toString() {
+   public function toString() {
       return $this->mbnToString(static::$MbnS, static::$MbnF);
    }
 
