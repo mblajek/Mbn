@@ -455,7 +455,7 @@ if ($vString !== null) {
       we(['//constants can be get by name', 'Mbn.def("PI");']);
 
       w();
-      we(['//constants can be defined, have to start from upper-case letter', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
+      we(['//constants can be defined, have to start from letter or _', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
 
       w();
       we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");']);

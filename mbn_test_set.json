@@ -20,6 +20,7 @@
       ["0", "0"],
       ["typeof ((new Mbn(1))->toNumber())", "number"],
       ["typeof ((new Mbn0(1.2))->toNumber())", "number"],
+      ["Mbn::reduce('pow', [2, 3], undefined)", "1.00,1.00"],
       ["0", "0"]
    ],
    "both": [
@@ -460,6 +461,10 @@
       ["(new Mbn(4))->toString()", "4.00"],
       ["$a = {a:0.1, b:2}; new Mbn('=a * b', $a); $a['b']", "2"],
       ["$a = {a:0.1, b:2}; Mbn::calc('=a * b', $a); $a['b']", "2"],
+      ["(new Mbn('42'))->split(-5)", "Mbn.split error*"],
+      ["Mbn::reduce('pow', [2, 3], null)", "1.00,1.00"],
+      ["Mbn::reduce('pow', [2, 3])", "8.00"],
+      ["Mbn::def('_q', 2)", "2.00"],
       ["0", "0"]
    ]
 }

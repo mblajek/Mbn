@@ -6,9 +6,9 @@ class MbnErr extends Exception {
     * Common error message object
     * @export
     * @constructor
-    * @param {string} $fn Function name
-    * @param {string} $msg Message
-    * @param {*=} $val Incorrect value to message
+    * @param string $fn Function name
+    * @param string $msg Message
+    * @param mixed $val Incorrect value to message, default null
     */
    public function __construct($fn, $msg, $val = null) {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
@@ -29,7 +29,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.38';
+   protected static $MbnV = '1.39';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -89,8 +89,9 @@ class Mbn {
 
    /**
     * Private function, if m is true, sets value to b and return value, otherwise returns b
-    * @param {Mbn} $b
-    * @param {boolean} $m
+    * @param Mbn $b
+    * @param boolean $m
+    * @return Mbn
     */
    private function mbnSetReturn($b, $m) {
       if ($m === true) {
@@ -119,8 +120,9 @@ class Mbn {
 
    /**
     * Private function, sets value from string
-    * @param {string} $ns
-    * @param {array|boolean=} $v
+    * @param string $ns String or formula
+    * @param array|boolean $v Variables, default null
+    * @throws MbnErr invalid format, calc error
     */
    private function fromString($ns, $v = null) {
       $np = [];
@@ -160,7 +162,7 @@ class Mbn {
 
    /**
     * Private function, sets value from number
-    * @param {number} $nn
+    * @param int|float|double $nn
     */
    private function mbnFromNumber($nn) {
       if (!is_finite($nn)) {
@@ -190,8 +192,9 @@ class Mbn {
 
    /**
     * Private function, returns string value
-    * @param {string} $s Separator
-    * @param {boolean} $f Format thousands
+    * @param string $s Separator
+    * @param boolean $f Format thousands
+    * @return string
     */
    private function mbnToString($s, $f) {
       $l = count($this->d) - static::$MbnP;
@@ -223,8 +226,9 @@ class Mbn {
     * Constructor of Mbn object
     * @export
     * @constructor
-    * @param {*=} $n Value
-    * @param {array|boolean=} v Array with vars for evaluation
+    * @param mixed $n Value, default 0
+    * @param array|boolean $v Array with vars for evaluation, default null
+    * @throws MbnErr invalid argument, invalid format, calc error
     */
    public function __construct($n = 0, $v = null) {
       if (is_float($n) || is_int($n)) {
@@ -244,6 +248,7 @@ class Mbn {
 
    /**
     * Returns properties of Mbn class
+    * @return array properties
     */
    public static function prop() {
       return ['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS,
@@ -252,7 +257,7 @@ class Mbn {
 
    /**
     * Sets value from b
-    * @param {*} $b
+    * @param mixed $b
     */
    public function set($b) {
       if (!($b instanceof static)) {
@@ -266,6 +271,7 @@ class Mbn {
 
    /**
     * Returns string value
+    * @return string
     */
    public function toString() {
       return $this->mbnToString(static::$MbnS, static::$MbnF);
@@ -273,18 +279,24 @@ class Mbn {
 
    /**
     * Returns string value with or without thousand grouping
-    * @param {boolean=} $f Thousand grouping, dafault true
+    * @param boolean $f Thousand grouping, default true
+    * @return string
     */
    public function format($f = true) {
       return $this->mbnToString(static::$MbnS, $f);
    }
 
+   /**
+    * Returns string value
+    * @return string
+    */
    public function __toString() {
       return $this->toString();
    }
 
    /**
-    * Returns int value for MbnP = 0, otherwise float value
+    * Returns int value for MbnP = 0, otherwise float (double) value
+    * @return int|float|double
     */
    public function toNumber() {
       $v = $this->mbnToString('.', false);
@@ -292,30 +304,32 @@ class Mbn {
    }
 
    /**
-    * Compare value with b, returns 1 if value > b, returns -1 if value < b, otherwise 0
-    * @param {*=} $b
-    * @param {*=} $d Maximum difference treated as equality, default 0
+    * Compare value with b, a.cmp(b)<=0 means a<=b
+    * @param mixed $b
+    * @param mixed $d Maximum difference treated as equality, default 0
+    * @return int 1 if value > b, -1 if value < b, otherwise 0
+    * @throws MbnErr negative maximal difference
     */
    public function cmp($b, $d = 0) {
       if ($d !== 0) {
          $dm = new static($d);
       }
+      if (!($b instanceof static)) {
+         $b = new static($b);
+      }
       if ($d === 0 || $dm->s === 0) {
-         if (!($b instanceof static)) {
-            $b = new static($b);
-         }
          if ($this->s !== $b->s) {
             return ($this->s > $b->s) ? 1 : -1;
          }
          if ($this->s === 0) {
             return 0;
          }
-         $dl = count($this->d);
-         $ld = $dl - count($b->d);
+         $bl = count($b->d);
+         $ld = count($this->d) - $bl;
          if ($ld !== 0) {
             return ($ld > 0) ? $this->s : -$this->s;
          }
-         for ($i = 0; $i < $dl; $i++) {
+         for ($i = 0; $i < $bl; $i++) {
             if ($this->d[$i] !== $b->d[$i]) {
                return ($this->d[$i] > $b->d[$i]) ? $this->s : -$this->s;
             }
@@ -335,8 +349,9 @@ class Mbn {
 
    /**
     * Add b to value
-    * @param {*} $b
-    * @param {boolean=} $m Modify original variable, default false
+    * @param mixed $b
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function add($b, $m = false) {
       if (!($b instanceof static)) {
@@ -372,8 +387,9 @@ class Mbn {
 
    /**
     * Substract b from value
-    * @param {*} $b
-    * @param {boolean=} $m Modify original variable, default false
+    * @param mixed $b
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function sub($b, $m = false) {
       if (!($b instanceof static)) {
@@ -414,8 +430,9 @@ class Mbn {
 
    /**
     * Multiple value by b
-    * @param {*} $b
-    * @param {boolean=} $m Modify original variable, default false
+    * @param mixed $b
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function mul($b, $m = false) {
       if (!($b instanceof static)) {
@@ -444,8 +461,10 @@ class Mbn {
 
    /**
     * Divide value by b
-    * @param {*} $b
-    * @param {boolean=} $m Modify original variable, default false
+    * @param mixed $b
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
+    * @throws MbnErr division by zero
     */
    public function div($b, $m = false) {
       if (!($b instanceof static)) {
@@ -519,8 +538,10 @@ class Mbn {
 
    /**
     * Modulo, remainder of division value by b, keep sign of value
-    * @param {*} $b
-    * @param {boolean=} $m Modify original variable, default false
+    * @param mixed $b
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
+    * @throws MbnErr division by zero
     */
    public function mod($b, $m = false) {
       $ba = ($b instanceof static) ? $b->abs() : (new static($b))->abs();
@@ -534,7 +555,9 @@ class Mbn {
 
    /**
     * Split value to array of values, with same ratios as in given array, or to given number of parts, default 2
-    * @param {array} $ar Ratios array or number of parts, default 2
+    * @param array|mixed $ar Ratios array or number of parts, default 2
+    * @return Mbn[]
+    * @throws MbnErr negative ratio, non-positve or not integer number of parts
     */
    public function split($ar = 2) {
       $arr = [];
@@ -586,6 +609,7 @@ class Mbn {
 
    /**
     * Returns if the number is integer
+    * @return boolean
     */
    public function isInt() {
       $ct = count($this->d);
@@ -599,7 +623,8 @@ class Mbn {
 
    /**
     * Returns bigest integer value not greater than number
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function floor($m = false) {
       $r = ($m === true) ? $this : new static($this);
@@ -620,7 +645,8 @@ class Mbn {
 
    /**
     * Rounds number to closest integer value (half-up)
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function round($m = false) {
       $r = ($m === true) ? $this : new static($this);
@@ -638,7 +664,8 @@ class Mbn {
 
    /**
     * Returns absolute value
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function abs($m = false) {
       $r = ($m === true) ? $this : new static($this);
@@ -648,7 +675,8 @@ class Mbn {
 
    /**
     * Returns additive inverse of value
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function inva($m = false) {
       $r = ($m === true) ? $this : new static($this);
@@ -658,7 +686,9 @@ class Mbn {
 
    /**
     * Returns multiplicative inverse of value
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
+    * @throws MbnErr division by zero
     */
    public function invm($m = false) {
       $r = (new static(1))->div($this);
@@ -667,7 +697,8 @@ class Mbn {
 
    /**
     * Returns lowest integer value not lower than number
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function ceil($m = false) {
       $r = ($m === true) ? $this : new static($this);
@@ -676,7 +707,8 @@ class Mbn {
 
    /**
     * Returns integer part of number
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function intp($m = false) {
       $r = ($m === true) ? $this : new static($this);
@@ -685,8 +717,9 @@ class Mbn {
 
    /**
     * Returns if value equals b
-    * @param {*} $b
-    * @param {*} $d Maximum difference treated as equality, default 0
+    * @param mixed $b
+    * @param mixed $d Maximum difference treated as equality, default 0
+    * @return boolean
     */
    public function eq($b, $d = 0) {
       return $this->cmp($b, $d) === 0;
@@ -694,8 +727,9 @@ class Mbn {
 
    /**
     * Returns minimum from value and b
-    * @param {*} $b
-    * @param {boolean=} $m Modify original variable, default false
+    * @param mixed $b
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function min($b, $m = false) {
       return $this->mbnSetReturn(new static((($this->cmp($b)) <= 0) ? $this : $b), $m);
@@ -703,8 +737,9 @@ class Mbn {
 
    /**
     * Returns maximum from value and b
-    * @param {*} $b
-    * @param {boolean=} $m Modify original variable, default false
+    * @param mixed $b
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
     */
    public function max($b, $m = false) {
       return $this->mbnSetReturn(new static((($this->cmp($b)) >= 0) ? $this : $b), $m);
@@ -712,7 +747,9 @@ class Mbn {
 
    /**
     * Returns square root of value
-    * @param {boolean=} $m Modify original variable, default false
+    * @param boolean $m Modify original variable, default false
+    * @return Mbn
+    * @throws MbnErr square root of negative number
     */
    public function sqrt($m = false) {
       $t = new static($this);
@@ -736,6 +773,7 @@ class Mbn {
    /**
     * Returns sign from value, 1 - positive, -1 - negative, otherwise 0
     * @param {boolean=} $m Modify original variable, default false
+    * @return Mbn
     */
    public function sgn($m = false) {
       return $this->mbnSetReturn(new static($this->s), $m);
@@ -745,6 +783,8 @@ class Mbn {
     * Returns value to the power of b, b must be integer
     * @param {number} $b
     * @param {boolean=} $m Modify original variable, default false
+    * @return Mbn
+    * @throws MbnErr not integer exponent
     */
    public function pow($b, $m = false) {
       $n = new static($b);
@@ -802,9 +842,11 @@ class Mbn {
     * array of products for 1 argument function [arr[0].fn(), arr[1].fn(), ..]
     * array of products for 2 argument function and when b is same size array or single value
     * [arr[0].fn(b[0]), arr[1].fn(b[1]), ..] or [arr[0].fn(b), arr[1].fn(b), ..]
-    * @param {string} $fn
-    * @param {*} $arr
-    * @param {*=} $b
+    * @param string $fn
+    * @param array|mixed $arr first argument
+    * @param array|mixed $b second argument, defauult null
+    * @return Mbn|Mbn[]
+    * @throws MbnErr invalid function name, wrong number of arguments, different array sizes
     */
    public static function reduce($fn, $arr, $b = null) {
       $inv = false;
@@ -820,7 +862,7 @@ class Mbn {
          $arr = $inv;
       }
       $mode = static::$fnReduce[$fn];
-      $bmode = (($b !== null) ? (is_array($b) ? 2 : 1) : 0);
+      $bmode = ((func_num_args() === 3) ? (is_array($b) ? 2 : 1) : 0);
       if ($mode !== 2 && $bmode !== 0) {
          throw new MbnErr('.reduce', 'two agruments can be used with two-argument functions');
       }
@@ -863,8 +905,10 @@ class Mbn {
 
    /**
     * Sets and reads constant
-    * @param {string|null} $n Constant name, must start with upper-case letter
-    * @param {*=} v$ Constant value to set
+    * @param string|null $n Constant name, must start with letter or _
+    * @param mixed v$ Constant value to set
+    * @return Mbn|boolean
+    * @throws MbnErr undefined constant, constant allready set, incorrect name
     */
    public static function def($n, $v = null) {
       $mc = &static::$MbnConst;
@@ -887,7 +931,7 @@ class Mbn {
          if (isset($mc[$mx][$n]) || isset($mc[''][$n])) {
             throw new MbnErr('.def', 'constant allready set', $n);
          } else {
-            if (preg_match('/^[A-Z]\\w*$/', $n) !== 1) {
+            if (preg_match('/^[A-Za-z_]\\w*/', $n) !== 1) {
                throw new MbnErr('.def', 'incorrect name', $n);
             }
             $v = new static($v);
@@ -931,16 +975,22 @@ class Mbn {
 
    /**
     * Evaluate expression
-    * @param {string} $exp Evaluation formula
-    * @param {array|boolean=} $vars Object with vars for evaluation
+    * @param string $exp Expression
+    * @param array|boolean $vars Array with vars for evaluation, dafault null
+    * @return Mbn
+    * @throws MbnErr syntax error, operation error
     */
    public static function calc($exp, $vars = null) {
-      if ($vars !== true && !is_array($vars)) {
-         $vars = [];
-      }
-      return new static($exp, $vars);
+      return new static($exp, is_array($vars) ? $vars : true);
    }
 
+   /**
+    * Evaluate expression
+    * @param string $exp Expression
+    * @param array|boolean $vars Array with vars for evaluation, dafault null
+    * @return Mbn
+    * @throws MbnErr syntax error, operation error
+    */
    private static function mbnCalc($exp, $vars = null) {
       $expr = preg_replace('/^[\\s=]+/', '', $exp);
       if (!is_array($vars)) {
