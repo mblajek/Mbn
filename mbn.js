@@ -24,7 +24,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.39";
+   var MbnV = "1.40";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -38,13 +38,14 @@ var Mbn = (function () {
 
    /**
     * Function returns constructor of Mbn objects
-    * MbnP - precission, number of digits in fractional part
+    * MbnP - precision, number of digits in fractional part
     * MbnS - output separator(".", ","), default "."
-    * MbnT - trim insignifficant zeros in output string ("0.20" to "0.2"), default false (no trimming)
+    * MbnT - trim insignificant zeros in output string ("0.20" to "0.2"), default false (no trimming)
     * MbnF - format thousands in output string ("1234" to "1 234"), default false
-    * MbnE - evauate strings, true - allways, null - starting with "=", false - never,  default null
+    * MbnE - evaluate strings, true - allways, null - starting with "=", false - never,  default null
     * @export
-    * @param {number|Object=} opt precission or object with params
+    * @param {number|Object=} opt precision or object with params
+    * @throws {MbnErr} invalid class options
     */
    var MbnCr = function (opt) {
       if (typeof opt !== "object") {
@@ -206,6 +207,7 @@ var Mbn = (function () {
        * Private function, sets value from number
        * @param {Mbn} a
        * @param {number} nn
+       * @throws {MbnErr} infinite value
        */
       var mbnFromNumber = function (a, nn) {
          if (!isFinite(nn)) {
@@ -242,11 +244,10 @@ var Mbn = (function () {
        * @return {string}
        */
       var mbnToString = function (a, s, f) {
-         var l = a._d.length - MbnP;
-         var l0;
+         var i, l0, l = a._d.length - MbnP;
          if (MbnT) {
             l0 = l - 1;
-            for (var i = l; i < a._d.length; i++) {
+            for (i = l; i < a._d.length; i++) {
                if (a._d[i] !== 0) {
                   l0 = i;
                }
@@ -256,8 +257,9 @@ var Mbn = (function () {
          }
          var d = a._d.slice(0, l);
          if (f === true) {
-            for (var i = 3; i < d.length; i += 4) {
-               d.splice(-i, 0, " ");
+            var dl = d.length;
+            for (i = 0; 3 * i < dl - 3; i ++) {
+              d.splice(-3 - 4 * i, 0, " ");
             }
          }
          var r = ((a._s < 0) ? "-" : "") + d.join("");
@@ -271,7 +273,7 @@ var Mbn = (function () {
        * Constructor of Mbn object
        * @export
        * @constructor
-       * @param {*=} n Value, dafault 0
+       * @param {*=} n Value, default 0
        * @param {Object|boolean=} v Object with vars for evaluation
        * @throws {MbnErr} invalid argument, invalid format, calc error
        */
@@ -316,6 +318,8 @@ var Mbn = (function () {
       /**
        * Sets value from b
        * @param {*} b
+       * @return {Mbn}
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.set = function (b) {
          if (!(b instanceof Mbn)) {
@@ -337,7 +341,7 @@ var Mbn = (function () {
 
       /**
        * Returns string value with or without thousand grouping
-       * @param {boolean=} f Thousand grouping, dafault true
+       * @param {boolean=} f Thousand grouping, default true
        */
       Mbn.prototype.format = function (f) {
          return mbnToString(this, MbnS, (f === undefined) ? true : f);
@@ -357,6 +361,7 @@ var Mbn = (function () {
        * @param {*=} d Maximum difference treated as equality, default 0
        * @return {number} 1 if value > b, -1 if value < b, otherwise 0
        * @throws {MbnErr} negative maximal difference
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.cmp = function (b, d) {
          var dm;
@@ -381,16 +386,14 @@ var Mbn = (function () {
                }
             }
             return 0;
-         } else {
-            if (dm._s === -1) {
-               throw new MbnErr(".cmp", "negative maximal difference", dm);
-            }
-            if (this.sub(b).abs().cmp(dm) <= 0) {
-               return 0;
-            } else {
-               return this.cmp(b);
-            }
          }
+         if (dm._s === -1) {
+            throw new MbnErr(".cmp", "negative maximal difference", dm);
+         }
+         if (this.sub(b).abs().cmp(dm) <= 0) {
+            return 0;
+         }
+         return this.cmp(b);
       };
 
       /**
@@ -398,6 +401,7 @@ var Mbn = (function () {
        * @param {*} b
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.add = function (b, m) {
          if (!(b instanceof Mbn)) {
@@ -435,6 +439,7 @@ var Mbn = (function () {
        * @param {*} b
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.sub = function (b, m) {
          if (!(b instanceof Mbn)) {
@@ -477,6 +482,7 @@ var Mbn = (function () {
        * @param {*} b
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.mul = function (b, m) {
          if (!(b instanceof Mbn)) {
@@ -506,6 +512,7 @@ var Mbn = (function () {
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
        * @throws {MbnErr} division by zero
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.div = function (b, m) {
          if (!(b instanceof Mbn)) {
@@ -532,8 +539,7 @@ var Mbn = (function () {
             y.push(0);
             mp++;
          }
-         var xl;
-         var yl;
+         var i, xl, yl;
          do {
             while ((x[(xl = x.length) - 1] + y[(yl = y.length) - 1]) === 0) {
                x.pop();
@@ -541,7 +547,7 @@ var Mbn = (function () {
             }
             var xge = (xl >= yl);
             if (xl === yl) {
-               for (var i = 0; i < xl; i++) {
+               for (i = 0; i < xl; i++) {
                   if (x[i] !== y[i]) {
                      xge = x[i] > y[i];
                      break;
@@ -551,7 +557,7 @@ var Mbn = (function () {
             if (xge) {
                ra[p]++;
                var ld = xl - yl;
-               for (var i = yl - 1; i >= 0; i--) {
+               for (i = yl - 1; i >= 0; i--) {
                   if (x[i + ld] < y[i]) {
                      x[i + ld - 1]--;
                      x[i + ld] += 10 - y[i];
@@ -585,6 +591,7 @@ var Mbn = (function () {
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
        * @throws (MbnErr) division by zero
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.mod = function (b, m) {
          var ba = (b instanceof Mbn) ? b.abs() : (new Mbn(b)).abs();
@@ -601,32 +608,32 @@ var Mbn = (function () {
        * @param {Array|*=} ar Ratios array or number of parts, default 2
        * @return {Array}
        * @throws {MbnErr} negative ratio, non-positve or not integer number of parts
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.split = function (ar) {
          var arr = [];
-         var asum;
-         var n;
+         var asum, n, i;
          if (ar === undefined) {
             ar = 2;
          }
          if (!(ar instanceof Array)) {
             var mbn1 = new Mbn(1);
             asum = new Mbn(ar);
-            if (!asum.isInt() || asum._s < 0) {
+            if (asum._s < 0 || !asum.isInt()) {
                throw new MbnErr(".split", "only natural number of parts supported");
             }
             n = asum.toNumber();
-            for (var i = 0; i < n; i++) {
+            for (i = 0; i < n; i++) {
                arr.push(mbn1);
             }
          } else {
             var mulp = new Mbn(1);
-            for (var i = 0; i < MbnP; i++) {
+            for (i = 0; i < MbnP; i++) {
                mulp._d.push(0);
             }
             asum = new Mbn(0);
             n = ar.length;
-            for (var i = 0; i < n; i++) {
+            for (i = 0; i < n; i++) {
                var ai = (new Mbn(ar[i])).mul(mulp);
                if (ai._s === -1) {
                   throw new MbnErr(".split", "only non-negative ratio values supported");
@@ -640,7 +647,7 @@ var Mbn = (function () {
          }
          var a = new Mbn(this);
          var brr = [];
-         for (var i = 0; i < n; i++) {
+         for (i = 0; i < n; i++) {
             if (arr[i]._s === 0) {
                brr.push(arr[i]);
             } else {
@@ -762,6 +769,8 @@ var Mbn = (function () {
        * @param {*} b
        * @param {boolean=} d Maximum difference treated as equality, default 0
        * @return {boolean}
+       * @throws {MbnErr} negative maximal difference
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.eq = function (b, d) {
          return this.cmp(b, d) === 0;
@@ -772,9 +781,10 @@ var Mbn = (function () {
        * @param {*} b
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.min = function (b, m) {
-         return mbnSetReturn(this, new Mbn(((this.cmp(b)) <= 0) ? this : b), m);
+         return mbnSetReturn(this, new Mbn((this.cmp(b) <= 0) ? this : b), m);
       };
 
       /**
@@ -782,9 +792,10 @@ var Mbn = (function () {
        * @param {*} b
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.max = function (b, m) {
-         return mbnSetReturn(this, new Mbn(((this.cmp(b)) >= 0) ? this : b), m);
+         return mbnSetReturn(this, new Mbn((this.cmp(b) >= 0) ? this : b), m);
       };
 
       /**
@@ -827,6 +838,7 @@ var Mbn = (function () {
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
        * @throws {MbnErr} not integer exponent
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.prototype.pow = function (b, m) {
          var n = new Mbn(b);
@@ -887,6 +899,7 @@ var Mbn = (function () {
        * @param {*=} b
        * @return {Mbn|Array}
        * @throws {MbnErr} invalid function name, wrong number of arguments, different array sizes
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.reduce = function (fn, arr, b) {
          var inv = false;
@@ -901,16 +914,16 @@ var Mbn = (function () {
             b = arr;
             arr = inv;
          }
-         var r;
+         var r, i;
          var arrl = arr.length;
          var mode = fnReduce[fn];
-         var bmode = ((arguments.length === 3) ? ((b instanceof Array) ? 2 : 1) : 0);
+         var bmode = (arguments.length === 3) ? ((b instanceof Array) ? 2 : 1) : 0;
          if (mode !== 2 && bmode !== 0) {
             throw new MbnErr(".reduce", "two agruments can be used with two-argument functions");
          }
          if (mode === 2 && bmode === 0) {
             r = new Mbn((arrl > 0) ? arr[0] : 0);
-            for (var i = 1; i < arrl; i++) {
+            for (i = 1; i < arrl; i++) {
                r[fn](arr[i], true);
             }
          } else {
@@ -919,10 +932,10 @@ var Mbn = (function () {
                throw new MbnErr(".reduce", "arrays have different length", b);
             }
             var bv = (bmode === 1) ? (new Mbn(b)) : null;
-            for (var i = 0; i < arrl; i++) {
+            for (i = 0; i < arrl; i++) {
                var e = new Mbn(arr[i]);
                if (bmode !== 0) {
-                  var bi = ((bmode === 2) ? (new Mbn(b[i])) : bv);
+                  var bi = (bmode === 2) ? (new Mbn(b[i])) : bv;
                   e.set((inv === false) ? e[fn](bi) : bi[fn](e));
                }
                r.push((mode === 1) ? e[fn](true) : e);
@@ -943,7 +956,8 @@ var Mbn = (function () {
        * @param {string|null} n Constant name, must start with letter or _
        * @param {*=} v Constant value to set
        * @return {Mbn|boolean}
-       * @throws {MbnErr} undefined constant, constant allready set, incorrect name
+       * @throws {MbnErr} undefined constant, constant already set, incorrect name
+       * @throws {MbnErr} invalid argument format
        */
       Mbn.def = function (n, v) {
          if (n === null) {
@@ -957,18 +971,16 @@ var Mbn = (function () {
                MbnConst[n] = (n === "eps") ? ((new Mbn(10)).pow(-MbnP)) : (new Mbn(MbnConst[n]));
             }
             return new Mbn(MbnConst[n]);
-         } else {
-            if (MbnConst.hasOwnProperty(n)) {
-               throw new MbnErr(".def", "constant allready set", n);
-            } else {
-               if (!cnRx.test(n)) {
-                  throw new MbnErr(".def", "incorrect name", n);
-               }
-               v = new Mbn(v);
-               MbnConst[n] = v;
-               return new Mbn(v);
-            }
          }
+         if (MbnConst.hasOwnProperty(n)) {
+            throw new MbnErr(".def", "constant allready set", n);
+         }
+         if (!cnRx.test(n)) {
+            throw new MbnErr(".def", "incorrect name", n);
+         }
+         v = new Mbn(v);
+         MbnConst[n] = v;
+         return new Mbn(v);
       };
 
       var fnEval = {abs: true, inva: false, ceil: true, floor: true, sqrt: true, round: true, sgn: true, int: "intp"};
@@ -986,11 +998,11 @@ var Mbn = (function () {
       };
       var funPrx = 4;
       var rxs = {
-         num: {rx: /^([0-9\., ]+)\s*/, next: ["bop", "pc", "pr"], end: true},
+         num: {rx: /^([0-9., ]+)\s*/, next: ["bop", "pc", "pr"], end: true},
          name: {rx: /^([A-Za-z_]\w*)\s*/},
          fn: {next: ["po"], end: false},
          vr: {next: endBop, end: true},
-         bop: {rx: /^([-+\*\/#^&|])\s*/, next: uopVal, end: false},
+         bop: {rx: /^([-+*\/#^&|])\s*/, next: uopVal, end: false},
          uop: {rx: /^([-+])\s*/, next: uopVal, end: false},
          po: {rx: /^(\()\s*/, next: uopVal, end: false},
          pc: {rx: /^(\))\s*/, next: endBop, end: true},
@@ -1029,13 +1041,12 @@ var Mbn = (function () {
          var rpno = [];
          var neg = false;
          var t = null;
-         var tok;
-         var mtch;
+         var tok, mtch, i, rolp, rolm;
          var invaUop = [funPrx, true, "inva"];
 
          while (expr.length > 0) {
             mtch = null;
-            for (var i = 0; i < larl && mtch === null; i++) {
+            for (i = 0; i < larl && mtch === null; i++) {
                t = larr[i];
                mtch = expr.match(rxs[t].rx);
             }
@@ -1077,9 +1088,8 @@ var Mbn = (function () {
                   break;
                case "bop":
                   var bop = bops[tok];
-                  var rolm;
                   while ((rolm = rpno.length - 1) !== -1) {
-                     var rolp = rpno[rolm];
+                     rolp = rpno[rolm];
                      if (rolp !== "(" && (rolp[0] > bop[0] - (bop[1] ? 1 : 0))) {
                         rpns.push(rpno.pop()[2]);
                      } else {
@@ -1097,9 +1107,8 @@ var Mbn = (function () {
                   rpno.push(tok);
                   break;
                case "pc":
-                  var rolm;
                   while ((rolm = rpno.length - 1) !== -1) {
-                     var rolp = rpno[rolm];
+                     rolp = rpno[rolm];
                      if (rolp !== "(") {
                         rpns.push(rpno.pop()[2]);
                      } else {
@@ -1109,11 +1118,10 @@ var Mbn = (function () {
                   }
                   if (rolm === -1) {
                      throw new MbnErr(".calc", "unexpected", ")");
-                  } else {
-                     rolm = rpno.length - 1;
-                     if (rolm !== -1 && rpno[rolm][2] === funPrx) {
-                        rpns.push(rpno.pop()[2]);
-                     }
+                  }
+                  rolm = rpno.length - 1;
+                  if (rolm !== -1 && rpno[rolm][2] === funPrx) {
+                     rpns.push(rpno.pop()[2]);
                   }
                   break;
                case "pr":
@@ -1142,7 +1150,7 @@ var Mbn = (function () {
 
          var rpnsl = rpns.length;
 
-         for (var i = 0; i < rpnsl; i++) {
+         for (i = 0; i < rpnsl; i++) {
             var tn = rpns[i];
             if (tn instanceof Mbn) {
                rpn.push(tn);
