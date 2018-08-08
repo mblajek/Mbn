@@ -1,4 +1,3 @@
-
 "use strict";
 var Mbn = (function () {
    /**
@@ -42,7 +41,7 @@ var Mbn = (function () {
     * MbnS - output separator(".", ","), default "."
     * MbnT - trim insignificant zeros in output string ("0.20" to "0.2"), default false (no trimming)
     * MbnF - format thousands in output string ("1234" to "1 234"), default false
-    * MbnE - evaluate strings, true - allways, null - starting with "=", false - never,  default null
+    * MbnE - evaluate strings, true - always, null - starting with "=", false - never, default null
     * @export
     * @param {number|Object=} opt precision or object with params
     * @throws {MbnErr} invalid class options
@@ -58,25 +57,25 @@ var Mbn = (function () {
       }
 
       //actual separator for Mbn class
-      var MbnS = (opt.MbnS === undefined) ? MbnDS : opt.MbnS;
+      var MbnS = opt.hasOwnProperty("MbnS") ? opt.MbnS : MbnDS;
       if (MbnS !== "." && MbnS !== ",") {
          throw new MbnErr(".extend", "invalid separator (dot, comma)", MbnS);
       }
 
       //actual truncate for Mbn class
-      var MbnT = (opt.MbnT === undefined) ? MbnDT : opt.MbnT;
+      var MbnT = opt.hasOwnProperty("MbnT") ? opt.MbnT : MbnDT;
       if (MbnT !== true && MbnT !== false) {
          throw new MbnErr(".extend", "invalid truncate (bool)", MbnT);
       }
 
       //actual extension for Mbn class
-      var MbnE = (opt.MbnE === undefined) ? MbnDE : opt.MbnE;
+      var MbnE = opt.hasOwnProperty("MbnE") ? opt.MbnE : MbnDE;
       if (MbnE !== true && MbnE !== false && MbnE !== null) {
          throw new MbnErr(".extend", "invalid extension (bool)", MbnT);
       }
 
       //actual format for Mbn class
-      var MbnF = (opt.MbnF === undefined) ? MbnDF : opt.MbnF;
+      var MbnF = opt.hasOwnProperty("MbnF") ? opt.MbnF : MbnDF;
       if (MbnF !== true && MbnF !== false) {
          throw new MbnErr(".extend", "invalid format (bool)", MbnF);
       }
@@ -191,8 +190,7 @@ var Mbn = (function () {
                   a._d.push(c);
                }
             } else if ((i !== ln || nl === 1) && (c !== -16 || (i + 1) >= ln)) {
-               if (v !== false && ((v instanceof Object) || v === true || MbnE === true
-                       || (MbnE !== false && np[1] === "="))) {
+               if (v !== false && ((v instanceof Object) || v === true || MbnE === true || (MbnE !== false && np[1] === "="))) {
                   a.set(mbnCalc(ns, v));
                   return;
                }
@@ -258,8 +256,8 @@ var Mbn = (function () {
          var d = a._d.slice(0, l);
          if (f === true) {
             var dl = d.length;
-            for (i = 0; 3 * i < dl - 3; i ++) {
-              d.splice(-3 - 4 * i, 0, " ");
+            for (i = 0; 3 * i < dl - 3; i++) {
+               d.splice(-3 - 4 * i, 0, " ");
             }
          }
          var r = ((a._s < 0) ? "-" : "") + d.join("");
@@ -435,7 +433,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Substract b from value
+       * Subtract b from value
        * @param {*} b
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
@@ -674,7 +672,7 @@ var Mbn = (function () {
       };
 
       /**
-       * Returns bigest integer value not greater than number
+       * Returns greatest integer value not greater than number
        * @param {boolean=} m Modify original variable, default false
        * @return {Mbn}
        */
@@ -813,7 +811,8 @@ var Mbn = (function () {
          var mbn2 = new Mbn(2);
          if (r._s === -1) {
             throw new MbnErr(".sqrt", "square root of negative number", this);
-         } else if (r._s === 1) {
+         }
+         if (r._s === 1) {
             do {
                rb.set(r);
                r.add(t.div(r), true).div(mbn2, true);
@@ -886,8 +885,10 @@ var Mbn = (function () {
          return mbnSetReturn(this, r, m);
       };
 
-      var fnReduce = {set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1,
-         min: 2, max: 2, add: 2, sub: 2, mul: 2, div: 2, mod: 2, pow: 2};
+      var fnReduce = {
+         set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1,
+         min: 2, max: 2, add: 2, sub: 2, mul: 2, div: 2, mod: 2, pow: 2
+      };
       /**
        * Runs function on each element, returns:
        * single value for 2 argument function (arr[0].fn(arr[1]).fn(arr[2]), ..)
@@ -919,7 +920,7 @@ var Mbn = (function () {
          var mode = fnReduce[fn];
          var bmode = (arguments.length === 3) ? ((b instanceof Array) ? 2 : 1) : 0;
          if (mode !== 2 && bmode !== 0) {
-            throw new MbnErr(".reduce", "two agruments can be used with two-argument functions");
+            throw new MbnErr(".reduce", "two arguments can be used with two-argument functions");
          }
          if (mode === 2 && bmode === 0) {
             r = new Mbn((arrl > 0) ? arr[0] : 0);
@@ -973,7 +974,7 @@ var Mbn = (function () {
             return new Mbn(MbnConst[n]);
          }
          if (MbnConst.hasOwnProperty(n)) {
-            throw new MbnErr(".def", "constant allready set", n);
+            throw new MbnErr(".def", "constant already set", n);
          }
          if (!cnRx.test(n)) {
             throw new MbnErr(".def", "incorrect name", n);

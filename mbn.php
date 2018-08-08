@@ -14,7 +14,7 @@ class MbnErr extends Exception {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
       if ($val !== null) {
          if (is_array($val)) {
-            $val = '[' . implode(",", $val) . ']';
+            $val = '[' . implode(',', $val) . ']';
          }
          $ret .= ': ' . ((strlen($val) > 20) ? (substr($val, 0, 18) . '..') : $val);
       }
@@ -51,7 +51,7 @@ class Mbn {
          $adi = $ad[$i];
          while ($adi < 0) {
             $adi += 10;
-            $ad[$i - 1] --;
+            $ad[$i - 1]--;
          }
          $adid = $adi % 10;
          $adic = ($adi - $adid) / 10;
@@ -69,11 +69,11 @@ class Mbn {
       }
       while ($adlm1 > static::$MbnP && $ad[0] === 0) {
          array_shift($ad);
-         $adlm1 --;
+         $adlm1--;
       }
       while ($adlm1 < static::$MbnP) {
          array_unshift($ad, 0);
-         $adlm1 ++;
+         $adlm1++;
       }
       if ($adlm1 === static::$MbnP) {
          $i = 0;
@@ -110,7 +110,7 @@ class Mbn {
          $adl++;
       }
       if (array_pop($ad) >= 5) {
-         $ad[$adl - 2] ++;
+         $ad[$adl - 2]++;
       }
       $this->mbnCarry();
    }
@@ -210,7 +210,7 @@ class Mbn {
       $d = array_slice($this->d, 0, $l);
       if ($f === true) {
          $dl = count($d);
-         for ($i = 0; 3 * $i < $dl - 3; $i ++) {
+         for ($i = 0; 3 * $i < $dl - 3; $i++) {
             array_splice($d, -3 - 4 * $i, 0, ' ');
          }
       }
@@ -387,7 +387,7 @@ class Mbn {
    }
 
    /**
-    * Substract b from value
+    * Subtract b from value
     * @param mixed $b
     * @param boolean $m Modify original variable, default false
     * @return Mbn
@@ -514,7 +514,7 @@ class Mbn {
             $ld = $xl - $yl;
             for ($i = $yl - 1; $i >= 0; $i--) {
                if ($x[$i + $ld] < $y[$i]) {
-                  $x[$i + $ld - 1] --;
+                  $x[$i + $ld - 1]--;
                   $x[$i + $ld] += 10 - $y[$i];
                } else {
                   $x[$i + $ld] -= $y[$i];
@@ -628,7 +628,7 @@ class Mbn {
    }
 
    /**
-    * Returns bigest integer value not greater than number
+    * Returns greatest integer value not greater than number
     * @param boolean $m Modify original variable, default false
     * @return Mbn
     */
@@ -642,7 +642,7 @@ class Mbn {
             $r->d[$l] = 0;
          }
          if ($r->s === -1 && $ds > 0) {
-            $r->d[$ct - static::$MbnP - 1] ++;
+            $r->d[$ct - static::$MbnP - 1]++;
          }
          $r->mbnCarry();
       }
@@ -718,7 +718,7 @@ class Mbn {
     */
    public function intp($m = false) {
       $r = ($m === true) ? $this : new static($this);
-      return($r->s >= 0) ? $r->floor(true) : $r->ceil(true);
+      return ($r->s >= 0) ? $r->floor(true) : $r->ceil(true);
    }
 
    /**
@@ -770,7 +770,8 @@ class Mbn {
       $mbn2 = new static('2');
       if ($r->s === -1) {
          throw new MbnErr('.sqrt', 'square root of negative number', $this);
-      } else if ($r->s === 1) {
+      }
+      if ($r->s === 1) {
          do {
             $rb->set($r);
             $r->add($t->div($r), true)->div($mbn2, true);
@@ -937,7 +938,7 @@ class Mbn {
             if (!isset($mc[''][$n])) {
                throw new MbnErr('.def', 'undefined constant', $n);
             }
-            $mc[$mx][$n] = ($n === "eps") ? ((new static(10))->pow(-static::$MbnP)) : (new static($mc[''][$n]));
+            $mc[$mx][$n] = ($n === 'eps') ? ((new static(10))->pow(-static::$MbnP)) : (new static($mc[''][$n]));
          }
          return new static($mc[$mx][$n]);
       }
@@ -987,7 +988,7 @@ class Mbn {
    /**
     * Evaluate expression
     * @param string $exp Expression
-    * @param array|boolean $vars Array with vars for evaluation, dafault null
+    * @param array|boolean $vars Array with vars for evaluation, default null
     * @return Mbn
     * @throws MbnErr syntax error, operation error
     * @throws MbnErr invalid argument format
@@ -999,7 +1000,7 @@ class Mbn {
    /**
     * Evaluate expression
     * @param string $exp Expression
-    * @param array|boolean $vars Array with vars for evaluation, dafault null
+    * @param array|boolean $vars Array with vars for evaluation, default null
     * @return Mbn
     * @throws MbnErr syntax error, operation error
     * @throws MbnErr invalid argument format
@@ -1106,7 +1107,6 @@ class Mbn {
          }
 
          $larr = &static::$states[static::$rxs[$t]['next']];
-         $larl = count($larr);
          $lare = static::$rxs[$t]['end'];
       }
       while (count($rpno) !== 0) {
@@ -1125,7 +1125,7 @@ class Mbn {
 
       foreach ($rpns as &$tn) {
          if ($tn instanceof static) {
-            $rpn[] = $tn;
+            $rpn[] = &$tn;
          } elseif (isset(static::$fnEval[$tn])) {
             if (is_string(static::$fnEval[$tn])) {
                $tn = static::$fnEval[$tn];
