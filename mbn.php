@@ -1132,8 +1132,7 @@ class Mbn {
             }
             $rpn[count($rpn) - 1]->{$tn}(true);
          } else {
-            $pp = array_pop($rpn);
-            $rpn[count($rpn) - 1]->{$tn}($pp, true);
+            $rpn[count($rpn) - 2]->{$tn}(array_pop($rpn), true);
          }
       }
       return $rpn[0];

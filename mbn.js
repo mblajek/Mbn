@@ -1148,11 +1148,11 @@ var Mbn = (function () {
          }
 
          var rpn = [];
-
          var rpnsl = rpns.length;
+         var tn;
 
          for (i = 0; i < rpnsl; i++) {
-            var tn = rpns[i];
+            tn = rpns[i];
             if (tn instanceof Mbn) {
                rpn.push(tn);
             } else if (fnEval.hasOwnProperty(tn)) {
@@ -1161,8 +1161,7 @@ var Mbn = (function () {
                }
                rpn[rpn.length - 1][tn](true);
             } else {
-               var pp = rpn.pop();
-               rpn[rpn.length - 1][tn](pp, true);
+               rpn[rpn.length - 2][tn](rpn.pop(), true);
             }
          }
          return rpn[0];
