@@ -1,4 +1,5 @@
 "use strict";
+
 var Mbn = (function () {
    /**
     * Common error message object
@@ -23,7 +24,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.40";
+   var MbnV = "1.41";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -34,6 +35,49 @@ var Mbn = (function () {
    var MbnDE = null;
    //default format
    var MbnDF = false;
+
+   /**
+    * fill options with default parameters and check
+    * @param opt {Object} params by reference
+    * @param MbnDP default precission
+    * @param MbnDS default separator
+    * @param MbnDT default truncate
+    * @param MbnDE default evaluation
+    * @param MbnDF default format
+    * @param fname name of function for exception
+    */
+   var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, fname) {
+      //actual precision for Mbn class
+      if (!opt.hasOwnProperty("MbnP")) {
+         opt.MbnP = MbnDP;
+      } else if (typeof opt.MbnP !== "number" || opt.MbnP < 0 || !isFinite(opt.MbnP) || Math.round(opt.MbnP) !== opt.MbnP) {
+         throw new MbnErr(fname, "invalid precision (non-negative int)", opt.MbnP);
+      }
+      //actual separator for Mbn class
+      if (!opt.hasOwnProperty("MbnS")) {
+         opt.MbnS = MbnDS;
+      } else if (opt.MbnS !== "." && opt.MbnS !== ",") {
+         throw new MbnErr(fname, "invalid separator (dot, comma)", opt.MbnS);
+      }
+      //actual truncate for Mbn class
+      if (!opt.hasOwnProperty("MbnT")) {
+         opt.MbnT = MbnDT;
+      } else if (opt.MbnT !== true && opt.MbnT !== false) {
+         throw new MbnErr(fname, "invalid truncate (bool)", opt.MbnT);
+      }
+      //actual extension for Mbn class
+      if (!opt.hasOwnProperty("MbnE")) {
+         opt.MbnE = MbnDE;
+      } else if (opt.MbnE !== true && opt.MbnE !== false && opt.MbnE !== null) {
+         throw new MbnErr(fname, "invalid extension (bool)", opt.MbnT);
+      }
+      //actual format for Mbn class
+      if (!opt.hasOwnProperty("MbnF")) {
+         opt.MbnF = MbnDF;
+      } else if (opt.MbnF !== true && opt.MbnF !== false) {
+         throw new MbnErr(fname, "invalid format (bool)", opt.MbnF);
+      }
+   };
 
    /**
     * Function returns constructor of Mbn objects
@@ -50,35 +94,8 @@ var Mbn = (function () {
       if (typeof opt !== "object") {
          opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
       }
-      //actual precision for Mbn class
-      var MbnP = (opt.MbnP === undefined) ? MbnDP : Number(opt.MbnP);
-      if (!isFinite(MbnP) || Math.round(MbnP) !== MbnP || MbnP < 0) {
-         throw new MbnErr(".extend", "invalid precision (non-negative int)", MbnP);
-      }
-
-      //actual separator for Mbn class
-      var MbnS = opt.hasOwnProperty("MbnS") ? opt.MbnS : MbnDS;
-      if (MbnS !== "." && MbnS !== ",") {
-         throw new MbnErr(".extend", "invalid separator (dot, comma)", MbnS);
-      }
-
-      //actual truncate for Mbn class
-      var MbnT = opt.hasOwnProperty("MbnT") ? opt.MbnT : MbnDT;
-      if (MbnT !== true && MbnT !== false) {
-         throw new MbnErr(".extend", "invalid truncate (bool)", MbnT);
-      }
-
-      //actual extension for Mbn class
-      var MbnE = opt.hasOwnProperty("MbnE") ? opt.MbnE : MbnDE;
-      if (MbnE !== true && MbnE !== false && MbnE !== null) {
-         throw new MbnErr(".extend", "invalid extension (bool)", MbnT);
-      }
-
-      //actual format for Mbn class
-      var MbnF = opt.hasOwnProperty("MbnF") ? opt.MbnF : MbnDF;
-      if (MbnF !== true && MbnF !== false) {
-         throw new MbnErr(".extend", "invalid format (bool)", MbnF);
-      }
+      prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, ".extend");
+      var MbnP = opt.MbnP, MbnS = opt.MbnS, MbnT = opt.MbnT, MbnE = opt.MbnE, MbnF = opt.MbnF;
 
       /**
        * Private function, carries digits bigger than 9, and removes leading zeros
@@ -159,7 +176,7 @@ var Mbn = (function () {
          mbnCarry(a);
       };
 
-      var wsRx2 = /^\s*(=)?[\s=]*(\+|-)?\s*((.*\S)?)/;
+      var wsRx2 = /^\s*(=)?[\s=]*([+\-])?\s*((.*\S)?)/;
       /**
        * Private function, sets value from string
        * @param {Mbn} a
@@ -237,32 +254,51 @@ var Mbn = (function () {
       /**
        * Private function, returns string value
        * @param {Mbn} a
+       * @param {number} p Target precision
        * @param {string} s Separator
+       * @param {boolean} t Trim zeros
        * @param {boolean} f Format thousands
        * @return {string}
        */
-      var mbnToString = function (a, s, f) {
-         var i, l0, l = a._d.length - MbnP;
-         if (MbnT) {
-            l0 = l - 1;
-            for (i = l; i < a._d.length; i++) {
-               if (a._d[i] !== 0) {
-                  l0 = i;
+      var mbnToString = function (a, p, s, t, f) {
+         var v = a, li = a._d.length - MbnP;
+         if (p < MbnP) {
+            var b = new Mbn(a);
+            var bl = b._d.length;
+            if (p < MbnP - 1) {
+               b._d = b._d.slice(0, bl - MbnP + p + 1);
+            }
+            mbnRoundLast(b);
+            if (b._d.length - p > li) {
+               b._d = b._d.slice(b._d.length - p - li);
+            }
+            v = b;
+         }
+         var di = v._d.slice(0, li);
+         if (f === true) {
+            var dl = di.length;
+            for (i = 0; 3 * i < dl - 3; i++) {
+               di.splice(-3 - 4 * i, 0, " ");
+            }
+         }
+         var df = v._d.slice(li);
+         if (p > MbnP && !t) {
+            for (i = 0; i < p - MbnP; i++) {
+               df.push(0);
+            }
+         }
+         if (t) {
+            i = v._d.length - 1;
+            for (; i >= li; i--) {
+               if (v._d[i] !== 0) {
+                  break;
                }
             }
-         } else {
-            l0 = l + MbnP;
+            df = df.slice(0, i - li + 1);
          }
-         var d = a._d.slice(0, l);
-         if (f === true) {
-            var dl = d.length;
-            for (i = 0; 3 * i < dl - 3; i++) {
-               d.splice(-3 - 4 * i, 0, " ");
-            }
-         }
-         var r = ((a._s < 0) ? "-" : "") + d.join("");
-         if (MbnP !== 0 && l0 >= l) {
-            r += s + a._d.slice(l, l0 + 1).join("");
+         var r = ((a._s < 0) ? "-" : "") + di.join("");
+         if (df.length > 0) {
+            r += s + df.join("");
          }
          return r;
       };
@@ -334,15 +370,19 @@ var Mbn = (function () {
        * @return string
        */
       Mbn.prototype.toString = function () {
-         return mbnToString(this, MbnS, MbnF);
+         return mbnToString(this, MbnP, MbnS, MbnT, MbnF);
       };
 
       /**
        * Returns string value with or without thousand grouping
-       * @param {boolean=} f Thousand grouping, default true
+       * @param {boolean|Object=} opt Thousand grouping, default true
        */
-      Mbn.prototype.format = function (f) {
-         return mbnToString(this, MbnS, (f === undefined) ? true : f);
+      Mbn.prototype.format = function (opt) {
+         if (typeof opt !== "object") {
+            opt = {MbnF: opt === true || opt === undefined};
+         }
+         prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, ".format");
+         return mbnToString(this, opt.MbnP, opt.MbnS, opt.MbnT, opt.MbnF);
       };
 
       /**
@@ -350,7 +390,7 @@ var Mbn = (function () {
        * @return {number}
        */
       Mbn.prototype.toNumber = function () {
-         return Number(mbnToString(this, ".", false));
+         return Number(mbnToString(this, MbnP, ".", false, false));
       };
 
       /**
@@ -885,6 +925,24 @@ var Mbn = (function () {
          return mbnSetReturn(this, r, m);
       };
 
+      /**
+       * Returns factorial, value must be non-negative integer
+       * @param {boolean=} m Modify original variable, default false
+       * @return {Mbn}
+       * @throws {MbnErr} value is not non-negative integer
+       */
+      Mbn.prototype.fact = function (m) {
+         if (!this.isInt() || this.cmp(0) === -1) {
+            throw new MbnErr(".fact", "only non-negative integers supported", this);
+         }
+         var n = this.sub(1), r = new Mbn(this);
+         while (n._s === 1) {
+            r.mul(n, true);
+            n.sub(1, true);
+         }
+         return mbnSetReturn(this, r, m);
+      };
+
       var fnReduce = {
          set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1,
          min: 2, max: 2, add: 2, sub: 2, mul: 2, div: 2, mod: 2, pow: 2
@@ -984,8 +1042,19 @@ var Mbn = (function () {
          return new Mbn(v);
       };
 
-      var fnEval = {abs: true, inva: false, ceil: true, floor: true, sqrt: true, round: true, sgn: true, int: "intp"};
-      var endBop = ["bop", "pc"];
+      var fnEval = {
+         abs: true,
+         inva: false,
+         ceil: true,
+         floor: true,
+         sqrt: true,
+         round: true,
+         sgn: true,
+         int: "intp",
+         fact: true,
+         div100: "div100"
+      };
+      var endBop = ["bop", "pc", "fs"];
       var uopVal = ["num", "name", "uop", "po"];
       var bops = {
          "|": [1, true, "max"],
@@ -999,7 +1068,7 @@ var Mbn = (function () {
       };
       var funPrx = 4;
       var rxs = {
-         num: {rx: /^([0-9., ]+)\s*/, next: ["bop", "pc", "pr"], end: true},
+         num: {rx: /^([0-9., ]+)\s*/, next: endBop, end: true},
          name: {rx: /^([A-Za-z_]\w*)\s*/},
          fn: {next: ["po"], end: false},
          vr: {next: endBop, end: true},
@@ -1007,7 +1076,7 @@ var Mbn = (function () {
          uop: {rx: /^([-+])\s*/, next: uopVal, end: false},
          po: {rx: /^(\()\s*/, next: uopVal, end: false},
          pc: {rx: /^(\))\s*/, next: endBop, end: true},
-         pr: {rx: /^(%)\s*/, next: endBop, end: true}
+         fs: {rx: /^([%!])\s*/, next: endBop, end: true}
       };
 
       var wsRx3 = /^[\s=]+/;
@@ -1045,7 +1114,7 @@ var Mbn = (function () {
          var tok, mtch, i, rolp, rolm;
          var invaUop = [funPrx, true, "inva"];
 
-         while (expr.length > 0) {
+         while (expr !== "") {
             mtch = null;
             for (i = 0; i < larl && mtch === null; i++) {
                t = larr[i];
@@ -1125,8 +1194,12 @@ var Mbn = (function () {
                      rpns.push(rpno.pop()[2]);
                   }
                   break;
-               case "pr":
-                  rpns[rpns.length - 1].div(100, true);
+               case "fs":
+                  if (tok === "%") {
+                     rpno.push([funPrx, true, "div100"]);
+                  } else if (tok === "!") {
+                     rpno.push([funPrx, true, "fact"]);
+                  }
                   break;
                default:
             }
@@ -1158,6 +1231,10 @@ var Mbn = (function () {
             } else if (fnEval.hasOwnProperty(tn)) {
                if (typeof fnEval[tn] === "string") {
                   tn = fnEval[tn];
+                  if (tn === "div100") {
+                     rpn[rpn.length - 1].div(100, true);
+                     continue;
+                  }
                }
                rpn[rpn.length - 1][tn](true);
             } else {

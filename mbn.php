@@ -123,7 +123,7 @@ class Mbn {
     */
    private function fromString($ns, $v = null) {
       $np = [];
-      preg_match('/^\s*(=)?[\s=]*(\+|-)?\s*((.*\S)?)/', $ns, $np);
+      preg_match('/^\s*(=)?[\s=]*([+\\-])?\s*((.*\S)?)/', $ns, $np);
       $n = $np[3];
       if ($np[2] === '-') {
          $this->s = -1;
@@ -238,7 +238,7 @@ class Mbn {
             return;
          }
          $this->fromString($n, $v);
-      } elseif (is_bool($n) || is_null($n)) {
+      } elseif (is_bool($n) || $n === null) {
          $this->mbnFromNumber((int)$n);
       } else {
          throw new MbnErr('', 'invalid argument', $n);
@@ -1019,7 +1019,7 @@ class Mbn {
       $t = null;
       $invaUop = [static::$funPrx, true, 'inva'];
 
-      while (strlen($expr) > 0) {
+      while ($expr !== '') {
          $mtch = [];
          foreach ($larr as $t) {
             if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch) === 1) {

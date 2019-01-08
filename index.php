@@ -12,6 +12,9 @@ $relFiles = array(
     'mbn.min.php' => array(
         'Minified library in PHP'
     ),
+    'mbn.d.ts' => array(
+       'TypeScript declaration file'
+    ),
 );
 foreach ($relFiles as $n => &$relFile) {
    $relFile[] = filesize('release/' . $n);

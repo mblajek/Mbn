@@ -177,6 +177,9 @@ function releaseMbn() {
    file_put_contents('release/mbn.js', preg_replace('/^\s*/i', $licenseJs, $mbn_js));
    file_put_contents('release/mbn.min.js', preg_replace('/^\s*/i', $licenseJs, $mbn_min_js));
 
+   $mbn_d_ts = file_get_contents('mbn.d.ts');
+   file_put_contents('release/mbn.d.ts', preg_replace('/^\s*/i', $licenseJs, $mbn_d_ts));
+
    file_put_contents('release/v', json_encode([
        'mbn_js' => $versionJs,
        'mbn_php' => $versionPhp,

@@ -14,6 +14,7 @@ project page: https://mirkl.es/n/lib - library files avalaible there
    Library:
       mbn.js - JavaScript version
       mbn.php - PHP version
+      mbn.d.ts - TypeScript declaration file
       download from https://mirkl.es/n/lib#downloads
 
    Developer tools:
