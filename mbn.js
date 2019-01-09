@@ -39,43 +39,55 @@ var Mbn = (function () {
    /**
     * fill options with default parameters and check
     * @param opt {Object} params by reference
-    * @param MbnDP default precission
+    * @param MbnDP default precision
     * @param MbnDS default separator
     * @param MbnDT default truncate
     * @param MbnDE default evaluation
     * @param MbnDF default format
     * @param fname name of function for exception
+    * @throws {MbnErr} invalid options
     */
    var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, fname) {
-      //actual precision for Mbn class
+      var val;
       if (!opt.hasOwnProperty("MbnP")) {
          opt.MbnP = MbnDP;
-      } else if (typeof opt.MbnP !== "number" || opt.MbnP < 0 || !isFinite(opt.MbnP) || Math.round(opt.MbnP) !== opt.MbnP) {
-         throw new MbnErr(fname, "invalid precision (non-negative int)", opt.MbnP);
+      } else {
+         val = opt.MbnP;
+         if (typeof val !== "number" || val < 0 || !isFinite(val) || Math.round(val) !== val) {
+            throw new MbnErr(fname, "invalid precision (non-negative int)", val);
+         }
       }
-      //actual separator for Mbn class
       if (!opt.hasOwnProperty("MbnS")) {
          opt.MbnS = MbnDS;
-      } else if (opt.MbnS !== "." && opt.MbnS !== ",") {
-         throw new MbnErr(fname, "invalid separator (dot, comma)", opt.MbnS);
+      } else {
+         val = opt.MbnS;
+         if (val !== "." && val !== ",") {
+            throw new MbnErr(fname, "invalid separator (dot, comma)", val);
+         }
       }
-      //actual truncate for Mbn class
       if (!opt.hasOwnProperty("MbnT")) {
          opt.MbnT = MbnDT;
-      } else if (opt.MbnT !== true && opt.MbnT !== false) {
-         throw new MbnErr(fname, "invalid truncate (bool)", opt.MbnT);
+      } else {
+         val = opt.MbnT;
+         if (val !== true && val !== false) {
+            throw new MbnErr(fname, "invalid truncate (bool)", val);
+         }
       }
-      //actual extension for Mbn class
       if (!opt.hasOwnProperty("MbnE")) {
          opt.MbnE = MbnDE;
-      } else if (opt.MbnE !== true && opt.MbnE !== false && opt.MbnE !== null) {
-         throw new MbnErr(fname, "invalid extension (bool)", opt.MbnT);
+      } else {
+         val = opt.MbnE;
+         if (val !== true && val !== false && val !== null) {
+            throw new MbnErr(fname, "invalid evaluation (bool, null)", val);
+         }
       }
-      //actual format for Mbn class
       if (!opt.hasOwnProperty("MbnF")) {
          opt.MbnF = MbnDF;
-      } else if (opt.MbnF !== true && opt.MbnF !== false) {
-         throw new MbnErr(fname, "invalid format (bool)", opt.MbnF);
+      } else {
+         val = opt.MbnF;
+         if (val !== true && val !== false) {
+            throw new MbnErr(fname, "invalid format (bool)", val);
+         }
       }
    };
 
@@ -1043,16 +1055,8 @@ var Mbn = (function () {
       };
 
       var fnEval = {
-         abs: true,
-         inva: false,
-         ceil: true,
-         floor: true,
-         sqrt: true,
-         round: true,
-         sgn: true,
-         int: "intp",
-         fact: true,
-         div100: "div100"
+         abs: true, inva: false, ceil: true, floor: true, fact: true,
+         sqrt: true, round: true, sgn: true, int: "intp", div100: "div100"
       };
       var endBop = ["bop", "pc", "fs"];
       var uopVal = ["num", "name", "uop", "po"];

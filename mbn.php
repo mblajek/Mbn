@@ -41,6 +41,60 @@ class Mbn {
    private $s = 1;
 
    /**
+    * fill options with default parameters and check
+    * @param array $opt params by reference
+    * @param int $MbnDP default precision
+    * @param string $MbnDS default separator
+    * @param boolean $MbnDT default truncate
+    * @param boolean $MbnDE default evaluation
+    * @param boolean $MbnDF default format
+    * @param string $fname name of function for exception
+    * @throws MbnErr invalid options
+    */
+   private static function prepareOpt(&$opt, $MbnDP, $MbnDS, $MbnDT, $MbnDE, $MbnDF, $fname) {
+      if (array_key_exists('MbnP', $opt)) {
+         $opt['MbnP'] = $MbnDP;
+      } else {
+         $val = $opt['MbnP'];
+         if (!(is_int($val) || is_float($val)) || $val < 0 || is_infinite($val) || (float)(int)$val !== (float)$val) {
+            throw new MbnErr($fname, 'invalid precision (non-negative int)', $val);
+         }
+      }
+      if (array_key_exists('MbnS', $opt)) {
+         $opt['MbnS'] = $MbnDS;
+      } else {
+         $val = $opt['MbnS'];
+         if ($val !== '.' && $val !== ',') {
+            throw new MbnErr($fname, 'invalid separator (dot, comma)', $val);
+         }
+      }
+      if (array_key_exists('MbnT', $opt)) {
+         $opt['MbnT'] = $MbnDT;
+      } else {
+         $val = $opt['MbnT'];
+         if ($val !== true && $val !== false) {
+            throw new MbnErr($fname, 'invalid truncate (bool)', $val);
+         }
+      }
+      if (array_key_exists('MbnE', $opt)) {
+         $opt['MbnE'] = $MbnDE;
+      } else {
+         $val = $opt['MbnE'];
+         if ($val !== true && $val !== false && $val !== null) {
+            throw new MbnErr($fname, 'invalid evaluation (bool, null)', $val);
+         }
+      }
+      if (array_key_exists('MbnF', $opt)) {
+         $opt['MbnF'] = $MbnDF;
+      } else {
+         $val = $opt['MbnF'];
+         if ($val !== true && $val !== false) {
+            throw new MbnErr($fname, 'invalid format (bool)', $val);
+         }
+      }
+   }
+
+   /**
     * Private function, carries digits bigger than 9, and removes leading zeros
     */
    private function mbnCarry() {
@@ -844,6 +898,25 @@ class Mbn {
       return $this->mbnSetReturn($r, $m);
    }
 
+   /**
+    * Returns factorial, value must be non-negative integer
+    * @param boolean= m Modify original variable, default false
+    * @return Mbn
+    * @throws {MbnErr} value is not non-negative integer
+    */
+   public function fact($m = false) {
+      if (!$this->isInt() || $this->cmp(0) === -1) {
+         throw new MbnErr('.fact', 'only non-negative integers supported', $this);
+      }
+      $n = $this->sub(1);
+      $r = new Mbn($this);
+      while ($n->s === 1) {
+         $r->mul($n, true);
+         $n->sub(1, true);
+      }
+      return $this->mbnSetReturn($r, $m);
+   }
+
    protected static $fnReduce = ['set' => 0, 'abs' => 1, 'inva' => 1, 'invm' => 1, 'ceil' => 1, 'floor' => 1,
        'sqrt' => 1, 'round' => 1, 'sgn' => 1, 'intp' => 1,
        'min' => 2, 'max' => 2, 'add' => 2, 'sub' => 2, 'mul' => 2, 'div' => 2, 'mod' => 2, 'pow' => 2];
@@ -953,11 +1026,11 @@ class Mbn {
       return new static($v);
    }
 
-   protected static $fnEval = ['abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true,
-       'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp'];
+   protected static $fnEval = [
+       'abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true, 'fact' => true,
+       'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp', 'div100' => 'div100'];
    protected static $states = [
-       'endBopPr' => ['bop', 'pc', 'pr'],
-       'endBop' => ['bop', 'pc'],
+       'endBop' => ['bop', 'pc', 'fs'],
        'uopVal' => ['num', 'name', 'uop', 'po'],
        'po' => ['po']
    ];
@@ -975,14 +1048,14 @@ class Mbn {
    ];
    protected static $funPrx = 4;
    protected static $rxs = [
-       'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBopPr', 'end' => true],
+       'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBop', 'end' => true],
        'name' => ['rx' => '/^([A-Za-z_]\\w*)\\s*/'], 'fn' => ['next' => 'po', 'end' => false],
        'vr' => ['next' => 'endBop', 'end' => true],
        'bop' => ['rx' => '/^([-+\\*\\/#^&|])\\s*/', 'next' => 'uopVal', 'end' => false],
        'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal', 'end' => false],
        'po' => ['rx' => '/^(\\()\\s*/', 'next' => 'uopVal', 'end' => false],
        'pc' => ['rx' => '/^(\\))\\s*/', 'next' => 'endBop', 'end' => true],
-       'pr' => ['rx' => '/^(%)\\s*/', 'next' => 'endBop', 'end' => true]
+       'fs' => ['rx' => '/^([%!])\\s*/', 'next' => 'endBop', 'end' => true]
    ];
 
    /**
@@ -1100,8 +1173,12 @@ class Mbn {
                   $rpns[] = array_pop($rpno)[2];
                }
                break;
-            case 'pr':
-               $rpns[count($rpns) - 1]->div(100, true);
+            case 'fs':
+               if ($tok === '%') {
+                  $rpno [] = [static::$funPrx, true, 'div100'];
+               } else if ($tok === "!") {
+                  $rpno [] = [static::$funPrx, true, 'fact'];
+               }
                break;
             default:
          }
@@ -1129,6 +1206,10 @@ class Mbn {
          } elseif (isset(static::$fnEval[$tn])) {
             if (is_string(static::$fnEval[$tn])) {
                $tn = static::$fnEval[$tn];
+               if($tn === 'div100'){
+                  $rpn[count($rpn) - 1]->div(100, true);
+                  continue;
+               }
             }
             $rpn[count($rpn) - 1]->{$tn}(true);
          } else {
