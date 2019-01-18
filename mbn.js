@@ -46,49 +46,41 @@ var Mbn = (function () {
     * @param MbnDF default format
     * @param fname name of function for exception
     * @throws {MbnErr} invalid options
+    * @return {Object} checked ad filled class options
     */
    var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, fname) {
-      var val;
-      if (!opt.hasOwnProperty("MbnP")) {
-         opt.MbnP = MbnDP;
-      } else {
-         val = opt.MbnP;
-         if (typeof val !== "number" || val < 0 || !isFinite(val) || Math.round(val) !== val) {
-            throw new MbnErr(fname, "invalid precision (non-negative int)", val);
+      var MbnP = MbnDP, MbnS = MbnDS, MbnT = MbnDT, MbnE = MbnDE, MbnF = MbnDF;
+      if (opt.hasOwnProperty("MbnP")) {
+         MbnP = opt.MbnP;
+         if (typeof MbnP !== "number" || MbnP < 0 || !isFinite(MbnP) || Math.round(MbnP) !== MbnP) {
+            throw new MbnErr(fname, "invalid precision (non-negative int)", MbnP);
          }
       }
-      if (!opt.hasOwnProperty("MbnS")) {
-         opt.MbnS = MbnDS;
-      } else {
-         val = opt.MbnS;
-         if (val !== "." && val !== ",") {
-            throw new MbnErr(fname, "invalid separator (dot, comma)", val);
+      if (opt.hasOwnProperty("MbnS")) {
+         MbnS = opt.MbnS;
+         if (MbnS !== "." && MbnS !== ",") {
+            throw new MbnErr(fname, "invalid separator (dot, comma)", MbnS);
          }
       }
-      if (!opt.hasOwnProperty("MbnT")) {
-         opt.MbnT = MbnDT;
-      } else {
-         val = opt.MbnT;
-         if (val !== true && val !== false) {
-            throw new MbnErr(fname, "invalid truncate (bool)", val);
+      if (opt.hasOwnProperty("MbnT")) {
+         MbnT = opt.MbnT;
+         if (MbnT !== true && MbnT !== false) {
+            throw new MbnErr(fname, "invalid truncate (bool)", MbnT);
          }
       }
-      if (!opt.hasOwnProperty("MbnE")) {
-         opt.MbnE = MbnDE;
-      } else {
-         val = opt.MbnE;
-         if (val !== true && val !== false && val !== null) {
-            throw new MbnErr(fname, "invalid evaluation (bool, null)", val);
+      if (opt.hasOwnProperty("MbnE")) {
+         MbnE = opt.MbnE;
+         if (MbnE !== true && MbnE !== false && MbnE !== null) {
+            throw new MbnErr(fname, "invalid evaluation (bool, null)", MbnE);
          }
       }
-      if (!opt.hasOwnProperty("MbnF")) {
-         opt.MbnF = MbnDF;
-      } else {
-         val = opt.MbnF;
-         if (val !== true && val !== false) {
-            throw new MbnErr(fname, "invalid format (bool)", val);
+      if (opt.hasOwnProperty("MbnF")) {
+         MbnF = opt.MbnF;
+         if (MbnF !== true && MbnF !== false) {
+            throw new MbnErr(fname, "invalid format (bool)", MbnF);
          }
       }
+      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF};
    };
 
    /**
@@ -106,7 +98,7 @@ var Mbn = (function () {
       if (typeof opt !== "object") {
          opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
       }
-      prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, ".extend");
+      opt = prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, ".extend");
       var MbnP = opt.MbnP, MbnS = opt.MbnS, MbnT = opt.MbnT, MbnE = opt.MbnE, MbnF = opt.MbnF;
 
       /**
@@ -387,13 +379,13 @@ var Mbn = (function () {
 
       /**
        * Returns string value with or without thousand grouping
-       * @param {boolean|Object=} opt Thousand grouping, default true
+       * @param {boolean|Object=} opt thousand grouping or object with params, default true
        */
       Mbn.prototype.format = function (opt) {
          if (typeof opt !== "object") {
             opt = {MbnF: opt === true || opt === undefined};
          }
-         prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, ".format");
+         opt = prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, ".format");
          return mbnToString(this, opt.MbnP, opt.MbnS, opt.MbnT, opt.MbnF);
       };
 

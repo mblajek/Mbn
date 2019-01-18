@@ -50,48 +50,45 @@ class Mbn {
     * @param boolean $MbnDF default format
     * @param string $fname name of function for exception
     * @throws MbnErr invalid options
+    * @return array checked ad filled class options
     */
-   private static function prepareOpt(&$opt, $MbnDP, $MbnDS, $MbnDT, $MbnDE, $MbnDF, $fname) {
+   private static function prepareOpt($opt, $MbnDP, $MbnDS, $MbnDT, $MbnDE, $MbnDF, $fname) {
+      $MbnP = $MbnDP;
+      $MbnS = $MbnDS;
+      $MbnT = $MbnDT;
+      $MbnE = $MbnDE;
+      $MbnF = $MbnDF;
       if (array_key_exists('MbnP', $opt)) {
-         $opt['MbnP'] = $MbnDP;
-      } else {
-         $val = $opt['MbnP'];
-         if (!(is_int($val) || is_float($val)) || $val < 0 || is_infinite($val) || (float)(int)$val !== (float)$val) {
-            throw new MbnErr($fname, 'invalid precision (non-negative int)', $val);
+         $MbnP = $opt['MbnP'];
+         if (!(is_int($MbnP) || is_float($MbnP)) || $MbnP < 0 || is_infinite($MbnP) || (float)(int)$MbnP !== (float)$MbnP) {
+            throw new MbnErr($fname, 'invalid precision (non-negative int)', $MbnP);
          }
       }
       if (array_key_exists('MbnS', $opt)) {
-         $opt['MbnS'] = $MbnDS;
-      } else {
-         $val = $opt['MbnS'];
-         if ($val !== '.' && $val !== ',') {
-            throw new MbnErr($fname, 'invalid separator (dot, comma)', $val);
+         $MbnS = $opt['MbnS'];
+         if ($MbnS !== '.' && $MbnS !== ',') {
+            throw new MbnErr($fname, 'invalid separator (dot, comma)', $MbnS);
          }
       }
       if (array_key_exists('MbnT', $opt)) {
-         $opt['MbnT'] = $MbnDT;
-      } else {
-         $val = $opt['MbnT'];
-         if ($val !== true && $val !== false) {
-            throw new MbnErr($fname, 'invalid truncate (bool)', $val);
+         $MbnT = $opt['MbnT'];
+         if ($MbnT !== true && $MbnT !== false) {
+            throw new MbnErr($fname, 'invalid truncate (bool)', $MbnT);
          }
       }
       if (array_key_exists('MbnE', $opt)) {
-         $opt['MbnE'] = $MbnDE;
-      } else {
-         $val = $opt['MbnE'];
-         if ($val !== true && $val !== false && $val !== null) {
-            throw new MbnErr($fname, 'invalid evaluation (bool, null)', $val);
+         $MbnE = $opt['MbnE'];
+         if ($MbnE !== true && $MbnE !== false && $MbnE !== null) {
+            throw new MbnErr($fname, 'invalid evaluation (bool, null)', $MbnE);
          }
       }
       if (array_key_exists('MbnF', $opt)) {
-         $opt['MbnF'] = $MbnDF;
-      } else {
-         $val = $opt['MbnF'];
-         if ($val !== true && $val !== false) {
-            throw new MbnErr($fname, 'invalid format (bool)', $val);
+         $MbnF = $opt['MbnF'];
+         if ($MbnF !== true && $MbnF !== false) {
+            throw new MbnErr($fname, 'invalid format (bool)', $MbnF);
          }
       }
+      return ['MbnV' => static::$MbnV, 'MbnP' => $MbnP, 'MbnS' => $MbnS, 'MbnT' => $MbnT, 'MbnE' => $MbnE, 'MbnF' => $MbnF];
    }
 
    /**
@@ -302,10 +299,11 @@ class Mbn {
    /**
     * Returns properties of Mbn class
     * @return array properties
+    * @throws MbnErr
     */
    public static function prop() {
-      return ['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS,
-          'MbnT' => static::$MbnT, 'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF];
+      return static::prepareOpt(['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS,
+          'MbnT' => static::$MbnT, 'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF], 0, 0, 0, 0, 0, '.prop');
    }
 
    /**
@@ -1206,7 +1204,7 @@ class Mbn {
          } elseif (isset(static::$fnEval[$tn])) {
             if (is_string(static::$fnEval[$tn])) {
                $tn = static::$fnEval[$tn];
-               if($tn === 'div100'){
+               if ($tn === 'div100') {
                   $rpn[count($rpn) - 1]->div(100, true);
                   continue;
                }

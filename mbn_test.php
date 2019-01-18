@@ -40,6 +40,12 @@ class Mbn4yec extends Mbn {
 
 }
 
+class MbnColon extends Mbn {
+
+   protected static $MbnS = ':';
+
+}
+
 function testMbn() {
 
    function runTestMbn($tests) {
