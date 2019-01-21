@@ -1026,7 +1026,7 @@ class Mbn {
 
    protected static $fnEval = [
        'abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true, 'fact' => true,
-       'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp', 'div100' => 'div100'];
+       'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp', 'div_100' => 'div_100'];
    protected static $states = [
        'endBop' => ['bop', 'pc', 'fs'],
        'uopVal' => ['num', 'name', 'uop', 'po'],
@@ -1044,7 +1044,7 @@ class Mbn {
        '/' => [4, true, 'div'],
        '^' => [5, false, 'pow']
    ];
-   protected static $funPrx = 4;
+   protected static $funPrx = 6;
    protected static $rxs = [
        'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBop', 'end' => true],
        'name' => ['rx' => '/^([A-Za-z_]\\w*)\\s*/'], 'fn' => ['next' => 'po', 'end' => false],
@@ -1135,48 +1135,39 @@ class Mbn {
                break;
             case 'bop':
                $bop = static::$bops[$tok];
-               while (($rolm = count($rpno) - 1) !== -1) {
-                  $rolp = $rpno[$rolm];
-                  if ($rolp !== '(' && ($rolp[0] > $bop[0] - ($bop[1] ? 1 : 0))) {
-                     $rpns[] = array_pop($rpno)[2];
-                  } else {
+               while (($rolp = array_pop($rpno)) !== null) {
+                  if ($rolp === '(' || ($rolp[0] <= $bop[0] - ($bop[1] ? 1 : 0))) {
+                     $rpno[] = $rolp;
                      break;
                   }
+                  $rpns[] = $rolp[2];
                }
                $rpno[] = $bop;
                break;
             case 'uop':
-               if ($tok === '-') {
-                  $neg = !$neg;
-               }
+               $neg ^= ($tok === '-');
                break;
             case 'po':
                $rpno [] = $tok;
                break;
             case 'pc':
-               while (($rolm = count($rpno) - 1) !== -1) {
-                  $rolp = $rpno[$rolm];
-                  if ($rolp !== '(') {
-                     $rpns[] = array_pop($rpno)[2];
-                  } else {
-                     array_pop($rpno);
-                     break;
+               while (($rolp = array_pop($rpno)) !== '(') {
+                  if ($rolp === null) {
+                     throw new MbnErr('.calc', 'unexpected', ')');
                   }
-               }
-               if ($rolm === -1) {
-                  throw new MbnErr('.calc', 'unexpected', ')');
-               }
-               $rolm = count($rpno) - 1;
-               if ($rolm !== -1 && $rpno[$rolm][2] === static::$funPrx) {
-                  $rpns[] = array_pop($rpno)[2];
+                  $rpns[] = $rolp[2];
                }
                break;
             case 'fs':
-               if ($tok === '%') {
-                  $rpno [] = [static::$funPrx, true, 'div100'];
-               } else if ($tok === "!") {
-                  $rpno [] = [static::$funPrx, true, 'fact'];
+               $op = [static::$funPrx, true, ($tok === '%') ? 'div_100' : 'fact'];
+               while (($rolp = array_pop($rpno)) !== null) {
+                  if ($rolp === '(' || ($rolp[0] <= $op[0] - ($op[1] ? 1 : 0))) {
+                     $rpno[] = $rolp;
+                     break;
+                  }
+                  $rpns[] = $rolp[2];
                }
+               $rpno[] = $op;
                break;
             default:
          }
@@ -1184,13 +1175,11 @@ class Mbn {
          $larr = &static::$states[static::$rxs[$t]['next']];
          $lare = static::$rxs[$t]['end'];
       }
-      while (count($rpno) !== 0) {
-         $v = array_pop($rpno);
-         if ($v !== '(') {
-            $rpns[] = $v[2];
-         } else {
+      while (($rolp = array_pop($rpno)) !== null) {
+         if ($rolp === '(') {
             throw new MbnErr('.calc', 'unexpected', '(');
          }
+         $rpns[] = $rolp[2];
       }
       if (!$lare) {
          throw new MbnErr('.calc', 'unexpected', 'END');
@@ -1204,8 +1193,9 @@ class Mbn {
          } elseif (isset(static::$fnEval[$tn])) {
             if (is_string(static::$fnEval[$tn])) {
                $tn = static::$fnEval[$tn];
-               if ($tn === 'div100') {
-                  $rpn[count($rpn) - 1]->div(100, true);
+               if (strpos($tn, '_') !== false) {
+                  $tn = explode('_', $tn);
+                  $rpn[count($rpn) - 1]->{$tn[0]}($tn[1], true);
                   continue;
                }
             }

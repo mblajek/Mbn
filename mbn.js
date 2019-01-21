@@ -1048,7 +1048,7 @@ var Mbn = (function () {
 
       var fnEval = {
          abs: true, inva: false, ceil: true, floor: true, fact: true,
-         sqrt: true, round: true, sgn: true, int: "intp", div100: "div100"
+         sqrt: true, round: true, sgn: true, int: "intp", div_100: "div_100"
       };
       var endBop = ["bop", "pc", "fs"];
       var uopVal = ["num", "name", "uop", "po"];
@@ -1062,7 +1062,7 @@ var Mbn = (function () {
          "/": [4, true, "div"],
          "^": [5, false, "pow"]
       };
-      var funPrx = 4;
+      var funPrx = 6;
       var rxs = {
          num: {rx: /^([0-9., ]+)\s*/, next: endBop, end: true},
          name: {rx: /^([A-Za-z_]\w*)\s*/},
@@ -1107,7 +1107,7 @@ var Mbn = (function () {
          var rpno = [];
          var neg = false;
          var t = null;
-         var tok, mtch, i, rolp, rolm;
+         var tok, mtch, i, rolp;
          var invaUop = [funPrx, true, "inva"];
 
          while (expr !== "") {
@@ -1154,48 +1154,39 @@ var Mbn = (function () {
                   break;
                case "bop":
                   var bop = bops[tok];
-                  while ((rolm = rpno.length - 1) !== -1) {
-                     rolp = rpno[rolm];
-                     if (rolp !== "(" && (rolp[0] > bop[0] - (bop[1] ? 1 : 0))) {
-                        rpns.push(rpno.pop()[2]);
-                     } else {
+                  while ((rolp = rpno.pop()) !== undefined) {
+                     if (rolp === "(" || (rolp[0] <= bop[0] - (bop[1] ? 1 : 0))) {
+                        rpno.push(rolp);
                         break;
                      }
+                     rpns.push(rolp[2]);
                   }
                   rpno.push(bop);
                   break;
                case "uop":
-                  if (tok === "-") {
-                     neg = !neg;
-                  }
+                  neg ^= (tok === "-");
                   break;
                case "po":
                   rpno.push(tok);
                   break;
                case "pc":
-                  while ((rolm = rpno.length - 1) !== -1) {
-                     rolp = rpno[rolm];
-                     if (rolp !== "(") {
-                        rpns.push(rpno.pop()[2]);
-                     } else {
-                        rpno.pop();
-                        break;
+                  while ((rolp = rpno.pop()) !== "(") {
+                     if (rolp === undefined) {
+                        throw new MbnErr(".calc", "unexpected", ")");
                      }
-                  }
-                  if (rolm === -1) {
-                     throw new MbnErr(".calc", "unexpected", ")");
-                  }
-                  rolm = rpno.length - 1;
-                  if (rolm !== -1 && rpno[rolm][2] === funPrx) {
-                     rpns.push(rpno.pop()[2]);
+                     rpns.push(rolp[2]);
                   }
                   break;
                case "fs":
-                  if (tok === "%") {
-                     rpno.push([funPrx, true, "div100"]);
-                  } else if (tok === "!") {
-                     rpno.push([funPrx, true, "fact"]);
+                  var op = [funPrx, true, (tok === "%") ? "div_100" : "fact"];
+                  while ((rolp = rpno.pop()) !== undefined) {
+                     if (rolp === "(" || (rolp[0] <= op[0] - (op[1] ? 1 : 0))) {
+                        rpno.push(rolp);
+                        break;
+                     }
+                     rpns.push(rolp[2]);
                   }
+                  rpno.push(op);
                   break;
                default:
             }
@@ -1204,13 +1195,11 @@ var Mbn = (function () {
             larl = larr.length;
             lare = rxs[t].end;
          }
-         while (rpno.length !== 0) {
-            var v = rpno.pop();
-            if (v !== "(") {
-               rpns.push(v[2]);
-            } else {
+         while ((rolp = rpno.pop()) !== undefined) {
+            if (rolp === "(") {
                throw new MbnErr(".calc", "unexpected", "(");
             }
+            rpns.push(rolp[2]);
          }
          if (!lare) {
             throw new MbnErr(".calc", "unexpected", "END");
@@ -1227,8 +1216,9 @@ var Mbn = (function () {
             } else if (fnEval.hasOwnProperty(tn)) {
                if (typeof fnEval[tn] === "string") {
                   tn = fnEval[tn];
-                  if (tn === "div100") {
-                     rpn[rpn.length - 1].div(100, true);
+                  if (tn.indexOf("_") !== -1) {
+                     tn = tn.split("_")
+                     rpn[rpn.length - 1][tn[0]](tn[1], true);
                      continue;
                   }
                }
