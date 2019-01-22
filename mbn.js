@@ -273,8 +273,9 @@ var Mbn = (function () {
                b._d = b._d.slice(0, bl - MbnP + p + 1);
             }
             mbnRoundLast(b);
-            if (b._d.length - p > li) {
-               b._d = b._d.slice(b._d.length - p - li);
+            bl = b._d.length;
+            if (bl - p > li) {
+               b._d = b._d.slice(bl - p - li);
             }
             v = b;
          }
@@ -292,13 +293,12 @@ var Mbn = (function () {
             }
          }
          if (t) {
-            i = v._d.length - 1;
-            for (; i >= li; i--) {
-               if (v._d[i] !== 0) {
+            for (i = df.length - 1; i >= 0; i--) {
+               if (df[i] !== 0) {
                   break;
                }
             }
-            df = df.slice(0, i - li + 1);
+            df = df.slice(0, i + 1);
          }
          var r = ((a._s < 0) ? "-" : "") + di.join("");
          if (df.length > 0) {
@@ -378,8 +378,9 @@ var Mbn = (function () {
       };
 
       /**
-       * Returns string value with or without thousand grouping
+       * Returns reformatted string value
        * @param {boolean|Object=} opt thousand grouping or object with params, default true
+       * @return {string}
        */
       Mbn.prototype.format = function (opt) {
          if (typeof opt !== "object") {
@@ -1052,7 +1053,7 @@ var Mbn = (function () {
       };
       var endBop = ["bop", "pc", "fs"];
       var uopVal = ["num", "name", "uop", "po"];
-      var bops = {
+      var ops = {
          "|": [1, true, "max"],
          "&": [2, true, "min"],
          "+": [3, true, "add"],
@@ -1060,9 +1061,12 @@ var Mbn = (function () {
          "*": [4, true, "mul"],
          "#": [4, true, "mod"],
          "/": [4, true, "div"],
-         "^": [5, false, "pow"]
+         "^": [5, false, "pow"],
+         "%": [6, true, "div_100"],
+         "!": [6, true, "fact"],
+         "inva": [6, true, "inva"],
+         "fn": [6, true]
       };
-      var funPrx = 6;
       var rxs = {
          num: {rx: /^([0-9., ]+)\s*/, next: endBop, end: true},
          name: {rx: /^([A-Za-z_]\w*)\s*/},
@@ -1108,7 +1112,6 @@ var Mbn = (function () {
          var neg = false;
          var t = null;
          var tok, mtch, i, rolp;
-         var invaUop = [funPrx, true, "inva"];
 
          while (expr !== "") {
             mtch = null;
@@ -1128,7 +1131,7 @@ var Mbn = (function () {
                expr = expr.slice(mtch[0].length);
             }
             if (t !== "uop" && neg) {
-               rpno.push(invaUop);
+               rpno.push(ops.inva);
                neg = false;
             }
             switch (t) {
@@ -1138,7 +1141,7 @@ var Mbn = (function () {
                case "name":
                   if (fnEval.hasOwnProperty(tok) && fnEval[tok] !== false) {
                      t = "fn";
-                     rpno.push([funPrx, true, tok]);
+                     rpno.push(ops.fn.concat([tok]));
                   } else if (vars.hasOwnProperty(tok)) {
                      t = "vr";
                      if (!vnames.hasOwnProperty(tok)) {
@@ -1153,7 +1156,7 @@ var Mbn = (function () {
                   }
                   break;
                case "bop":
-                  var bop = bops[tok];
+                  var bop = ops[tok];
                   while ((rolp = rpno.pop()) !== undefined) {
                      if (rolp === "(" || (rolp[0] <= bop[0] - (bop[1] ? 1 : 0))) {
                         rpno.push(rolp);
@@ -1178,7 +1181,7 @@ var Mbn = (function () {
                   }
                   break;
                case "fs":
-                  var op = [funPrx, true, (tok === "%") ? "div_100" : "fact"];
+                  var op = ops[tok];
                   while ((rolp = rpno.pop()) !== undefined) {
                      if (rolp === "(" || (rolp[0] <= op[0] - (op[1] ? 1 : 0))) {
                         rpno.push(rolp);
@@ -1217,7 +1220,7 @@ var Mbn = (function () {
                if (typeof fnEval[tn] === "string") {
                   tn = fnEval[tn];
                   if (tn.indexOf("_") !== -1) {
-                     tn = tn.split("_")
+                     tn = tn.split("_");
                      rpn[rpn.length - 1][tn[0]](tn[1], true);
                      continue;
                   }

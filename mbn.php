@@ -26,7 +26,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.40';
+   protected static $MbnV = '1.41';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -241,33 +241,52 @@ class Mbn {
 
    /**
     * Private function, returns string value
+    * @param int $p Target precision
     * @param string $s Separator
+    * @param boolean $t Trim zeros
     * @param boolean $f Format thousands
     * @return string
     */
-   private function mbnToString($s, $f) {
-      $l = count($this->d) - static::$MbnP;
-      if (static::$MbnT) {
-         $l0 = $l - 1;
-         $cd = count($this->d);
-         for ($i = $l; $i < $cd; $i++) {
-            if ($this->d[$i] !== 0) {
-               $l0 = $i;
+   private function mbnToString($p, $s, $t, $f) {
+      $v = $this;
+      $li = count($this->d) - static::$MbnP;
+      if ($p < static::$MbnP) {
+         $b = new static($this);
+         $bl = count($b->d);
+         if ($p < static::$MbnP - 1) {
+            $b->d = array_slice($b->d, 0, $bl - static::$MbnP + $p + 1);
+         }
+         $b->mbnRoundLast();
+         $bl = count($b->d);
+         if ($bl - $p > $li) {
+            $b->d = array_slice($b->d, $bl - $p - $li);
+         }
+         $v = $b;
+      }
+      $di = array_slice($v->d, 0, $li);
+      if ($f === true) {
+         $dl = count($di);
+         for ($i = 0; 3 * $i < $dl - 3; $i++) {
+            array_splice($di, -3 - 4 * $i, 0, ' ');
+         }
+      }
+      $df = array_slice($v->d, $li);
+      if ($p > static::$MbnP && !$t) {
+         for ($i = 0; $i < $p - static::$MbnP; $i++) {
+            $df[] = 0;
+         }
+      }
+      if ($t) {
+         for ($i = count($df) - 1; $i >= 0; $i--) {
+            if ($df[$i] !== 0) {
+               break;
             }
          }
-      } else {
-         $l0 = $l + static::$MbnP;
+         $df = array_slice($df, 0, $i + 1);
       }
-      $d = array_slice($this->d, 0, $l);
-      if ($f === true) {
-         $dl = count($d);
-         for ($i = 0; 3 * $i < $dl - 3; $i++) {
-            array_splice($d, -3 - 4 * $i, 0, ' ');
-         }
-      }
-      $r = (($this->s < 0) ? '-' : '') . implode($d, '');
-      if (static::$MbnP !== 0 && $l0 >= $l) {
-         $r .= $s . implode(array_slice($this->d, $l, $l0 + 1 - $l), '');
+      $r = (($this->s < 0) ? '-' : '') . implode('', $di);
+      if (!empty($df)) {
+         $r .= $s . implode('', $df);
       }
       return $r;
    }
@@ -327,16 +346,20 @@ class Mbn {
     * @return string
     */
    public function toString() {
-      return $this->mbnToString(static::$MbnS, static::$MbnF);
+      return $this->mbnToString(static::$MbnP, static::$MbnS, static::$MbnT, static::$MbnF);
    }
 
    /**
-    * Returns string value with or without thousand grouping
-    * @param boolean $f Thousand grouping, default true
+    * Returns reformatted string value
+    * @param bool|array $opt thousand grouping or object with params, default true
     * @return string
     */
-   public function format($f = true) {
-      return $this->mbnToString(static::$MbnS, $f);
+   public function format($opt = true) {
+      if (!is_array($opt)) {
+         $opt = ['MbnF' => $opt === true];
+      }
+      $opt = static::prepareOpt($opt, static::$MbnP, static::$MbnS, static::$MbnT, static::$MbnE, static::$MbnF, '.format');
+      return $this->mbnToString($opt['MbnP'], $opt['MbnS'], $opt['MbnT'], $opt['MbnF']);
    }
 
    /**
@@ -352,7 +375,7 @@ class Mbn {
     * @return int|float|double
     */
    public function toNumber() {
-      $v = $this->mbnToString('.', false);
+      $v = $this->mbnToString(static::$MbnP, '.', false, false);
       return (static::$MbnP === 0) ? (int)$v : (float)$v;
    }
 
@@ -907,7 +930,7 @@ class Mbn {
          throw new MbnErr('.fact', 'only non-negative integers supported', $this);
       }
       $n = $this->sub(1);
-      $r = new Mbn($this);
+      $r = new static($this);
       while ($n->s === 1) {
          $r->mul($n, true);
          $n->sub(1, true);
@@ -1034,7 +1057,7 @@ class Mbn {
    ];
    protected static $endBop = ['bop', 'pc'];
    protected static $uopVal = ['num', 'name', 'uop', 'po'];
-   protected static $bops = [
+   protected static $ops = [
        '|' => [1, true, 'max'],
        '&' => [2, true, 'min'],
        '+' => [3, true, 'add'],
@@ -1042,12 +1065,16 @@ class Mbn {
        '*' => [4, true, 'mul'],
        '#' => [4, true, 'mod'],
        '/' => [4, true, 'div'],
-       '^' => [5, false, 'pow']
+       '^' => [5, false, 'pow'],
+       '%' => [6, true, 'div_100'],
+       '!'=> [6, true, 'fact'],
+       'inva'=> [6, true, 'inva'],
+       'fn'=> [6, true]
    ];
-   protected static $funPrx = 6;
    protected static $rxs = [
        'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBop', 'end' => true],
-       'name' => ['rx' => '/^([A-Za-z_]\\w*)\\s*/'], 'fn' => ['next' => 'po', 'end' => false],
+       'name' => ['rx' => '/^([A-Za-z_]\\w*)\\s*/'],
+       'fn' => ['next' => 'po', 'end' => false],
        'vr' => ['next' => 'endBop', 'end' => true],
        'bop' => ['rx' => '/^([-+\\*\\/#^&|])\\s*/', 'next' => 'uopVal', 'end' => false],
        'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal', 'end' => false],
@@ -1088,7 +1115,6 @@ class Mbn {
       $rpno = [];
       $neg = false;
       $t = null;
-      $invaUop = [static::$funPrx, true, 'inva'];
 
       while ($expr !== '') {
          $mtch = [];
@@ -1109,7 +1135,7 @@ class Mbn {
             $expr = substr($expr, strlen($mtch[0]));
          }
          if ($t !== 'uop' && $neg) {
-            $rpno[] = &$invaUop;
+            $rpno[] = &static::$ops['inva'];
             $neg = false;
          }
          switch ($t) {
@@ -1119,7 +1145,7 @@ class Mbn {
             case 'name':
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
                   $t = 'fn';
-                  $rpno [] = [static::$funPrx, true, $tok];
+                  $rpno [] = array_merge(static::$ops['fn'], [$tok]);
                } elseif (array_key_exists($tok, $vars)) {
                   $t = 'vr';
                   if (!isset($vnames[$tok])) {
@@ -1134,7 +1160,7 @@ class Mbn {
                }
                break;
             case 'bop':
-               $bop = static::$bops[$tok];
+               $bop = static::$ops[$tok];
                while (($rolp = array_pop($rpno)) !== null) {
                   if ($rolp === '(' || ($rolp[0] <= $bop[0] - ($bop[1] ? 1 : 0))) {
                      $rpno[] = $rolp;
@@ -1159,7 +1185,7 @@ class Mbn {
                }
                break;
             case 'fs':
-               $op = [static::$funPrx, true, ($tok === '%') ? 'div_100' : 'fact'];
+               $op = static::$ops[$tok];
                while (($rolp = array_pop($rpno)) !== null) {
                   if ($rolp === '(' || ($rolp[0] <= $op[0] - ($op[1] ? 1 : 0))) {
                      $rpno[] = $rolp;

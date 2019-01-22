@@ -1,21 +1,11 @@
 <?php
-$relFiles = array(
-    'mbn.js' => array(
-        'Library in JS'
-    ),
-    'mbn.php' => array(
-        'Library in PHP'
-    ),
-    'mbn.min.js' => array(
-        'Minified library in JS'
-    ),
-    'mbn.min.php' => array(
-        'Minified library in PHP'
-    ),
-    'mbn.d.ts' => array(
-       'TypeScript declaration file'
-    ),
-);
+$relFiles = [
+    'mbn.js' => ['Library in JS'],
+    'mbn.php' => ['Library in PHP'],
+    'mbn.min.js' => ['Minified library in JS'],
+    'mbn.min.php' => ['Minified library in PHP'],
+    'mbn.d.ts' => ['TypeScript declaration file'],
+];
 foreach ($relFiles as $n => &$relFile) {
    $relFile[] = filesize('release/' . $n);
 }
