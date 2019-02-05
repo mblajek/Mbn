@@ -26,7 +26,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.41';
+   protected static $MbnV = '1.42';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -37,6 +37,8 @@ class Mbn {
    protected static $MbnE = null;
    //default truncate
    protected static $MbnF = false;
+   //default limit
+   protected static $MbnL = 1000;
    private $d = [];
    private $s = 1;
 
@@ -48,16 +50,18 @@ class Mbn {
     * @param boolean $MbnDT default truncate
     * @param boolean $MbnDE default evaluation
     * @param boolean $MbnDF default format
+    * @param boolean $MbnDL default limit
     * @param string $fname name of function for exception
     * @throws MbnErr invalid options
     * @return array checked ad filled class options
     */
-   private static function prepareOpt($opt, $MbnDP, $MbnDS, $MbnDT, $MbnDE, $MbnDF, $fname) {
+   private static function prepareOpt($opt, $MbnDP, $MbnDS, $MbnDT, $MbnDE, $MbnDF, $MbnDL, $fname) {
       $MbnP = $MbnDP;
       $MbnS = $MbnDS;
       $MbnT = $MbnDT;
       $MbnE = $MbnDE;
       $MbnF = $MbnDF;
+      $MbnL = $MbnDL;
       if (array_key_exists('MbnP', $opt)) {
          $MbnP = $opt['MbnP'];
          if (!(is_int($MbnP) || is_float($MbnP)) || $MbnP < 0 || is_infinite($MbnP) || (float)(int)$MbnP !== (float)$MbnP) {
@@ -88,11 +92,18 @@ class Mbn {
             throw new MbnErr($fname, 'invalid format (bool)', $MbnF);
          }
       }
-      return ['MbnV' => static::$MbnV, 'MbnP' => $MbnP, 'MbnS' => $MbnS, 'MbnT' => $MbnT, 'MbnE' => $MbnE, 'MbnF' => $MbnF];
+      if (array_key_exists('MbnL', $opt)) {
+         $MbnL = $opt['MbnL'];
+         if (!(is_int($MbnL) || is_float($MbnL)) || $MbnL < 0 || is_infinite($MbnP) || (float)(int)$MbnP !== (float)$MbnP) {
+            throw new MbnErr($fname, 'invalid limit (positive int)', $MbnP);
+         }
+      }
+      return ['MbnV' => static::$MbnV, 'MbnP' => $MbnP, 'MbnS' => $MbnS, 'MbnT' => $MbnT, 'MbnE' => $MbnE, 'MbnF' => $MbnF, 'MbnL' => $MbnL];
    }
 
    /**
     * Private function, carries digits bigger than 9, and removes leading zeros
+    * @throws MbnErr exceeded MbnL digits limit
     */
    private function mbnCarry() {
       $ad = &$this->d;
@@ -127,12 +138,13 @@ class Mbn {
          $adlm1++;
       }
       if ($adlm1 === static::$MbnP) {
-         $i = 0;
-         while ($i <= $adlm1 && $ad[$i] === 0) {
-            $i++;
+         for ($i = 0; $i <= $adlm1 && $ad[$i] === 0; $i++) {
          }
          $this->s *= ($i <= $adlm1) ? 1 : 0;
+      } elseif ($adlm1 - static::$MbnP > static::$MbnL) {
+         throw new MbnErr('.limit', 'exceeded ' . static::$MbnL . ' digits limit');
       }
+
    }
 
    /**
@@ -321,8 +333,8 @@ class Mbn {
     * @throws MbnErr
     */
    public static function prop() {
-      return static::prepareOpt(['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS,
-          'MbnT' => static::$MbnT, 'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF], 0, 0, 0, 0, 0, '.prop');
+      return static::prepareOpt(['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS, 'MbnT' => static::$MbnT,
+          'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF, 'MbnL' => static::$MbnL], 0, 0, 0, 0, 0, 0, '.prop');
    }
 
    /**
@@ -358,7 +370,7 @@ class Mbn {
       if (!is_array($opt)) {
          $opt = ['MbnF' => $opt === true];
       }
-      $opt = static::prepareOpt($opt, static::$MbnP, static::$MbnS, static::$MbnT, static::$MbnE, static::$MbnF, '.format');
+      $opt = static::prepareOpt($opt, static::$MbnP, static::$MbnS, static::$MbnT, static::$MbnE, static::$MbnF, static::$MbnL, '.format');
       return $this->mbnToString($opt['MbnP'], $opt['MbnS'], $opt['MbnT'], $opt['MbnF']);
    }
 
@@ -1066,10 +1078,10 @@ class Mbn {
        '#' => [4, true, 'mod'],
        '/' => [4, true, 'div'],
        '^' => [5, false, 'pow'],
-       '%' => [6, true, 'div_100'],
-       '!'=> [6, true, 'fact'],
-       'inva'=> [6, true, 'inva'],
-       'fn'=> [6, true]
+       '%' => [7, true, 'div_100'],
+       '!' => [7, true, 'fact'],
+       'inva' => [6, true, 'inva'],
+       'fn' => [7, true]
    ];
    protected static $rxs = [
        'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBop', 'end' => true],
@@ -1134,10 +1146,6 @@ class Mbn {
             $tok = $mtch[1];
             $expr = substr($expr, strlen($mtch[0]));
          }
-         if ($t !== 'uop' && $neg) {
-            $rpno[] = &static::$ops['inva'];
-            $neg = false;
-         }
          switch ($t) {
             case 'num':
                $rpns[] = new static($tok, false);
@@ -1171,7 +1179,9 @@ class Mbn {
                $rpno[] = $bop;
                break;
             case 'uop':
-               $neg ^= ($tok === '-');
+               if ($tok === '-') {
+                  $rpno [] = static::$ops['inva'];
+               }
                break;
             case 'po':
                $rpno [] = $tok;

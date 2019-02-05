@@ -477,6 +477,7 @@
       ["Mbn::calc('sqrt(9!)')", "602.40"],
       ["Mbn::calc('sqrt(9))')", "Mbn.calc error*"],
       ["Mbn::calc('500%!')", "120.00"],
+      ["Mbn::calc('-500%!')", "-120.00"],
       ["Mbn20u::calc('50!%')", "304140932017133780436126081660647688443776415689605120000000000"],
       ["(new Mbn('2102.6'))->format()", "2 102.60"],
       ["(new Mbn('2102.6'))->format(true)", "2 102.60"],
@@ -496,6 +497,10 @@
       ["(new Mbn20u('2102.6'))->format({MbnP: 1, MbnT: false})", "2102,6"],
       ["(new Mbn20u('2102.12395'))->format({MbnP: 4, MbnT: false})", "2102,1240"],
       ["(new Mbn20u('2102.12395'))->format({MbnP: 4})", "2102,124"],
+      ["(new Mbn0(100))->pow(501)", "Mbn.limit error*"],
+      ["(new Mbn4yec('sgn(-18!)'))", "-1,0000"],
+      ["(new Mbn4yec('sgn(-19!)'))", "Mbn.limit error*"],
+      ["Mbn::prop()['MbnL']", "1000"],
       ["0", "0"]
    ]
 }

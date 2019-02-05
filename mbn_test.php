@@ -37,6 +37,7 @@ class Mbn4yec extends Mbn {
    protected static $MbnP = 4;
    protected static $MbnE = true;
    protected static $MbnS = ',';
+   protected static $MbnL = 20;
 
 }
 

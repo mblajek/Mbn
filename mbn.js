@@ -24,7 +24,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.41";
+   var MbnV = "1.42";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -35,6 +35,8 @@ var Mbn = (function () {
    var MbnDE = null;
    //default format
    var MbnDF = false;
+   //default limit
+   var MbnDL = 1000;
 
    /**
     * fill options with default parameters and check
@@ -44,12 +46,13 @@ var Mbn = (function () {
     * @param MbnDT default truncate
     * @param MbnDE default evaluation
     * @param MbnDF default format
+    * @param MbnDL default limit
     * @param fname name of function for exception
     * @throws {MbnErr} invalid options
     * @return {Object} checked ad filled class options
     */
-   var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, fname) {
-      var MbnP = MbnDP, MbnS = MbnDS, MbnT = MbnDT, MbnE = MbnDE, MbnF = MbnDF;
+   var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, fname) {
+      var MbnP = MbnDP, MbnS = MbnDS, MbnT = MbnDT, MbnE = MbnDE, MbnF = MbnDF, MbnL = MbnDL;
       if (opt.hasOwnProperty("MbnP")) {
          MbnP = opt.MbnP;
          if (typeof MbnP !== "number" || MbnP < 0 || !isFinite(MbnP) || Math.round(MbnP) !== MbnP) {
@@ -80,7 +83,13 @@ var Mbn = (function () {
             throw new MbnErr(fname, "invalid format (bool)", MbnF);
          }
       }
-      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF};
+      if (opt.hasOwnProperty("MbnL")) {
+         MbnL = opt.MbnL;
+         if (typeof MbnL !== "number" || MbnL <= 0 || !isFinite(MbnP) || Math.round(MbnL) !== MbnL) {
+            throw new MbnErr(fname, "invalid limit (positive int)", MbnL);
+         }
+      }
+      return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF, MbnL: MbnL};
    };
 
    /**
@@ -98,8 +107,8 @@ var Mbn = (function () {
       if (typeof opt !== "object") {
          opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
       }
-      opt = prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, ".extend");
-      var MbnP = opt.MbnP, MbnS = opt.MbnS, MbnT = opt.MbnT, MbnE = opt.MbnE, MbnF = opt.MbnF;
+      opt = prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, ".extend");
+      var MbnP = opt.MbnP, MbnS = opt.MbnS, MbnT = opt.MbnT, MbnE = opt.MbnE, MbnF = opt.MbnF, MbnL = opt.MbnL;
 
       /**
        * Private function, carries digits bigger than 9, and removes leading zeros
@@ -139,12 +148,14 @@ var Mbn = (function () {
             adlm1++;
          }
          if (adlm1 === MbnP) {
-            i = 0;
-            while (i <= adlm1 && ad[i] === 0) {
-               i++;
+            for (i = 0; i <= adlm1 && ad[i] === 0; i++) {
+
             }
             a._s *= (i <= adlm1) ? 1 : 0;
+         } else if (adlm1 - MbnP > MbnL) {
+            throw new MbnErr(".limit", "exceeded " + MbnL + " digits limit");
          }
+
       };
 
       /**
@@ -350,7 +361,7 @@ var Mbn = (function () {
        * @return {Object} properties
        */
       Mbn.prop = function () {
-         return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF};
+         return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF, MbnL: MbnL};
       };
 
       /**
@@ -386,7 +397,7 @@ var Mbn = (function () {
          if (typeof opt !== "object") {
             opt = {MbnF: opt === true || opt === undefined};
          }
-         opt = prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, ".format");
+         opt = prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, MbnL, ".format");
          return mbnToString(this, opt.MbnP, opt.MbnS, opt.MbnT, opt.MbnF);
       };
 
@@ -1062,10 +1073,10 @@ var Mbn = (function () {
          "#": [4, true, "mod"],
          "/": [4, true, "div"],
          "^": [5, false, "pow"],
-         "%": [6, true, "div_100"],
-         "!": [6, true, "fact"],
+         "%": [7, true, "div_100"],
+         "!": [7, true, "fact"],
          "inva": [6, true, "inva"],
-         "fn": [6, true]
+         "fn": [7, true]
       };
       var rxs = {
          num: {rx: /^([0-9., ]+)\s*/, next: endBop, end: true},
@@ -1109,7 +1120,6 @@ var Mbn = (function () {
          var lare = false;
          var rpns = [];
          var rpno = [];
-         var neg = false;
          var t = null;
          var tok, mtch, i, rolp;
 
@@ -1129,10 +1139,6 @@ var Mbn = (function () {
             } else {
                tok = mtch[1];
                expr = expr.slice(mtch[0].length);
-            }
-            if (t !== "uop" && neg) {
-               rpno.push(ops.inva);
-               neg = false;
             }
             switch (t) {
                case "num":
@@ -1155,19 +1161,22 @@ var Mbn = (function () {
                      throw new MbnErr(".calc", "undefined", tok);
                   }
                   break;
+               case "fs":
                case "bop":
-                  var bop = ops[tok];
+                  var op = ops[tok];
                   while ((rolp = rpno.pop()) !== undefined) {
-                     if (rolp === "(" || (rolp[0] <= bop[0] - (bop[1] ? 1 : 0))) {
+                     if (rolp === "(" || (rolp[0] <= op[0] - (op[1] ? 1 : 0))) {
                         rpno.push(rolp);
                         break;
                      }
                      rpns.push(rolp[2]);
                   }
-                  rpno.push(bop);
+                  rpno.push(op);
                   break;
                case "uop":
-                  neg ^= (tok === "-");
+                  if (tok === "-") {
+                     rpno.push(ops.inva);
+                  }
                   break;
                case "po":
                   rpno.push(tok);
@@ -1179,17 +1188,6 @@ var Mbn = (function () {
                      }
                      rpns.push(rolp[2]);
                   }
-                  break;
-               case "fs":
-                  var op = ops[tok];
-                  while ((rolp = rpno.pop()) !== undefined) {
-                     if (rolp === "(" || (rolp[0] <= op[0] - (op[1] ? 1 : 0))) {
-                        rpno.push(rolp);
-                        break;
-                     }
-                     rpns.push(rolp[2]);
-                  }
-                  rpno.push(op);
                   break;
                default:
             }

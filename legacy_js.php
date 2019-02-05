@@ -1,27 +1,28 @@
 <script>
-<?php readfile('mbn.js'); ?>
+   <?php readfile('mbn.js'); ?>
 
    var Mbn0 = Mbn.extend(0);
    var Mbn3c = Mbn.extend({MbnP: 3, MbnS: ','});
    var Mbn20u = Mbn.extend({MbnP: 20, MbnS: ',', MbnT: true});
    var Mbn2nef = Mbn.extend({MbnE: false, MbnF: true});
-   var Mbn4yec  = Mbn.extend({MbnP: 4, MbnE: true, MbnS: ","});
+   var Mbn4yec = Mbn.extend({MbnP: 4, MbnE: true, MbnS: ",", MbnL: 20});
 
    //partial JSON support for envirment without JSON
    if (typeof JSON === "undefined") {
-      JSON = {parse: function (s) {
+      JSON = {
+         parse: function (s) {
             return eval("(" + s + ")");
          }, stringify: function (o) {
             switch (typeof o) {
                case "number":
                   return String(o);
                case "string":
-                  return'"' + o.replace(/"/g, '\\"') + '"';
+                  return '"' + o.replace(/"/g, '\\"') + '"';
                case "object":
                   var a = [], r = o instanceof Array, i;
                   for (i in o)
                      a.push((r ? "" : this.stringify(i) + ":") + this.stringify(o[i]));
-                  return(r ? "[" : "{") + a.join(",") + (r ? "]" : "}");
+                  return (r ? "[" : "{") + a.join(",") + (r ? "]" : "}");
                default:
                   throw"invalid type " + typeof o;
             }
