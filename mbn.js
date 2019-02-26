@@ -24,7 +24,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.42";
+   var MbnV = "1.43";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -689,9 +689,6 @@ var Mbn = (function () {
             n = ar.length;
             for (i = 0; i < n; i++) {
                var ai = (new Mbn(ar[i])).mul(mulp);
-               if (ai._s === -1) {
-                  throw new MbnErr(".split", "only non-negative ratio values supported");
-               }
                arr.push(ai);
                asum.add(ai, true);
             }

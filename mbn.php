@@ -26,7 +26,7 @@ class MbnErr extends Exception {
 class Mbn {
 
    //version of Mbn library
-   protected static $MbnV = '1.42';
+   protected static $MbnV = '1.43';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -673,9 +673,6 @@ class Mbn {
          $n = count($ar);
          foreach ($ar as $k => &$v) {
             $ai = (new static($v))->mul($mulp);
-            if ($ai->s === -1) {
-               throw new MbnErr('.split', 'only non-negative ratio values supported');
-            }
             $asum->add($ai, true);
             $arr[$k] = $ai;
          }
