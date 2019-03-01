@@ -35,7 +35,7 @@ if (!empty($getFile)) {
 $hashChanged = 1;
 if ($vString !== null) {
    $oldHash = json_decode($vString)->hash;
-   $newHash = hash('sha256', file_get_contents('mbn.js') . file_get_contents('mbn.php'));
+   $newHash = hash('sha256', file_get_contents('mbn.js') . file_get_contents('mbn.php') . file_get_contents('mbn.d.ts'));
    if ($oldHash === $newHash) {
       $hashChanged = 0;
    }
@@ -543,7 +543,7 @@ if ($vString !== null) {
     <table>
         <tbody>
         <tr>
-            <th>operatin</th>
+            <th>operation</th>
             <th>Number</th>
             <th>Mbn</th>
             <th>Number</th>
@@ -586,7 +586,7 @@ if ($vString !== null) {
             <th>divide</th>
             <td>a / 3</td>
             <td>a.div(3)</td>
-            <td>a *= 3</td>
+            <td>a /= 3</td>
             <td>a.div(3, true)</td>
             <th>Mbn</th>
         </tr>
@@ -619,12 +619,92 @@ if ($vString !== null) {
             <th>Mbn</th>
         </tr>
         <tr>
-            <th>maximum</th>
-            <td>Math.max(a, 3)</td>
-            <td>a.max(3)</td>
-            <td>a = Math.max(a, 3)</td>
-            <td>a.max(3, true)</td>
+            <th>power</th>
+            <td>Math.pow(a, 3)</td>
+            <td>a.pow(3)</td>
+            <td>a = Math.pow(a, 3)</td>
+            <td>a.pow(3, true)</td>
             <th>Mbn</th>
+        </tr>
+        <tr style="display: none"></tr>
+        <tr>
+            <td colspan="6">integer exponent only</td>
+        </tr>
+        <tr>
+            <th>round</th>
+            <td>Math.round(a)</td>
+            <td>a.round()</td>
+            <td>a = Math.round(a)</td>
+            <td>a.round(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>floor</th>
+            <td>Math.floor(a)</td>
+            <td>a.floor()</td>
+            <td>a = Math.floor(a)</td>
+            <td>a.floor(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>ceiling</th>
+            <td>Math.ceil(a)</td>
+            <td>a.ceil()</td>
+            <td>a = Math.ceil(a)</td>
+            <td>a.ceil(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>integer part of value</th>
+            <td>Math.trunc(a)</td>
+            <td>a.ceil()</td>
+            <td>a = Math.trunc(a)</td>
+            <td>a.intp(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>absolute value</th>
+            <td>Math.abs(a)</td>
+            <td>a.abs()</td>
+            <td>a = Math.abs(a)</td>
+            <td>a.abs(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>additional inverse</th>
+            <td>- a</td>
+            <td>a.inva()</td>
+            <td>a = -a</td>
+            <td>a.inva(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>multiplicative inverse</th>
+            <td>1 / a</td>
+            <td>a.invm()</td>
+            <td>a = 1 / a</td>
+            <td>a.invm(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>square root</th>
+            <td>Math.sqrt(a)</td>
+            <td>a.sqrt()</td>
+            <td>a = Math.sqrt(a)</td>
+            <td>a.sqrt(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>sign</th>
+            <td>Math.sign(a)</td>
+            <td>a.sgn()</td>
+            <td>a = Math.sign(a)</td>
+            <td>a.sgn(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr style="display: none"></tr>
+        <tr>
+            <td colspan="6">negative -> -1, positive -> 1, 0 -> 0</td>
         </tr>
         </tbody>
     </table>

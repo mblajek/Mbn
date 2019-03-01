@@ -77,6 +77,8 @@ interface Mbn {
     sgn(m?: boolean): Mbn;
 
     pow(b: MbnArg, m?: boolean): Mbn;
+
+    fact(m? : boolean): Mbn;
 }
 
 
