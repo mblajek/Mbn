@@ -15,8 +15,9 @@ function releaseMbn() {
 
    $mbn_js = file_get_contents('mbn.js');
    $mbn_php = file_get_contents('mbn.php');
+   $mbn_d_ts = file_get_contents('mbn.d.ts');
 
-   $newHash = hash('sha256', $mbn_js . $mbn_php);
+   $newHash = hash('sha256', $mbn_js . $mbn_php . $mbn_d_ts);
 
    if ($oldHash === $newHash) {
       return 'already up-to-date';
@@ -177,7 +178,6 @@ function releaseMbn() {
    file_put_contents('release/mbn.js', preg_replace('/^\s*/i', $licenseJs, $mbn_js));
    file_put_contents('release/mbn.min.js', preg_replace('/^\s*/i', $licenseJs, $mbn_min_js));
 
-   $mbn_d_ts = file_get_contents('mbn.d.ts');
    file_put_contents('release/mbn.d.ts', preg_replace('/^\s*/i', $licenseJs, $mbn_d_ts));
 
    file_put_contents('release/v', json_encode([
