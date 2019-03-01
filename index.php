@@ -154,6 +154,7 @@ if ($vString !== null) {
                xmlhttp.onreadystatechange = function () {
                   if (xmlhttp.readyState === 4) {
                      alert(xmlhttp.responseText);
+                     location.reload();
                   }
                };
                xmlhttp.open("POST", "mbn_release.php", true);

@@ -12,7 +12,7 @@ class MbnErr extends Exception {
     */
    public function __construct($fn, $msg, $val = null) {
       $ret = 'Mbn' . $fn . ' error: ' . $msg;
-      if ($val !== null) {
+      if (func_num_args() !== 2) {
          if (is_array($val)) {
             $val = '[' . implode(',', $val) . ']';
          }

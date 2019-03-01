@@ -10,17 +10,17 @@ var Mbn = (function () {
     * @param {*=} val Incorrect value to message
     */
    var MbnErr = function (fn, msg, val) {
-      this.toString = function () {
-         var ret = "Mbn" + fn + " error: " + msg;
-         if (val !== undefined) {
-            if (val instanceof Array) {
-               val = "[" + val + "]";
-            }
-            ret += ": " + ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
+      var msg = "Mbn" + fn + " error: " + msg;
+      if (arguments.length !== 2) {
+         if (val instanceof Array) {
+            val = "[" + val + "]";
          }
-         return ret;
+         msg += ": " + ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
+      }
+      this.message = msg;
+      this.toString = function () {
+         return msg;
       };
-      this.message = String(this);
    };
 
    //version of Mbn library
