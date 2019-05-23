@@ -684,25 +684,39 @@ var Mbn = (function () {
             var mulp = new Mbn(10).pow(MbnP);
             asum = new Mbn(0);
             n = ar.length;
+            var sgns = [false, false, false];
             for (i = 0; i < n; i++) {
                var ai = (new Mbn(ar[i])).mul(mulp);
+               ai._i = i;
+               sgns[ai._s + 1] = true;
                arr.push(ai);
                asum.add(ai, true);
+            }
+            if (sgns[0] && sgns[2]) {
+               arr.sort(function (a, b) {
+                  return asum._s * a.cmp(b);
+               });
             }
          }
          if (arr.length === 0) {
             throw new MbnErr(".split", "cannot split to zero parts");
          }
+         if(asum._s === 0){
+            throw new MbnErr(".split", "cannot split when sum of parts is zero");
+         }
          var a = new Mbn(this);
          var brr = [];
+         brr.length = n;
+         var idx;
          for (i = 0; i < n; i++) {
+            idx = arr[i].hasOwnProperty("_i") ? arr[i]._i : i;
             if (arr[i]._s === 0) {
-               brr.push(arr[i]);
+               brr[idx] = arr[i];
             } else {
                var b = a.mul(arr[i]).div(asum);
                asum.sub(arr[i], true);
                a.sub(b, true);
-               brr.push(b);
+               brr[idx] = b;
             }
          }
          return brr;
