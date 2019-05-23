@@ -25,7 +25,8 @@ if (!empty($getFile)) {
       readfile('release/' . $getFile);
    } elseif ($getFile === 'icon') {
       header('Content-Type: image/bmp');
-      echo gzinflate(base64_decode('c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDAwNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
+      echo gzinflate(base64_decode(
+          'c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDAwNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
    } elseif ($getFile === 'v') {
       header('Content-Type: text/json');
       echo $vString;
@@ -130,8 +131,13 @@ if ($vString !== null) {
         padding: 4px;
         border-left: 1px solid gray;
     }
+
     table th:first-child, table td:first-child {
         border-left: 0px solid gray;
+    }
+
+    table tr.hidden {
+        display: none
     }
 </style>
 <script>
@@ -598,7 +604,7 @@ if ($vString !== null) {
             <td>a.mod(3, true)</td>
             <th>Mbn</th>
         </tr>
-        <tr style="display: none"></tr>
+        <tr class="hidden"></tr>
         <tr>
             <td colspan="6">result has same sign as the original number</td>
         </tr>
@@ -626,9 +632,17 @@ if ($vString !== null) {
             <td>a.pow(3, true)</td>
             <th>Mbn</th>
         </tr>
-        <tr style="display: none"></tr>
+        <tr class="hidden"></tr>
         <tr>
             <td colspan="6">integer exponent only</td>
+        </tr>
+        <tr>
+            <th>factorial</th>
+            <td>Math.pow(a, 3)</td>
+            <td>a.fact()</td>
+            <td>a = Math.pow(a, 3)</td>
+            <td>a.fact(true)</td>
+            <th>Mbn</th>
         </tr>
         <tr>
             <th>round</th>
@@ -657,7 +671,7 @@ if ($vString !== null) {
         <tr>
             <th>integer part of value</th>
             <td>Math.trunc(a)</td>
-            <td>a.ceil()</td>
+            <td>a.intp()</td>
             <td>a = Math.trunc(a)</td>
             <td>a.intp(true)</td>
             <th>Mbn</th>
@@ -672,7 +686,7 @@ if ($vString !== null) {
         </tr>
         <tr>
             <th>additional inverse</th>
-            <td>- a</td>
+            <td>-a</td>
             <td>a.inva()</td>
             <td>a = -a</td>
             <td>a.inva(true)</td>
@@ -702,7 +716,7 @@ if ($vString !== null) {
             <td>a.sgn(true)</td>
             <th>Mbn</th>
         </tr>
-        <tr style="display: none"></tr>
+        <tr class="hidden"></tr>
         <tr>
             <td colspan="6">negative -> -1, positive -> 1, 0 -> 0</td>
         </tr>

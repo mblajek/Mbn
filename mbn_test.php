@@ -4,20 +4,23 @@ if (!class_exists('Mbn')) {
    require_once 'mbn.php';
 }
 
-class Mbn0 extends Mbn {
+class Mbn0 extends Mbn
+{
 
    protected static $MbnP = 0;
 
 }
 
-class Mbn3c extends Mbn {
+class Mbn3c extends Mbn
+{
 
    protected static $MbnP = 3;
    protected static $MbnS = ',';
 
 }
 
-class Mbn20u extends Mbn {
+class Mbn20u extends Mbn
+{
 
    protected static $MbnP = 20;
    protected static $MbnS = ',';
@@ -25,14 +28,16 @@ class Mbn20u extends Mbn {
 
 }
 
-class Mbn2nef extends Mbn {
+class Mbn2nef extends Mbn
+{
 
    protected static $MbnE = false;
    protected static $MbnF = true;
 
 }
 
-class Mbn4yec extends Mbn {
+class Mbn4yec extends Mbn
+{
 
    protected static $MbnP = 4;
    protected static $MbnE = true;
@@ -41,15 +46,18 @@ class Mbn4yec extends Mbn {
 
 }
 
-class MbnColon extends Mbn {
+class MbnColon extends Mbn
+{
 
    protected static $MbnS = ':';
 
 }
 
-function testMbn() {
+function testMbn()
+{
 
-   function runTestMbn($tests) {
+   function runTestMbn($tests)
+   {
       $ret = array();
       $i = 0;
       foreach ($tests as $test) {

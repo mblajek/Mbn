@@ -10,7 +10,7 @@ var Mbn = (function () {
     * @param {*=} val Incorrect value to message
     */
    var MbnErr = function (fn, msg, val) {
-      var msg = "Mbn" + fn + " error: " + msg;
+      msg = "Mbn" + fn + " error: " + msg;
       if (arguments.length !== 2) {
          if (val instanceof Array) {
             val = "[" + val + "]";
@@ -681,10 +681,7 @@ var Mbn = (function () {
                arr.push(mbn1);
             }
          } else {
-            var mulp = new Mbn(1);
-            for (i = 0; i < MbnP; i++) {
-               mulp._d.push(0);
-            }
+            var mulp = new Mbn(10).pow(MbnP);
             asum = new Mbn(0);
             n = ar.length;
             for (i = 0; i < n; i++) {

@@ -1,6 +1,7 @@
 <?php
 
-function releaseMbn() {
+function releaseMbn()
+{
    $err = [];
 
    if (!is_dir('release')) {
@@ -23,7 +24,8 @@ function releaseMbn() {
       return 'already up-to-date';
    }
 
-   function checkMinifyJS(&$errors, $code) {
+   function checkMinifyJS(&$errors, $code)
+   {
       $postfields = [
           'js_code' => $code,
           'compilation_level' => 'SIMPLE_OPTIMIZATIONS',
@@ -71,7 +73,8 @@ function releaseMbn() {
       return empty($resp->compiledCode) ? '' : $resp->compiledCode;
    }
 
-   function minifyCheckPHP(&$errors) {
+   function minifyCheckPHP(&$errors)
+   {
       $mbn_min_php = php_strip_whitespace('mbn.php');
       $ll = 500;
       $lineLen = 0;
@@ -157,14 +160,15 @@ function releaseMbn() {
       return $errStr;
    }
 
-   function getVersion($code) {
+   function getVersion($code)
+   {
       $varr = [];
       preg_match('/MbnV = [\'"]([\d\.]+)[\'"];/', $code, $varr);
       return 'v' . (isset($varr[1]) ? $varr[1] : '');
    }
 
    $license = '/* Mbn {V} | https://mirkl.es/n/lib | Copyright (c) 2016-' . date('Y')
-           . ' Mikołaj Błajek | https://github.com/mblajek/Mbn/blob/master/LICENSE.txt */' . PHP_EOL;
+       . ' Mikołaj Błajek | https://github.com/mblajek/Mbn/blob/master/LICENSE.txt */' . PHP_EOL;
 
    $versionJs = getVersion($mbn_js);
    $versionPhp = getVersion($mbn_php);

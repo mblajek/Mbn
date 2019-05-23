@@ -23,7 +23,7 @@ interface MbnDispOpt {
     MbnF?: MbnFT
 }
 
-interface MbnOpt extends MbnDispOpt{
+interface MbnOpt extends MbnDispOpt {
     MbnE?: MbnET
 }
 
@@ -78,7 +78,7 @@ interface Mbn {
 
     pow(b: MbnArg, m?: boolean): Mbn;
 
-    fact(m? : boolean): Mbn;
+    fact(m?: boolean): Mbn;
 }
 
 
@@ -95,7 +95,7 @@ interface MbnConstructor {
 
     def(n: string | null, v?: string): Mbn;
 
-    calc(exp: string, vars?: Record<string, MbnArg> ): Mbn;
+    calc(exp: string, vars?: Record<string, MbnArg>): Mbn;
 
     prototype: Mbn;
 }
