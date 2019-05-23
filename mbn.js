@@ -24,7 +24,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.43";
+   var MbnV = "1.44";
    //default precision
    var MbnDP = 2;
    //default separator

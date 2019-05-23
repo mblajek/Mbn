@@ -27,7 +27,7 @@ class MbnErr extends Exception
 class Mbn
 {
    //version of Mbn library
-   protected static $MbnV = '1.43';
+   protected static $MbnV = '1.44';
    //default precision
    protected static $MbnP = 2;
    //default separator
