@@ -5,6 +5,8 @@
       ["array_keys((new Mbn('42'))->split(5))", "0,1,2,3,4"],
       ["array_values((new Mbn('42'))->split(['a'=>2,0=>3,'c'=>5]))", "8.40,12.60,21.00"],
       ["array_keys((new Mbn('42'))->split(['a'=>2,0=>3,'c'=>5]))", "a,0,c"],
+      ["array_values((new Mbn('42'))->split(['a'=>2,0=>-3,'c'=>5]))", "21.00,-31.50,52.50"],
+      ["array_keys((new Mbn('42'))->split(['a'=>2,0=>-3,'c'=>5]))", "a,0,c"],
       ["Mbn::reduce('mul', ['a'=>2,0=>3,'c'=>5])", "30.00"],
       ["array_values(Mbn::reduce('invm', ['a'=>2,0=>3,'c'=>5]))", "0.50,0.33,0.20"],
       ["array_keys(Mbn::reduce('invm', ['a'=>2,0=>3,'c'=>5]))", "a,0,c"],

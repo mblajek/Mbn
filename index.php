@@ -550,9 +550,9 @@ if ($vString !== null) {
         <tbody>
         <tr>
             <th>operation</th>
-            <th>Number</th>
+            <th>number</th>
             <th>Mbn</th>
-            <th>Number</th>
+            <th>number</th>
             <th>Mbn</th>
             <th>return type</th>
         </tr>
@@ -638,9 +638,9 @@ if ($vString !== null) {
         </tr>
         <tr>
             <th>factorial</th>
-            <td>Math.pow(a, 3)</td>
+            <td></td>
             <td>a.fact()</td>
-            <td>a = Math.pow(a, 3)</td>
+            <td></td>
             <td>a.fact(true)</td>
             <th>Mbn</th>
         </tr>
@@ -719,6 +719,30 @@ if ($vString !== null) {
         <tr class="hidden"></tr>
         <tr>
             <td colspan="6">negative -> -1, positive -> 1, 0 -> 0</td>
+        </tr>
+        <tr>
+           <th>equals</th>
+           <td>a === b</td>
+           <td>a.eq(3)</td>
+           <td>Math.abs(a - 3) <= 0.1</td>
+           <td>a.cmp(3. 0.1)</td>
+           <th>boolean</th>
+        </tr>
+        <tr>
+           <th>compare</th>
+           <td>Math.sign(a - b)</td>
+           <td>a.cmp(3)</td>
+           <td></td>
+           <td>a.cmp(3)</td>
+           <th>number</th>
+        </tr>
+        <tr>
+           <th>is integer</th>
+           <td>a % 1 === 0</td>
+           <td>a.isInt()</td>
+           <td></td>
+           <td></td>
+           <th>boolean</th>
         </tr>
         </tbody>
     </table>

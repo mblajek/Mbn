@@ -686,6 +686,7 @@ class Mbn
          for ($i = 0; $i < $n; $i++) {
             $arr[] = $mbn1;
          }
+         $brr = $arr;
       } else {
          $mulp = new static(1);
          for ($i = 0; $i < static::$MbnP; $i++) {
@@ -693,26 +694,39 @@ class Mbn
          }
          $asum = new static(0);
          $n = count($ar);
+         $sgns = [false, false, false];
+         $i = 0;
          foreach ($ar as $k => &$v) {
             $ai = (new static($v))->mul($mulp);
+            $ai->k = $k;
+            $sgns[$ai->s + 1] = true;
             $asum->add($ai, true);
             $arr[$k] = $ai;
+         }
+         $brr = $arr;
+         if ($sgns[0] && $sgns[2]) {
+            usort($arr, function ($a, $b) use ($asum){
+               return $asum->s * $a->cmp($b);
+            });
          }
          unset($v);
       }
       if ($n === 0) {
          throw new MbnErr('.split', 'cannot split to zero parts');
       }
+      if ($asum->s === 0) {
+         throw new MbnErr(".split", "cannot split when sum of parts is zero");
+      }
       $a = new static($this);
-      $brr = [];
       foreach ($arr as $k => &$v) {
+         $idx = isset($v->k) ? $v->k : $k;
          if ($v->s === 0) {
-            $brr[$k] = $v;
+            $brr[$idx] = $v;
          } else {
             $b = $a->mul($v)->div($asum);
             $asum->sub($v, true);
             $a->sub($b, true);
-            $brr[$k] = $b;
+            $brr[$idx] = $b;
          }
       }
       unset($v);
