@@ -681,7 +681,7 @@ var Mbn = (function () {
                arr.push(mbn1);
             }
          } else {
-            var mulp = new Mbn(10).pow(MbnP);
+            var mulp = (new Mbn(10)).pow(MbnP);
             asum = new Mbn(0);
             n = ar.length;
             var sgns = [false, false, false];
@@ -867,9 +867,7 @@ var Mbn = (function () {
        * @throws {MbnErr} square root of negative number
        */
       Mbn.prototype.sqrt = function (m) {
-         var t = new Mbn(this);
-         t._d.push(0);
-         t._d.push(0);
+         var t = this.mul(100);
          var rb = new Mbn(t);
          var r = new Mbn(t);
          var mbn2 = new Mbn(2);

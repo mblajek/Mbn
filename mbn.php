@@ -688,10 +688,7 @@ class Mbn
          }
          $brr = $arr;
       } else {
-         $mulp = new static(1);
-         for ($i = 0; $i < static::$MbnP; $i++) {
-            $mulp->d[] = 0;
-         }
+         $mulp = (new static(10))->pow(static::$MbnP);
          $asum = new static(0);
          $n = count($ar);
          $sgns = [false, false, false];
@@ -894,12 +891,10 @@ class Mbn
     */
    public function sqrt($m = false)
    {
-      $t = new static($this);
-      $t->d[] = 0;
-      $t->d[] = 0;
+      $t = $this->mul(100);
       $rb = new static($t);
       $r = new static($t);
-      $mbn2 = new static('2');
+      $mbn2 = new static(2);
       if ($r->s === -1) {
          throw new MbnErr('.sqrt', 'square root of negative number', $this);
       }
