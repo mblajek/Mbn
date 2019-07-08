@@ -4,10 +4,8 @@ function releaseMbn()
 {
    $err = [];
 
-   if (!is_dir('release')) {
-      if (!mkdir('release')) {
-         return 'cannot create release folder';
-      }
+   if (!is_dir('release') && !mkdir('release') && !is_dir('release')) {
+      return 'cannot create release folder';
    }
    $oldHash = null;
    if (file_exists('release/v')) {
@@ -47,6 +45,7 @@ function releaseMbn()
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       curl_setopt($ch, CURLOPT_POST, 1);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $postfieldsStr);
+      /** @noinspection CurlSslServerSpoofingInspection */
       curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
       $resp = json_decode(curl_exec($ch));
       $curlErr = curl_error($ch);

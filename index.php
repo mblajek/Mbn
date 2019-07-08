@@ -73,6 +73,10 @@ if ($vString !== null) {
         border-left: 2px solid gray;
     }
 
+    .title3 {
+        font-size: 1.2em;
+    }
+
     .mono {
         font-family: "Consolas", monospace;
         background-color: lightgray;
@@ -106,12 +110,6 @@ if ($vString !== null) {
         margin-left: 0px;
         border-radius: 0px 2px 2px 0px;
         border-left: 0px;
-    }
-
-    .title3 {
-        font-size: 1.2em;
-        border-left: 20px solid gray;
-        border-radius: 0px;
     }
 
     table {
@@ -545,14 +543,18 @@ if ($vString !== null) {
       });
    }, 100);
 </script>
+<div class="title2">Reference</div>
+<div class="title3">JS and Mbn code examples.<br>In most cases Mbn code in PHP and JS is identical - <span class="mono">a.f()</span>
+    in JS is <span class="mono">$a->f()</span> in PHP
+</div>
 <div>
     <table>
         <tbody>
         <tr>
             <th>operation</th>
-            <th>number</th>
+            <th>JS (Number)</th>
             <th>Mbn</th>
-            <th>number</th>
+            <th>JS (Number)</th>
             <th>Mbn</th>
             <th>return type</th>
         </tr>
@@ -560,9 +562,9 @@ if ($vString !== null) {
             <th>declare</th>
             <td>a = 4</td>
             <td>a = new Mbn(4)</td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>a = 0;<br>a = 4;</td>
+            <td>a = new Mbn();<br>a.set(4);</td>
+            <th>Mbn</th>
         </tr>
         <tr>
             <th>add</th>
@@ -718,31 +720,35 @@ if ($vString !== null) {
         </tr>
         <tr class="hidden"></tr>
         <tr>
-            <td colspan="6">negative -> -1, positive -> 1, 0 -> 0</td>
+            <td colspan="6">negative -&gt; -1, positive -&gt; 1, 0 -&gt; 0</td>
         </tr>
         <tr>
-           <th>equals</th>
-           <td>a === b</td>
-           <td>a.eq(3)</td>
-           <td>Math.abs(a - 3) <= 0.1</td>
-           <td>a.cmp(3. 0.1)</td>
-           <th>boolean</th>
+            <th>clone</th>
+            <td>b = a</td>
+            <td>b = new Mbn(a)<br/>b = a.add(0)</td>
+            <td>b = 0;<br>b = a;</td>
+            <td>b = new Mbn()<br/>b.set(a)</td>
+            <th>Mbn</th>
         </tr>
         <tr>
-           <th>compare</th>
-           <td>Math.sign(a - b)</td>
-           <td>a.cmp(3)</td>
-           <td></td>
-           <td>a.cmp(3)</td>
-           <th>number</th>
+            <th>equals</th>
+            <td>a === 3</td>
+            <td>a.eq(3)</td>
+            <td>Math.abs(a - 3) <= 0.1</td>
+            <td>a.eq(3, 0.1)</td>
+            <th>boolean</th>
         </tr>
         <tr>
-           <th>is integer</th>
-           <td>a % 1 === 0</td>
-           <td>a.isInt()</td>
-           <td></td>
-           <td></td>
-           <th>boolean</th>
+            <th>compare</th>
+            <td>Math.sign(a - 3)</td>
+            <td>a.cmp(3)</td>
+            <td></td>
+            <td>a.cmp(b, 0.1)</td>
+            <th>boolean</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">a &lt; 3 -&gt; -1, a &gt; 3 -> 1, a === b -&gt; 0 (or Math.abs(a - 3) <= 0.1 -> 0)</td>
         </tr>
         </tbody>
     </table>
