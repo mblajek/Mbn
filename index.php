@@ -545,7 +545,7 @@ if ($vString !== null) {
 </script>
 <div class="title2">Reference</div>
 <div class="title3">JS and Mbn code examples.<br>In most cases Mbn code in PHP and JS is identical - <span class="mono">a.f()</span>
-    in JS is <span class="mono">$a->f()</span> in PHP
+    in JS is <span class="mono">$a-&gt;f()</span> in PHP
 </div>
 <div>
     <table>
@@ -734,7 +734,7 @@ if ($vString !== null) {
             <th>equals</th>
             <td>a === 3</td>
             <td>a.eq(3)</td>
-            <td>Math.abs(a - 3) <= 0.1</td>
+            <td>Math.abs(a - 3) &lt;= 0.1</td>
             <td>a.eq(3, 0.1)</td>
             <th>boolean</th>
         </tr>
@@ -748,7 +748,7 @@ if ($vString !== null) {
         </tr>
         <tr class="hidden"></tr>
         <tr>
-            <td colspan="6">a &lt; 3 -&gt; -1, a &gt; 3 -> 1, a === b -&gt; 0 (or Math.abs(a - 3) <= 0.1 -> 0)</td>
+            <td colspan="6">a &lt; 3 -&gt; -1, a &gt; 3 -> 1, a === 3 -&gt; 0 (or Math.abs(a - 3) &lt;= 0.1 -&gt; 0)</td>
         </tr>
         </tbody>
     </table>
