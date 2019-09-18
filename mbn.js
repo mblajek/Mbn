@@ -24,7 +24,7 @@ var Mbn = (function () {
    };
 
    //version of Mbn library
-   var MbnV = "1.44";
+   var MbnV = "1.45";
    //default precision
    var MbnDP = 2;
    //default separator
@@ -701,7 +701,7 @@ var Mbn = (function () {
          if (arr.length === 0) {
             throw new MbnErr(".split", "cannot split to zero parts");
          }
-         if(asum._s === 0){
+         if (asum._s === 0) {
             throw new MbnErr(".split", "cannot split when sum of parts is zero");
          }
          var a = new Mbn(this);
@@ -1109,18 +1109,40 @@ var Mbn = (function () {
       };
 
       /**
+       * Check expression, get names of used vars
+       * @param {string} exp Expression
+       * @return {Array|boolean}
+       */
+      Mbn.check = function (exp) {
+         try {
+            var varName, vars = mbnCalc(exp, false), varNames = [];
+            var hasOwnProperty = varNames.hasOwnProperty;
+            for (varName in vars) {
+               if (hasOwnProperty.call(vars, varName)) {
+                  varNames[vars[varName]] = varName;
+               }
+            }
+            return varNames;
+         } catch (e) {
+            return false;
+         }
+      };
+      /**
        * Evaluate expression
        * @param {string} exp Expression
        * @param {Object|boolean=} vars Object with vars for evaluation
-       * @return {Mbn}
+       * @return {Mbn|Object}
        * @throws {MbnErr} syntax error, operation error
        */
       var mbnCalc = function (exp, vars) {
+         var onlyCheck = vars === false;
          if (!(vars instanceof Object)) {
             vars = {};
          }
          var expr = String(exp).replace(wsRx3, "");
-         var vnames = {};
+         var varsUsed = {};
+         var hasOwnProperty = varsUsed.hasOwnProperty;
+         var varsUsedSize = 0;
          var larr = uopVal;
          var larl = larr.length;
          var lare = false;
@@ -1151,17 +1173,20 @@ var Mbn = (function () {
                   rpns.push(new Mbn(tok, false));
                   break;
                case "name":
-                  if (fnEval.hasOwnProperty(tok) && fnEval[tok] !== false) {
+                  t = "vr";
+                  if (hasOwnProperty.call(fnEval, tok) && fnEval[tok] !== false) {
                      t = "fn";
                      rpno.push(ops.fn.concat([tok]));
-                  } else if (vars.hasOwnProperty(tok)) {
-                     t = "vr";
-                     if (!vnames.hasOwnProperty(tok)) {
-                        vnames[tok] = new Mbn(vars[tok]);
+                  } else if (onlyCheck) {
+                     if (!hasOwnProperty.call(varsUsed,tok)) {
+                        varsUsed[tok] = varsUsedSize++;
                      }
-                     rpns.push(new Mbn(vnames[tok]));
+                  } else if (hasOwnProperty.call(vars, tok)) {
+                     if (!hasOwnProperty.call(varsUsed, tok)) {
+                        varsUsed[tok] = new Mbn(vars[tok]);
+                     }
+                     rpns.push(new Mbn(varsUsed[tok]));
                   } else if (Mbn.def(null, tok)) {
-                     t = "vr";
                      rpns.push(Mbn.def(tok));
                   } else {
                      throw new MbnErr(".calc", "undefined", tok);
@@ -1210,6 +1235,10 @@ var Mbn = (function () {
          }
          if (!lare) {
             throw new MbnErr(".calc", "unexpected", "END");
+         }
+
+         if (onlyCheck) {
+            return varsUsed;
          }
 
          var rpn = [];

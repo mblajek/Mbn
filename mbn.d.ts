@@ -97,6 +97,8 @@ interface MbnConstructor {
 
     calc(exp: string, vars?: Record<string, MbnArg>): Mbn;
 
+    check(exp: string): string[] | false;
+
     prototype: Mbn;
 }
 

@@ -508,6 +508,12 @@
       ["(new Mbn4yec('sgn(-18!)'))", "-1,0000"],
       ["(new Mbn4yec('sgn(-19!)'))", "Mbn.limit error*"],
       ["Mbn::prop()['MbnL']", "1000"],
+      ["Mbn::check('= ceil(b + a - PI) ^ sqrt(c) / 0')", "b,a,PI,c"],
+      ["Mbn::check('PI E PI s')", "PI,E,s"],
+      ["Mbn::check('PI E // PI s')", "false"],
+      ["Mbn::check('1 + 2')", ""],
+      ["Mbn::check('a + toString + valueOf + hasOwnProperty + b')", "a,toString,valueOf,hasOwnProperty,b"],
+      ["new Mbn('a + toString + valueOf + hasOwnProperty + b', {a: 1, toString:2, valueOf: 3, hasOwnProperty: 4, b:5})", "15.00"],
       ["0", "0"]
    ]
 }

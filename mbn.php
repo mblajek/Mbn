@@ -27,7 +27,7 @@ class MbnErr extends Exception
 class Mbn
 {
    //version of Mbn library
-   protected static $MbnV = '1.44';
+   protected static $MbnV = '1.45';
    //default precision
    protected static $MbnP = 2;
    //default separator
@@ -1154,15 +1154,30 @@ class Mbn
    }
 
    /**
+    * Check expression, get names of used vars
+    * @param string $exp Expression
+    * @return array|boolean
+    */
+   public static function check($exp)
+   {
+      try {
+         return array_keys(static::mbnCalc($exp, false));
+      } catch (MbnErr $e) {
+         return false;
+      }
+   }
+
+   /**
     * Evaluate expression
     * @param string $exp Expression
-    * @param array|boolean $vars Array with vars for evaluation, default null
-    * @return Mbn
+    * @param array|boolean $vars Array with vars for evaluation
+    * @return Mbn|string[]
     * @throws MbnErr syntax error, operation error
     * @throws MbnErr invalid argument format
     */
-   private static function mbnCalc($exp, $vars = null)
+   private static function mbnCalc($exp, $vars)
    {
+      $onlyCheck = $vars === false;
       $expr = preg_replace('/^[\\s=]+/', '', $exp);
       if (!is_array($vars)) {
          $vars = [];
@@ -1172,7 +1187,6 @@ class Mbn
       $lare = false;
       $rpns = [];
       $rpno = [];
-      $neg = false;
       $t = null;
 
       while ($expr !== '') {
@@ -1198,17 +1212,20 @@ class Mbn
                $rpns[] = new static($tok, false);
                break;
             case 'name':
+               $t = 'vr';
                if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
                   $t = 'fn';
                   $rpno [] = array_merge(static::$ops['fn'], [$tok]);
+               } elseif ($onlyCheck) {
+                  if (empty($vnames[$tok])) {
+                     $vnames[$tok] = true;
+                  }
                } elseif (array_key_exists($tok, $vars)) {
-                  $t = 'vr';
                   if (!isset($vnames[$tok])) {
                      $vnames[$tok] = new static($vars[$tok]);
                   }
                   $rpns [] = new static($vnames[$tok]);
                } elseif (static::def(null, $tok)) {
-                  $t = 'vr';
                   $rpns [] = static::def($tok);
                } else {
                   throw new MbnErr('.calc', 'undefined', $tok);
@@ -1266,6 +1283,10 @@ class Mbn
       }
       if (!$lare) {
          throw new MbnErr('.calc', 'unexpected', 'END');
+      }
+
+      if ($onlyCheck) {
+         return $vnames;
       }
 
       $rpn = [];
