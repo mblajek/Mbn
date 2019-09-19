@@ -692,7 +692,6 @@ class Mbn
          $asum = new static(0);
          $n = count($ar);
          $sgns = [false, false, false];
-         $i = 0;
          foreach ($ar as $k => &$v) {
             $ai = (new static($v))->mul($mulp);
             $ai->k = $k;
@@ -700,19 +699,19 @@ class Mbn
             $asum->add($ai, true);
             $arr[$k] = $ai;
          }
+         unset($v);
          $brr = $arr;
          if ($sgns[0] && $sgns[2]) {
-            usort($arr, function ($a, $b) use ($asum){
+            usort($arr, static function ($a, $b) use ($asum){
                return $asum->s * $a->cmp($b);
             });
          }
-         unset($v);
       }
       if ($n === 0) {
          throw new MbnErr('.split', 'cannot split to zero parts');
       }
       if ($asum->s === 0) {
-         throw new MbnErr(".split", "cannot split when sum of parts is zero");
+         throw new MbnErr('.split', 'cannot split when sum of parts is zero');
       }
       $a = new static($this);
       foreach ($arr as $k => &$v) {
@@ -1112,8 +1111,6 @@ class Mbn
        'uopVal' => ['num', 'name', 'uop', 'po'],
        'po' => ['po']
    ];
-   protected static $endBop = ['bop', 'pc'];
-   protected static $uopVal = ['num', 'name', 'uop', 'po'];
    protected static $ops = [
        '|' => [1, true, 'max'],
        '&' => [2, true, 'min'],
@@ -1129,15 +1126,15 @@ class Mbn
        'fn' => [7, true]
    ];
    protected static $rxs = [
-       'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBop', 'end' => true],
+       'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBop'],
        'name' => ['rx' => '/^([A-Za-z_]\\w*)\\s*/'],
-       'fn' => ['next' => 'po', 'end' => false],
-       'vr' => ['next' => 'endBop', 'end' => true],
-       'bop' => ['rx' => '/^([-+\\*\\/#^&|])\\s*/', 'next' => 'uopVal', 'end' => false],
-       'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal', 'end' => false],
-       'po' => ['rx' => '/^(\\()\\s*/', 'next' => 'uopVal', 'end' => false],
-       'pc' => ['rx' => '/^(\\))\\s*/', 'next' => 'endBop', 'end' => true],
-       'fs' => ['rx' => '/^([%!])\\s*/', 'next' => 'endBop', 'end' => true]
+       'fn' => ['next' => 'po'],
+       'vr' => ['next' => 'endBop'],
+       'bop' => ['rx' => '/^([-+\\*\\/#^&|])\\s*/', 'next' => 'uopVal'],
+       'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal'],
+       'po' => ['rx' => '/^(\\()\\s*/', 'next' => 'uopVal'],
+       'pc' => ['rx' => '/^(\\))\\s*/', 'next' => 'endBop'],
+       'fs' => ['rx' => '/^([%!])\\s*/', 'next' => 'endBop']
    ];
 
    /**
@@ -1182,22 +1179,21 @@ class Mbn
       if (!is_array($vars)) {
          $vars = [];
       }
-      $vnames = [];
-      $larr = &static::$states['uopVal'];
-      $lare = false;
+      $varsUsed = [];
+      $state = 'uopVal';
       $rpns = [];
       $rpno = [];
       $t = null;
 
       while ($expr !== '') {
          $mtch = [];
-         foreach ($larr as $t) {
+         foreach (static::$states[$state] as $t) {
             if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch) === 1) {
                break;
             }
          }
          if (empty($mtch)) {
-            if ($larr[0] === 'bop') {
+            if ($state === 'endBop') {
                $tok = '*';
                $t = 'bop';
             } else {
@@ -1217,14 +1213,14 @@ class Mbn
                   $t = 'fn';
                   $rpno [] = array_merge(static::$ops['fn'], [$tok]);
                } elseif ($onlyCheck) {
-                  if (empty($vnames[$tok])) {
-                     $vnames[$tok] = true;
+                  if (empty($varsUsed[$tok])) {
+                     $varsUsed[$tok] = true;
                   }
                } elseif (array_key_exists($tok, $vars)) {
-                  if (!isset($vnames[$tok])) {
-                     $vnames[$tok] = new static($vars[$tok]);
+                  if (!isset($varsUsed[$tok])) {
+                     $varsUsed[$tok] = new static($vars[$tok]);
                   }
-                  $rpns [] = new static($vnames[$tok]);
+                  $rpns [] = new static($varsUsed[$tok]);
                } elseif (static::def(null, $tok)) {
                   $rpns [] = static::def($tok);
                } else {
@@ -1271,9 +1267,7 @@ class Mbn
                break;
             default:
          }
-
-         $larr = &static::$states[static::$rxs[$t]['next']];
-         $lare = static::$rxs[$t]['end'];
+         $state = static::$rxs[$t]['next'];
       }
       while (($rolp = array_pop($rpno)) !== null) {
          if ($rolp === '(') {
@@ -1281,12 +1275,12 @@ class Mbn
          }
          $rpns[] = $rolp[2];
       }
-      if (!$lare) {
+      if ($state !== 'endBop') {
          throw new MbnErr('.calc', 'unexpected', 'END');
       }
 
       if ($onlyCheck) {
-         return $vnames;
+         return $varsUsed;
       }
 
       $rpn = [];

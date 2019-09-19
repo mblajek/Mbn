@@ -19,8 +19,24 @@ if (file_exists('release/v')) {
 $getFile = filter_input(INPUT_GET, 'gf');
 if (!empty($getFile)) {
    if (isset($relFiles[$getFile])) {
-      header('Content-Type: text/plain');
-      $disposition = (filter_input(INPUT_GET, 'show') !== null) ? 'inline' : 'attachment';
+      $disposition = null;
+      if (filter_input(INPUT_GET, 'show') === null) {
+         switch (strtolower(pathinfo($getFile, PATHINFO_EXTENSION))){
+            case 'js':
+            case 'ts':
+               header('Content-Type: text/javascript');
+               break;
+            case 'php':
+               header('Content-Type: appliction/php');
+               break;
+            default:
+               header('Content-Type: text/plain');
+         }
+         $disposition = 'attachment';
+      } else {
+         header('Content-Type: text/plain');
+         $disposition = 'inline';
+      }
       header('Content-Disposition: ' . $disposition . '; filename="' . $getFile . '"');
       readfile('release/' . $getFile);
    } elseif ($getFile === 'icon') {
@@ -495,6 +511,12 @@ if ($vString !== null) {
 
    w();
    we(['//constant can be checked if is defined', 'Mbn.def(null, "Q");']);
+
+   w("Other methods - check", "title2");
+   we(['//incorrect expressions return false', 'Mbn.check("a * b *");']);
+
+   w();
+   we(['//correct expressions return list of used vars, also already defined - not needed', 'Mbn.check("a * b * PI");']);
 
    w("Examples of calculations, that give wrong results, and can be easily corrected with Mbn", "title2");
 

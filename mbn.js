@@ -1068,8 +1068,10 @@ var Mbn = (function () {
          abs: true, inva: false, ceil: true, floor: true, fact: true,
          sqrt: true, round: true, sgn: true, int: "intp", div_100: "div_100"
       };
-      var endBop = ["bop", "pc", "fs"];
-      var uopVal = ["num", "name", "uop", "po"];
+      var states = {
+         endBop: ["bop", "pc", "fs"],
+         uopVal: ["num", "name", "uop", "po"]
+      };
       var ops = {
          "|": [1, true, "max"],
          "&": [2, true, "min"],
@@ -1085,15 +1087,15 @@ var Mbn = (function () {
          "fn": [7, true]
       };
       var rxs = {
-         num: {rx: /^([0-9., ]+)\s*/, next: endBop, end: true},
+         num: {rx: /^([0-9., ]+)\s*/, next: states.endBop},
          name: {rx: /^([A-Za-z_]\w*)\s*/},
-         fn: {next: ["po"], end: false},
-         vr: {next: endBop, end: true},
-         bop: {rx: /^([-+*\/#^&|])\s*/, next: uopVal, end: false},
-         uop: {rx: /^([-+])\s*/, next: uopVal, end: false},
-         po: {rx: /^(\()\s*/, next: uopVal, end: false},
-         pc: {rx: /^(\))\s*/, next: endBop, end: true},
-         fs: {rx: /^([%!])\s*/, next: endBop, end: true}
+         fn: {next: ["po"]},
+         vr: {next: states.endBop},
+         bop: {rx: /^([-+*\/#^&|])\s*/, next: states.uopVal},
+         uop: {rx: /^([-+])\s*/, next: states.uopVal},
+         po: {rx: /^(\()\s*/, next: states.uopVal},
+         pc: {rx: /^(\))\s*/, next: states.endBop},
+         fs: {rx: /^([%!])\s*/, next: states.endBop}
       };
 
       var wsRx3 = /^[\s=]+/;
@@ -1143,22 +1145,20 @@ var Mbn = (function () {
          var varsUsed = {};
          var hasOwnProperty = varsUsed.hasOwnProperty;
          var varsUsedSize = 0;
-         var larr = uopVal;
-         var larl = larr.length;
-         var lare = false;
+         var state = states.uopVal;
          var rpns = [];
          var rpno = [];
-         var t = null;
-         var tok, mtch, i, rolp;
+         var stateLength, t, tok, mtch, i, rolp;
 
          while (expr !== "") {
             mtch = null;
-            for (i = 0; i < larl && mtch === null; i++) {
-               t = larr[i];
+            stateLength = state.length;
+            for (i = 0; i < stateLength && mtch === null; i++) {
+               t = state[i];
                mtch = expr.match(rxs[t].rx);
             }
             if (mtch === null) {
-               if (larr[0] === "bop") {
+               if (state === states.endBop) {
                   tok = "*";
                   t = "bop";
                } else {
@@ -1223,9 +1223,7 @@ var Mbn = (function () {
                default:
             }
 
-            larr = rxs[t].next;
-            larl = larr.length;
-            lare = rxs[t].end;
+            state = rxs[t].next;
          }
          while ((rolp = rpno.pop()) !== undefined) {
             if (rolp === "(") {
@@ -1233,7 +1231,7 @@ var Mbn = (function () {
             }
             rpns.push(rolp[2]);
          }
-         if (!lare) {
+         if (state !== states.endBop) {
             throw new MbnErr(".calc", "unexpected", "END");
          }
 
