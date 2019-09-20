@@ -18,7 +18,7 @@ if (file_exists('release/v')) {
 
 $getFile = filter_input(INPUT_GET, 'gf');
 if (!empty($getFile)) {
-   if (isset($relFiles[$getFile])) {
+   if (isset($relFiles[$getFile]) && ($getFile === ucfirst($getFile) || $getFile === strtolower($getFile))) {
       $disposition = null;
       if (filter_input(INPUT_GET, 'show') === null) {
          switch (strtolower(pathinfo($getFile, PATHINFO_EXTENSION))){
@@ -27,7 +27,7 @@ if (!empty($getFile)) {
                header('Content-Type: text/javascript');
                break;
             case 'php':
-               header('Content-Type: appliction/php');
+               header('Content-Type: application/php');
                break;
             default:
                header('Content-Type: text/plain');
@@ -38,7 +38,7 @@ if (!empty($getFile)) {
          $disposition = 'inline';
       }
       header('Content-Disposition: ' . $disposition . '; filename="' . $getFile . '"');
-      readfile('release/' . $getFile);
+      readfile('release/' . strtolower($getFile));
    } elseif ($getFile === 'icon') {
       header('Content-Type: image/bmp');
       echo gzinflate(base64_decode(
@@ -46,6 +46,8 @@ if (!empty($getFile)) {
    } elseif ($getFile === 'v') {
       header('Content-Type: text/json');
       echo $vString;
+   } else {
+      header('HTTP/1.0 404 Not Found');
    }
    die;
 }
