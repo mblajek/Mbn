@@ -1,14 +1,14 @@
-Mbn (Multi-byte number) Librabry
-Library for PHP and JS to do calculations with any precission and correct (half-up) approximations
+Mbn (Multi-byte number) Library
+Library for PHP and JS to do calculations with any precision and correct (half-up) approximations
 
 Author: Mikołaj Błajek
 mblajek_mbn(at)mailplus.pl
 https://github.com/mblajek/Mbn/blob/master/LICENSE.txt
 
-project page: https://mirkl.es/n/lib - library files avalaible there
+project page: https://mirkl.es/n/lib - library files available there
 
    Pages:
-      index.php - Main page - destription of library with examples, also runs unit tests
+      index.php - Main page - description of library with examples, also runs unit tests
       calc.php - Calculator based on library ( https://mirkl.es/n/calc )
 
    Library:
@@ -22,6 +22,6 @@ project page: https://mirkl.es/n/lib - library files avalaible there
       mbn_test.php - Unit tests for PHP version
       mbn_test_set.json - Common set of tests
       mbn_release.php - Generate minified versions to /release/ folder
-      legacy_js.php - runs JS tests in ES3 enviorment
+      legacy_js.php - runs JS tests in ES3 environment
 
 Code is optimized for speed and size; not for readability.
