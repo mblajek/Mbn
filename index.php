@@ -18,7 +18,8 @@ if (file_exists('release/v')) {
 
 $getFile = filter_input(INPUT_GET, 'gf');
 if (!empty($getFile)) {
-   if (isset($relFiles[$getFile]) && ($getFile === ucfirst($getFile) || $getFile === strtolower($getFile))) {
+   $getFileLower = strtolower($getFile);
+   if (isset($relFiles[$getFileLower]) && ($getFile === $getFileLower || $getFile === ucfirst($getFileLower))) {
       $disposition = null;
       if (filter_input(INPUT_GET, 'show') === null) {
          switch (strtolower(pathinfo($getFile, PATHINFO_EXTENSION))){
