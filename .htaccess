@@ -1,7 +1,7 @@
 RewriteEngine On
 RewriteRule ^$ /n/lib [R]
-RewriteRule ^(release\/)?(v|[Mm]bn(\.min)?\.(js|php))(.*)$ /n/lib/$2$5 [R]
-RewriteRule ^(.*)\/$ /n/$1 [R]
+RewriteRule ^(?:release/)?(v|[Mm]bn(?:Err)?(?:\.min)?\.(?:js|php))(.*)$ /n/lib/$1$2 [R]
+RewriteRule ^(.*)/$ /n/$1 [R]
 
-RewriteRule ^lib(\/(.*))?$ index.php?gf=$2
+RewriteRule ^lib(?:/(.*))?$ index.php?gf=$1
 RewriteRule ^calc$ calc.php

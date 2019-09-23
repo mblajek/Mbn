@@ -5,8 +5,13 @@ $relFiles = [
     'mbn.min.js' => ['Minified library in JS'],
     'mbn.min.php' => ['Minified library in PHP'],
     'mbn.d.ts' => ['TypeScript declaration file'],
+    'Mbn.php' => ['Mbn class in PHP (with namespace, without MbnErr class)'],
+    'MbnErr.php' => ['MbnErr class in PHP (with namespace)'],
 ];
 foreach ($relFiles as $n => &$relFile) {
+   if ($n === ucfirst($n)) {
+      $n = '_' . $n;
+   }
    $relFile[] = filesize('release/' . $n);
 }
 unset($relFile);
@@ -19,10 +24,13 @@ if (file_exists('release/v')) {
 $getFile = filter_input(INPUT_GET, 'gf');
 if (!empty($getFile)) {
    $getFileLower = strtolower($getFile);
-   if (isset($relFiles[$getFileLower]) && ($getFile === $getFileLower || $getFile === ucfirst($getFileLower))) {
+   $isLowerCase = $getFile === $getFileLower;
+   $isInArray = isset($relFiles[$getFile]);
+   if ($isInArray || (isset($relFiles[$getFileLower]) && $getFile === ucfirst($getFileLower))) {
       $disposition = null;
+      $extension = pathinfo($getFile, PATHINFO_EXTENSION);
       if (filter_input(INPUT_GET, 'show') === null) {
-         switch (strtolower(pathinfo($getFile, PATHINFO_EXTENSION))){
+         switch ($extension){
             case 'js':
             case 'ts':
                header('Content-Type: text/javascript');
@@ -39,7 +47,12 @@ if (!empty($getFile)) {
          $disposition = 'inline';
       }
       header('Content-Disposition: ' . $disposition . '; filename="' . $getFile . '"');
-      readfile('release/' . strtolower($getFile));
+      $realFilePath = 'release/' . strtolower($getFile);
+      if (!$isLowerCase && $isInArray) {
+         readfile('release/_' . $getFile);
+      } else {
+         readfile('release/' . $getFileLower);
+      }
    } elseif ($getFile === 'icon') {
       header('Content-Type: image/bmp');
       echo gzinflate(base64_decode(
