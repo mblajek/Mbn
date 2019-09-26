@@ -9,7 +9,7 @@ function releaseMbn()
    }
    $oldHash = null;
    if (file_exists('release/v')) {
-      $oldHash = json_decode(file_get_contents('release/v'))->hash.'x';
+      $oldHash = json_decode(file_get_contents('release/v'))->hash;
    }
 
    $mbn_js = file_get_contents('mbn.js');
@@ -170,8 +170,10 @@ function releaseMbn()
    $licenseJs = str_replace('{V}', $versionJs, $license);
    $licensePhp = '<?php ' . str_replace('{V}', $versionPhp, $license);
 
-   file_put_contents('release/mbn.php', preg_replace('/^<\?php\s*/i', $licensePhp, $mbn_php));
-   file_put_contents('release/mbn.min.php', preg_replace('/^<\?php\s*/i', $licensePhp, $mbn_min_php));
+   $phpOpenTagRx = '/^<\?php\s*/i';
+
+   file_put_contents('release/mbn.php', preg_replace($phpOpenTagRx, $licensePhp, $mbn_php));
+   file_put_contents('release/mbn.min.php', preg_replace($phpOpenTagRx, $licensePhp, $mbn_min_php));
 
    file_put_contents('release/mbn.js', preg_replace('/^\s*/', $licenseJs, $mbn_js));
    file_put_contents('release/mbn.min.js', preg_replace('/^\s*/', $licenseJs, $mbn_min_js));
@@ -183,11 +185,11 @@ function releaseMbn()
    $mbnClasses = [];
    $mbnClassName = null;
 
-   foreach (explode(PHP_EOL, trim(preg_replace('/^<\?php\s*/i', '', $mbn_php))) as $line) {
+   foreach (explode(PHP_EOL, trim(preg_replace($phpOpenTagRx, '', $mbn_php))) as $line) {
       $match = [];
       if (preg_match('/^(?:final\\s+)?class\\s+(\\w+)(?:\\s+extends\\s+(\\w+))?/', trim($line), $match)) {
          $mbnClassName = $match[1];
-         if(!empty($match[1])){
+         if (!empty($match[1])) {
             $line = preg_replace('/(class\\s+\\w+\\s+extends\\s+)(\\w+)/', '$1\\\\$2', $line, 1);
          }
       }

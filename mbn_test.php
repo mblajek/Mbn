@@ -53,8 +53,15 @@ class MbnColon extends Mbn
 
 }
 
+
+
 function testMbn()
 {
+   $phpCheckFile = 'release/php_check';
+   $secondsSinceCheck = time() - filectime($phpCheckFile);
+   if ($secondsSinceCheck < 100) {
+      return file_get_contents($phpCheckFile);
+   }
 
    function runTestMbn($tests)
    {
@@ -124,7 +131,9 @@ function testMbn()
    $testPHP['time'] = round((microtime(true) - $starttimePHP) * 1000);
    $testPHP['MbnV'] = Mbn::prop()['MbnV'];
 
-   return json_encode($testPHP);
+   $result = json_encode($testPHP);
+   file_put_contents($phpCheckFile, $result);
+   return $result;
 }
 
 echo testMbn();

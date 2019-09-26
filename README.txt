@@ -6,6 +6,7 @@ mblajek_mbn(at)mailplus.pl
 https://github.com/mblajek/Mbn/blob/master/LICENSE.txt
 
 project page: https://mirkl.es/n/lib - library files available there
+Available for PHP Composer - https://packagist.org/packages/mblajek/mbn.
 
    Pages:
       index.php - Main page - description of library with examples, also runs unit tests
