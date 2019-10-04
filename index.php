@@ -71,8 +71,8 @@ if ($vString !== null) {
    $newHash = hash('sha256', file_get_contents('mbn.js') . file_get_contents('mbn.php') . file_get_contents('mbn.d.ts'));
    if ($oldHash === $newHash) {
       $hashChanged = 0;
-   } else {
-       unlink('release/php_check');
+   } elseif (file_exists('release/php_check')) {
+      unlink('release/php_check');
    }
 }
 ?><!DOCTYPE html>
@@ -558,15 +558,20 @@ if ($vString !== null) {
 <script>
    setTimeout(function () {
       function displayTestStatus(lng, result) {
-         var res = JSON.parse(result);
-         var txt = lng + " v" + res.MbnV + ": " + res.status + " (" + res.count + " tests, " + res.time + " ms)";
-         for (var i = 0; i < res.errors.length; i++) {
-            var error = res.errors[i];
-            txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;
-         }
-         document.getElementById("result" + lng).innerText = txt;
-         if (res.status === "OK") {
-            showRelease();
+         var resultSpan = document.getElementById("result" + lng);
+         try {
+            var res = JSON.parse(result);
+            var txt = lng + " v" + res.MbnV + ": " + res.status + " (" + res.count + " tests, " + res.time + " ms)";
+            for (var i = 0; i < res.errors.length; i++) {
+               var error = res.errors[i];
+               txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;
+            }
+            resultSpan.innerText = txt;
+            if (res.status === "OK") {
+               showRelease();
+            }
+         } catch (ex) {
+            resultSpan.innerText = result;
          }
       }
 

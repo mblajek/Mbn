@@ -58,8 +58,7 @@ class MbnColon extends Mbn
 function testMbn()
 {
    $phpCheckFile = 'release/php_check';
-   $secondsSinceCheck = time() - filectime($phpCheckFile);
-   if ($secondsSinceCheck < 100) {
+   if (file_exists($phpCheckFile) &&  (time() - filectime($phpCheckFile)) < 100) {
       return file_get_contents($phpCheckFile);
    }
 
@@ -80,7 +79,7 @@ function testMbn()
             } elseif (is_array($o)) {
                $o = implode(',', $o);
             }
-            $evv = strval($o);
+            $evv = (string)$o;
          } catch (Exception $s) {
             $evv = $s->getMessage();
          }
