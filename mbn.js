@@ -1,92 +1,172 @@
 "use strict";
 
 var Mbn = (function () {
+   var messages = {
+      invalid_argument: "invalid argument: %v%",
+      invalid_format: "invalid format: %v%",
+      limit_exceeded: "value exceeded %v% digits limit",
+      calc: {
+         undefined: "undefined: %v%",
+         unexpected: "unexpected: %v%"
+      },
+      cmp: {
+         negative_diff: "negative maximal difference: %v%"
+      },
+      def: {
+         undefined: "undefined constant: %v%",
+         already_set: "constant already set: %v%",
+         invalid_name: "invalid name for constant: %v%"
+      },
+      div: {
+         zero_divisor: "division by zero"
+      },
+      extend: {
+         invalid_precision: "invalid_precision (non-negative integer): %v%",
+         invalid_separator: "invalid separator (dot, comma): %v%",
+         invalid_truncation: "invalid truncation (bool): %v%",
+         invalid_evaluating: "invalid evaluating (bool, null): %v%",
+         invalid_formatting: "invalid formatting (bool): %v%",
+         invalid_limit: "invalid digit limit (positive int): %v%"
+      },
+      fact: {
+         invalid_value: "factorial of invalid value (non-negative integer): %v%"
+      },
+      format: {_: "extend"},
+      pow: {
+         unsupported_exponent: "only integer exponents supported: %v%"
+      },
+      reduce: {
+         invalid_function: "invalid function name: %v%",
+         no_array: "no array given",
+         invalid_argument_count: "two arguments can be used only with two-argument functions",
+         different_lengths: "arrays have different lengths: %v%",
+         different_keys: "arrays have different keys: %v%"
+      },
+      split: {
+         invalid_part_count: "only positive integer number of parts supported: %v%",
+         zero_part_sum: "cannot split value when sum of parts is zero"
+      },
+      sqrt: {
+         negative_value: "square root of negative value: %v%"
+      }
+   };
+   var hasOwnProperty = {}.hasOwnProperty;
+   var errTranslation = null;
    /**
     * Common error message object
     * @export
     * @constructor
-    * @param {string} fn Function name
-    * @param {string} msg Message
-    * @param {*=} val Incorrect value to message
+    * @param {string} key error code
+    * @param {*=} val incorrect value to message
     */
-   var MbnErr = function (fn, msg, val) {
-      msg = "Mbn" + fn + " error: " + msg;
-      if (arguments.length !== 2) {
-         if (val instanceof Array) {
-            val = "[" + val + "]";
-         }
-         msg += ": " + ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
+   var MbnErr = function (key, val) {
+      if (arguments.length === 2) {
+         val = (val instanceof Array) ? ("[" + String(val) + "]") : String(val);
+         val = ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
+      } else {
+         val = null;
       }
-      this.message = msg;
-      this.toString = function () {
-         return msg;
-      };
+      this.errorKey = "mbn." + key;
+      this.errorValue = val;
+
+      var msg = null;
+      if (typeof errTranslation === "function") {
+         try {
+            msg = errTranslation(this.errorKey, this.errorValue)
+         } catch (e) {
+         }
+      }
+      if(typeof msg !== "string") {
+         var keyArr = key.split(".");
+         var keyArrLength = keyArr.length;
+         msg = "Mbn";
+         if (keyArrLength > 1) {
+            msg += "." + keyArr[0];
+         }
+         var subMessages = messages;
+         for (var i = 0; i < keyArrLength; i++) {
+            var word = keyArr[i];
+            var nextSubMessages = subMessages[word];
+            if (typeof nextSubMessages === "object" && nextSubMessages.hasOwnProperty("_")) {
+               nextSubMessages = subMessages[nextSubMessages._];
+            }
+            subMessages = nextSubMessages;
+         }
+         msg +=" error: " + subMessages;
+      }
+      this.message = msg.replace("%v%", val);
+   };
+   MbnErr.prototype.toString = function () {
+      return this.message;
+   };
+   MbnErr.translate = function (translation) {
+      errTranslation = translation;
    };
 
    //version of Mbn library
-   var MbnV = "1.45";
+   var MbnV = "1.46";
    //default precision
    var MbnDP = 2;
    //default separator
    var MbnDS = ".";
-   //default truncate
+   //default truncation
    var MbnDT = false;
-   //default extension
+   //default evaluating
    var MbnDE = null;
-   //default format
+   //default formatting
    var MbnDF = false;
-   //default limit
+   //default digit limit
    var MbnDL = 1000;
 
    /**
     * fill options with default parameters and check
     * @param opt {Object} params by reference
-    * @param MbnDP default precision
-    * @param MbnDS default separator
-    * @param MbnDT default truncate
-    * @param MbnDE default evaluation
-    * @param MbnDF default format
-    * @param MbnDL default limit
+    * @param MbnDP {number} default precision
+    * @param MbnDS {string} default separator
+    * @param MbnDT {boolean} default truncation
+    * @param MbnDE {boolean|null} default evaluating
+    * @param MbnDF {boolean} default formatting
+    * @param MbnDL {number} default digit limit
     * @param fname name of function for exception
     * @throws {MbnErr} invalid options
-    * @return {Object} checked ad filled class options
+    * @return {Object} checked and filled class options
     */
    var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, fname) {
       var MbnP = MbnDP, MbnS = MbnDS, MbnT = MbnDT, MbnE = MbnDE, MbnF = MbnDF, MbnL = MbnDL;
       if (opt.hasOwnProperty("MbnP")) {
          MbnP = opt.MbnP;
          if (typeof MbnP !== "number" || MbnP < 0 || !isFinite(MbnP) || Math.round(MbnP) !== MbnP) {
-            throw new MbnErr(fname, "invalid precision (non-negative int)", MbnP);
+            throw new MbnErr(fname + "invalid_precision", MbnP);
          }
       }
       if (opt.hasOwnProperty("MbnS")) {
          MbnS = opt.MbnS;
          if (MbnS !== "." && MbnS !== ",") {
-            throw new MbnErr(fname, "invalid separator (dot, comma)", MbnS);
+            throw new MbnErr(fname + "invalid_separator", MbnS);
          }
       }
       if (opt.hasOwnProperty("MbnT")) {
          MbnT = opt.MbnT;
          if (MbnT !== true && MbnT !== false) {
-            throw new MbnErr(fname, "invalid truncate (bool)", MbnT);
+            throw new MbnErr(fname + "invalid_truncation", MbnT);
          }
       }
       if (opt.hasOwnProperty("MbnE")) {
          MbnE = opt.MbnE;
          if (MbnE !== true && MbnE !== false && MbnE !== null) {
-            throw new MbnErr(fname, "invalid evaluation (bool, null)", MbnE);
+            throw new MbnErr(fname + "invalid_evaluating", MbnE);
          }
       }
       if (opt.hasOwnProperty("MbnF")) {
          MbnF = opt.MbnF;
          if (MbnF !== true && MbnF !== false) {
-            throw new MbnErr(fname, "invalid format (bool)", MbnF);
+            throw new MbnErr(fname + "invalid_formatting", MbnF);
          }
       }
       if (opt.hasOwnProperty("MbnL")) {
          MbnL = opt.MbnL;
          if (typeof MbnL !== "number" || MbnL <= 0 || !isFinite(MbnP) || Math.round(MbnL) !== MbnL) {
-            throw new MbnErr(fname, "invalid limit (positive int)", MbnL);
+            throw new MbnErr(fname + "invalid_limit", MbnL);
          }
       }
       return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF, MbnL: MbnL};
@@ -105,9 +185,9 @@ var Mbn = (function () {
     */
    var MbnCr = function (opt) {
       if (typeof opt !== "object") {
-         opt = (opt !== undefined) ? {MbnP: Number(opt)} : {};
+         opt = (opt !== undefined) ? {MbnP: opt} : {};
       }
-      opt = prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, ".extend");
+      opt = prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, "extend.");
       var MbnP = opt.MbnP, MbnS = opt.MbnS, MbnT = opt.MbnT, MbnE = opt.MbnE, MbnF = opt.MbnF, MbnL = opt.MbnL;
 
       /**
@@ -149,11 +229,10 @@ var Mbn = (function () {
          }
          if (adlm1 === MbnP) {
             for (i = 0; i <= adlm1 && ad[i] === 0; i++) {
-
             }
             a._s *= (i <= adlm1) ? 1 : 0;
          } else if (adlm1 - MbnP > MbnL) {
-            throw new MbnErr(".limit", "exceeded " + MbnL + " digits limit");
+            throw new MbnErr("limit_exceeded", MbnL);
          }
 
       };
@@ -226,7 +305,7 @@ var Mbn = (function () {
                   a.set(mbnCalc(ns, v));
                   return;
                }
-               throw new MbnErr("", "invalid format", ns);
+               throw new MbnErr("invalid_format", ns);
             }
          }
          mbnRoundLast(a);
@@ -241,7 +320,7 @@ var Mbn = (function () {
        */
       var mbnFromNumber = function (a, nn) {
          if (!isFinite(nn)) {
-            throw new MbnErr("", "invalid value", nn);
+            throw new MbnErr("limit_exceeded", nn);
          }
          if (nn < 0) {
             nn = -nn;
@@ -345,14 +424,14 @@ var Mbn = (function () {
                   this.set(n);
                   return;
                } else if (n instanceof Array) {
-                  n = "[" + n + "]";
+                  throw new MbnErr("invalid_argument", n);
                }
                n = (n !== null) ? n.toString() : "0";
             case "string":
                mbnFromString(this, n, v);
                break;
             default:
-               throw new MbnErr("", "invalid argument", n);
+               throw new MbnErr("invalid_argument", n);
          }
       };
 
@@ -397,7 +476,7 @@ var Mbn = (function () {
          if (typeof opt !== "object") {
             opt = {MbnF: opt === true || opt === undefined};
          }
-         opt = prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, MbnL, ".format");
+         opt = prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, MbnL, "format.");
          return mbnToString(this, opt.MbnP, opt.MbnS, opt.MbnT, opt.MbnF);
       };
 
@@ -442,7 +521,7 @@ var Mbn = (function () {
             return 0;
          }
          if (dm._s === -1) {
-            throw new MbnErr(".cmp", "negative maximal difference", dm);
+            throw new MbnErr("cmp.negative_diff", dm);
          }
          if (this.sub(b).abs().cmp(dm) <= 0) {
             return 0;
@@ -573,7 +652,7 @@ var Mbn = (function () {
             b = new Mbn(b);
          }
          if (b._s === 0) {
-            throw new MbnErr(".div", "division by zero");
+            throw new MbnErr("div.zero_divisor");
          }
          if (this._s === 0) {
             return mbnSetReturn(this, new Mbn(this), m);
@@ -673,8 +752,8 @@ var Mbn = (function () {
          if (!(ar instanceof Array)) {
             var mbn1 = new Mbn(1);
             asum = new Mbn(ar);
-            if (asum._s < 0 || !asum.isInt()) {
-               throw new MbnErr(".split", "only natural number of parts supported");
+            if (!asum.isInt()) {
+               throw new MbnErr("split.invalid_part_count", ar);
             }
             n = asum.toNumber();
             for (i = 0; i < n; i++) {
@@ -698,11 +777,11 @@ var Mbn = (function () {
                });
             }
          }
-         if (arr.length === 0) {
-            throw new MbnErr(".split", "cannot split to zero parts");
+         if (n <= 0) {
+            throw new MbnErr("split.invalid_part_count", n);
          }
          if (asum._s === 0) {
-            throw new MbnErr(".split", "cannot split when sum of parts is zero");
+            throw new MbnErr("split.zero_part_sum");
          }
          var a = new Mbn(this);
          var brr = [];
@@ -872,7 +951,7 @@ var Mbn = (function () {
          var r = new Mbn(t);
          var mbn2 = new Mbn(2);
          if (r._s === -1) {
-            throw new MbnErr(".sqrt", "square root of negative number", this);
+            throw new MbnErr("sqrt.negative_value", this);
          }
          if (r._s === 1) {
             do {
@@ -904,7 +983,7 @@ var Mbn = (function () {
       Mbn.prototype.pow = function (b, m) {
          var n = new Mbn(b);
          if (!n.isInt()) {
-            throw new MbnErr(".pow", "only integer exponents supported", n);
+            throw new MbnErr("pow.unsupported_exponent", n);
          }
          var ns = n._s;
          n._s *= n._s;
@@ -954,8 +1033,8 @@ var Mbn = (function () {
        * @throws {MbnErr} value is not non-negative integer
        */
       Mbn.prototype.fact = function (m) {
-         if (!this.isInt() || this.cmp(0) === -1) {
-            throw new MbnErr(".fact", "only non-negative integers supported", this);
+         if (!this.isInt() || this._s === -1) {
+            throw new MbnErr("fact.invalid_value", this);
          }
          var n = this.sub(1), r = new Mbn(this);
          while (n._s === 1) {
@@ -985,11 +1064,11 @@ var Mbn = (function () {
       Mbn.reduce = function (fn, arr, b) {
          var inv = false;
          if (!fnReduce.hasOwnProperty(fn)) {
-            throw new MbnErr(".reduce", "invalid function name", fn);
+            throw new MbnErr("reduce.invalid_function", fn);
          }
          if (!(arr instanceof Array)) {
             if (!(b instanceof Array)) {
-               throw new MbnErr(".reduce", "argument is not array", arr);
+               throw new MbnErr("reduce.no_array");
             }
             inv = b;
             b = arr;
@@ -1000,7 +1079,7 @@ var Mbn = (function () {
          var mode = fnReduce[fn];
          var bmode = (arguments.length === 3) ? ((b instanceof Array) ? 2 : 1) : 0;
          if (mode !== 2 && bmode !== 0) {
-            throw new MbnErr(".reduce", "two arguments can be used with two-argument functions");
+            throw new MbnErr("reduce.invalid_argument_count");
          }
          if (mode === 2 && bmode === 0) {
             r = new Mbn((arrl > 0) ? arr[0] : 0);
@@ -1010,7 +1089,7 @@ var Mbn = (function () {
          } else {
             r = [];
             if (bmode === 2 && arrl !== b.length) {
-               throw new MbnErr(".reduce", "arrays have different length", b);
+               throw new MbnErr("reduce.different_lengths", "(" + arrl + " " + b.length + ")");
             }
             var bv = (bmode === 1) ? (new Mbn(b)) : null;
             for (i = 0; i < arrl; i++) {
@@ -1042,22 +1121,22 @@ var Mbn = (function () {
        */
       Mbn.def = function (n, v) {
          if (n === null) {
-            return MbnConst.hasOwnProperty(v);
+            return hasOwnProperty.call(MbnConst, v);
+         }
+         if (!cnRx.test(n)) {
+            throw new MbnErr("def.invalid_name", n);
          }
          if (v === undefined) {
-            if (!MbnConst.hasOwnProperty(n)) {
-               throw new MbnErr(".def", "undefined constant", n);
+            if (!hasOwnProperty.call(MbnConst, n)) {
+               throw new MbnErr("def.undefined", n);
             }
             if (!(MbnConst[n] instanceof Mbn)) {
                MbnConst[n] = (n === "eps") ? ((new Mbn(10)).pow(-MbnP)) : (new Mbn(MbnConst[n]));
             }
             return new Mbn(MbnConst[n]);
          }
-         if (MbnConst.hasOwnProperty(n)) {
-            throw new MbnErr(".def", "constant already set", n);
-         }
-         if (!cnRx.test(n)) {
-            throw new MbnErr(".def", "incorrect name", n);
+         if (hasOwnProperty.call(MbnConst, n)) {
+            throw new MbnErr("def.already_set", n + "=" + new Mbn(MbnConst[n]));
          }
          v = new Mbn(v);
          MbnConst[n] = v;
@@ -1143,7 +1222,6 @@ var Mbn = (function () {
          }
          var expr = String(exp).replace(wsRx3, "");
          var varsUsed = {};
-         var hasOwnProperty = varsUsed.hasOwnProperty;
          var varsUsedSize = 0;
          var state = states.uopVal;
          var rpns = [];
@@ -1162,7 +1240,7 @@ var Mbn = (function () {
                   tok = "*";
                   t = "bop";
                } else {
-                  throw new MbnErr(".calc", "unexpected", expr);
+                  throw new MbnErr("calc.unexpected", expr);
                }
             } else {
                tok = mtch[1];
@@ -1178,7 +1256,7 @@ var Mbn = (function () {
                      t = "fn";
                      rpno.push(ops.fn.concat([tok]));
                   } else if (onlyCheck) {
-                     if (!hasOwnProperty.call(varsUsed,tok)) {
+                     if (!hasOwnProperty.call(varsUsed, tok)) {
                         varsUsed[tok] = varsUsedSize++;
                      }
                   } else if (hasOwnProperty.call(vars, tok)) {
@@ -1189,7 +1267,7 @@ var Mbn = (function () {
                   } else if (Mbn.def(null, tok)) {
                      rpns.push(Mbn.def(tok));
                   } else {
-                     throw new MbnErr(".calc", "undefined", tok);
+                     throw new MbnErr("calc.undefined", tok);
                   }
                   break;
                case "fs":
@@ -1215,7 +1293,7 @@ var Mbn = (function () {
                case "pc":
                   while ((rolp = rpno.pop()) !== "(") {
                      if (rolp === undefined) {
-                        throw new MbnErr(".calc", "unexpected", ")");
+                        throw new MbnErr("calc.unexpected", ")");
                      }
                      rpns.push(rolp[2]);
                   }
@@ -1227,12 +1305,12 @@ var Mbn = (function () {
          }
          while ((rolp = rpno.pop()) !== undefined) {
             if (rolp === "(") {
-               throw new MbnErr(".calc", "unexpected", "(");
+               throw new MbnErr("calc.unexpected", "(");
             }
             rpns.push(rolp[2]);
          }
          if (state !== states.endBop) {
-            throw new MbnErr(".calc", "unexpected", "END");
+            throw new MbnErr("calc.unexpected", "END");
          }
 
          if (onlyCheck) {
@@ -1267,5 +1345,6 @@ var Mbn = (function () {
    };
    var Mbn = MbnCr();
    Mbn.extend = MbnCr;
+   Mbn.MbnErr = MbnErr;
    return Mbn;
 })();

@@ -11,8 +11,12 @@ var testMbn = function (displayResp) {
          var evv;
          try {
             evv = String(eval(exp));
-         } catch (s) {
-            evv = String(s);
+         } catch (ex) {
+            if (ex instanceof Mbn.MbnErr) {
+               evv = String(ex.errorKey) + " " + String(ex);
+            } else {
+               evv += String(ex);
+            }
          }
 
          var cmpn;
@@ -34,6 +38,12 @@ var testMbn = function (displayResp) {
    var Mbn20u = Mbn.extend({MbnP: 20, MbnS: ',', MbnT: true});
    var Mbn2nef = Mbn.extend({MbnE: false, MbnF: true});
    var Mbn4yec = Mbn.extend({MbnP: 4, MbnE: true, MbnS: ",", MbnL: 20});
+
+   Mbn.MbnErr.translate(function (key, value) {
+      if (key === "mbn.invalid_argument") {
+         return "Niepoprawny argument %a% dla konstruktora %v%".replace("%a%", value);
+      }
+   });
 
    var xmlhttp = new XMLHttpRequest();
    xmlhttp.onreadystatechange = function () {

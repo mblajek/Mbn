@@ -2,24 +2,108 @@
 
 class MbnErr extends Exception
 {
+   /* Common error message object */
+   private static $messages = [
+       'invalid_argument' => 'invalid argument: %v%',
+       'invalid_format' => 'invalid format: %v%',
+       'limit_exceeded' => 'value exceeded %v% digits limit',
+       'calc' => [
+           'undefined' => 'undefined: %v%',
+           'unexpected' => 'unexpected: %v%'
+       ],
+       'cmp' => [
+           'negative_diff' => 'negative maximal difference: %v%'
+       ],
+       'def' => [
+           'undefined' => 'undefined constant: %v%',
+           'already_set' => 'constant already set: %v%',
+           'invalid_name' => 'invalid name for constant: %v%'
+       ],
+       'div' => [
+           'zero_divisor' => 'division by zero'
+       ],
+       'extend' => [
+           'invalid_precision' => 'invalid_precision (non-negative integer): %v%',
+           'invalid_separator' => 'invalid separator (dot, comma): %v%',
+           'invalid_truncation' => 'invalid truncation (bool): %v%',
+           'invalid_evaluating' => 'invalid evaluating (bool, null): %v%',
+           'invalid_formatting' => 'invalid formatting (bool): %v%',
+           'invalid_limit' => 'invalid digit limit (positive int): %v%'
+       ],
+       'fact' => [
+           'invalid_value' => 'factorial of invalid value (non-negative integer): %v%'
+       ],
+       'format' => ['_' => 'extend'],
+       'pow' => [
+           'unsupported_exponent' => 'only integer exponents supported: %v%'
+       ],
+       'reduce' => [
+           'invalid_function' => 'invalid function name: %v%',
+           'no_array' => 'no array given',
+           'invalid_argument_count' => 'two arguments can be used only with two-argument functions',
+           'different_lengths' => 'arrays have different lengths: %v%',
+           'different_keys' => 'arrays have different keys: %v%'
+       ],
+       'split' => [
+           'invalid_part_count' => 'only positive integer number of parts supported: %v%',
+           'zero_part_sum' => 'cannot split value when sum of parts is zero'
+       ],
+       'sqrt' => [
+           'negative_value' => 'square root of negative value: %v%'
+       ]
+   ];
+
+   public $errorKey;
+   public $errorValue;
+   private static $translation = null;
+
+   public static function translate($translation)
+   {
+      static::$translation = $translation;
+   }
+
    /**
-    * Common error message object
     * @export
     * @constructor
-    * @param string $fn Function name
-    * @param string $msg Message
-    * @param mixed $val Incorrect value to message, default null
+    * @param string $key key error code
+    * @param mixed $val incorrect value to message
     */
-   public function __construct($fn, $msg, $val = null)
+   public function __construct($key, $val = null)
    {
-      $ret = 'Mbn' . $fn . ' error: ' . $msg;
-      if (func_num_args() !== 2) {
-         if (is_array($val)) {
-            $val = '[' . implode(',', $val) . ']';
-         }
-         $ret .= ': ' . ((strlen($val) > 20) ? (substr($val, 0, 18) . '..') : $val);
+      if ($val !== null) {
+         $val = is_array($val) ? ('[' . implode(',', $val) . ']') : (string)$val;
+         $val = ((strlen($val) > 20) ? (substr($val, 0, 18) . '..') : $val);
       }
-      parent::__construct($ret);
+      $this->errorKey = 'mbn.' . $key;
+      $this->errorValue = $val;
+
+      $msg = null;
+      $translation = static::$translation;
+      if (is_callable($translation)) {
+         try {
+            $msg = $translation($this->errorKey, $this->errorValue);
+         } catch (Exception $e) {
+         }
+      }
+      if (!is_string($msg)) {
+         $keyArr = explode('.', $key);
+         $keyArrLength = count($keyArr);
+         $msg = 'Mbn';
+         if ($keyArrLength > 1) {
+            $msg .= '.' . $keyArr[0];
+         }
+         $subMessages = &static::$messages;
+         for ($i = 0; $i < $keyArrLength; $i++) {
+            $word = $keyArr[$i];
+            $nextSubMessages = &$subMessages[$word];
+            if (is_array($nextSubMessages) && isset($nextSubMessages['_'])) {
+               $nextSubMessages = &$subMessages[$nextSubMessages['_']];
+            }
+            $subMessages = &$nextSubMessages;
+         }
+         $msg .= ' error: ' . $subMessages;
+      }
+      parent::__construct(str_replace('%v%', $val, $msg));
    }
 
 }
@@ -27,18 +111,18 @@ class MbnErr extends Exception
 class Mbn
 {
    //version of Mbn library
-   protected static $MbnV = '1.45';
+   protected static $MbnV = '1.46';
    //default precision
    protected static $MbnP = 2;
    //default separator
    protected static $MbnS = '.';
-   //default truncate
+   //default truncation
    protected static $MbnT = false;
-   //default truncate
+   //default evaluating
    protected static $MbnE = null;
-   //default truncate
+   //default formatting
    protected static $MbnF = false;
-   //default limit
+   //default digit limit
    protected static $MbnL = 1000;
    private $d = [];
    private $s = 1;
@@ -48,10 +132,10 @@ class Mbn
     * @param array $opt params by reference
     * @param int $MbnDP default precision
     * @param string $MbnDS default separator
-    * @param boolean $MbnDT default truncate
-    * @param boolean $MbnDE default evaluation
-    * @param boolean $MbnDF default format
-    * @param boolean $MbnDL default limit
+    * @param boolean $MbnDT default truncation
+    * @param boolean|null $MbnDE default evaluating
+    * @param boolean $MbnDF default formatting
+    * @param int $MbnDL default digit limit
     * @param string $fname name of function for exception
     * @return array checked ad filled class options
     * @throws MbnErr invalid options
@@ -67,37 +151,37 @@ class Mbn
       if (array_key_exists('MbnP', $opt)) {
          $MbnP = $opt['MbnP'];
          if (!(is_int($MbnP) || is_float($MbnP)) || $MbnP < 0 || is_infinite($MbnP) || (float)(int)$MbnP !== (float)$MbnP) {
-            throw new MbnErr($fname, 'invalid precision (non-negative int)', $MbnP);
+            throw new MbnErr($fname . 'invalid_precision', $MbnP);
          }
       }
       if (array_key_exists('MbnS', $opt)) {
          $MbnS = $opt['MbnS'];
          if ($MbnS !== '.' && $MbnS !== ',') {
-            throw new MbnErr($fname, 'invalid separator (dot, comma)', $MbnS);
+            throw new MbnErr($fname . 'invalid_separator', $MbnS);
          }
       }
       if (array_key_exists('MbnT', $opt)) {
          $MbnT = $opt['MbnT'];
          if ($MbnT !== true && $MbnT !== false) {
-            throw new MbnErr($fname, 'invalid truncate (bool)', $MbnT);
+            throw new MbnErr($fname . 'invalid_truncation', $MbnT);
          }
       }
       if (array_key_exists('MbnE', $opt)) {
          $MbnE = $opt['MbnE'];
          if ($MbnE !== true && $MbnE !== false && $MbnE !== null) {
-            throw new MbnErr($fname, 'invalid evaluation (bool, null)', $MbnE);
+            throw new MbnErr($fname . 'invalid_evaluation', $MbnE);
          }
       }
       if (array_key_exists('MbnF', $opt)) {
          $MbnF = $opt['MbnF'];
          if ($MbnF !== true && $MbnF !== false) {
-            throw new MbnErr($fname, 'invalid format (bool)', $MbnF);
+            throw new MbnErr($fname . 'invalid_formatting', $MbnF);
          }
       }
       if (array_key_exists('MbnL', $opt)) {
          $MbnL = $opt['MbnL'];
          if (!(is_int($MbnL) || is_float($MbnL)) || $MbnL < 0 || is_infinite($MbnP) || (float)(int)$MbnP !== (float)$MbnP) {
-            throw new MbnErr($fname, 'invalid limit (positive int)', $MbnP);
+            throw new MbnErr($fname . 'invalid_limit', $MbnP);
          }
       }
       return ['MbnV' => static::$MbnV, 'MbnP' => $MbnP, 'MbnS' => $MbnS, 'MbnT' => $MbnT, 'MbnE' => $MbnE, 'MbnF' => $MbnF, 'MbnL' => $MbnL];
@@ -145,7 +229,7 @@ class Mbn
          }
          $this->s *= ($i <= $adlm1) ? 1 : 0;
       } elseif ($adlm1 - static::$MbnP > static::$MbnL) {
-         throw new MbnErr('.limit', 'exceeded ' . static::$MbnL . ' digits limit');
+         throw new MbnErr('limit_exceeded', static::$MbnL);
       }
 
    }
@@ -220,7 +304,7 @@ class Mbn
                $this->set(static::mbnCalc($ns, $v));
                return;
             }
-            throw new MbnErr('', 'invalid format', $ns);
+            throw new MbnErr('invalid_format', $ns);
          }
       }
       $this->mbnRoundLast();
@@ -234,7 +318,7 @@ class Mbn
    private function mbnFromNumber($nn)
    {
       if (!is_finite($nn)) {
-         throw new MbnErr('', 'invalid value', $nn);
+         throw new MbnErr('limit_exceeded', $nn);
       }
       if ($nn < 0) {
          $nn = -$nn;
@@ -332,19 +416,19 @@ class Mbn
       } elseif (is_bool($n) || $n === null) {
          $this->mbnFromNumber((int)$n);
       } else {
-         throw new MbnErr('', 'invalid argument', $n);
+         throw new MbnErr('invalid_argument', $n);
       }
    }
 
    /**
     * Returns properties of Mbn class
     * @return array properties
-    * @throws MbnErr
+    * @throws MbnErr invalid options
     */
    public static function prop()
    {
       return static::prepareOpt(['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS, 'MbnT' => static::$MbnT,
-          'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF, 'MbnL' => static::$MbnL], 0, 0, 0, 0, 0, 0, '.prop');
+          'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF, 'MbnL' => static::$MbnL], 0, 0, 0, 0, 0, 0, 'prop.');
    }
 
    /**
@@ -377,13 +461,14 @@ class Mbn
     * Returns reformatted string value
     * @param bool|array $opt thousand grouping or object with params, default true
     * @return string
+    * @throws MbnErr invalid options
     */
    public function format($opt = true)
    {
       if (!is_array($opt)) {
          $opt = ['MbnF' => $opt === true];
       }
-      $opt = static::prepareOpt($opt, static::$MbnP, static::$MbnS, static::$MbnT, static::$MbnE, static::$MbnF, static::$MbnL, '.format');
+      $opt = static::prepareOpt($opt, static::$MbnP, static::$MbnS, static::$MbnT, static::$MbnE, static::$MbnF, static::$MbnL, 'format.');
       return $this->mbnToString($opt['MbnP'], $opt['MbnS'], $opt['MbnT'], $opt['MbnF']);
    }
 
@@ -442,7 +527,7 @@ class Mbn
          return 0;
       }
       if ($dm->s === -1) {
-         throw new MbnErr('.cmp', 'negative maximal difference', $dm);
+         throw new MbnErr('cmp.negative_diff', $dm);
       }
       if ($this->sub($b)->abs()->cmp($dm) <= 0) {
          return 0;
@@ -582,7 +667,7 @@ class Mbn
          $b = new static($b);
       }
       if ($b->s === 0) {
-         throw new MbnErr('.div', 'division by zero');
+         throw new MbnErr('div.zero_divisor');
       }
       if ($this->s === 0) {
          return $this->mbnSetReturn(new static($this), $m);
@@ -679,8 +764,8 @@ class Mbn
       if (!is_array($ar)) {
          $mbn1 = new static(1);
          $asum = new static($ar);
-         if ($asum->s < 0 || !$asum->isInt()) {
-            throw new MbnErr('.split', 'only natural number of parts supported');
+         if (!$asum->isInt()) {
+            throw new MbnErr('split.invalid_part_count', $ar);
          }
          $n = (int)$asum->toNumber();
          for ($i = 0; $i < $n; $i++) {
@@ -702,16 +787,16 @@ class Mbn
          unset($v);
          $brr = $arr;
          if ($sgns[0] && $sgns[2]) {
-            usort($arr, static function ($a, $b) use ($asum){
+            usort($arr, static function ($a, $b) use ($asum) {
                return $asum->s * $a->cmp($b);
             });
          }
       }
-      if ($n === 0) {
-         throw new MbnErr('.split', 'cannot split to zero parts');
+      if ($n <= 0) {
+         throw new MbnErr('split.invalid_part_count', $n);
       }
       if ($asum->s === 0) {
-         throw new MbnErr('.split', 'cannot split when sum of parts is zero');
+         throw new MbnErr('split.zero_part_sum');
       }
       $a = new static($this);
       foreach ($arr as $k => &$v) {
@@ -895,7 +980,7 @@ class Mbn
       $r = new static($t);
       $mbn2 = new static(2);
       if ($r->s === -1) {
-         throw new MbnErr('.sqrt', 'square root of negative number', $this);
+         throw new MbnErr('sqrt.negative_value', $this);
       }
       if ($r->s === 1) {
          do {
@@ -929,7 +1014,7 @@ class Mbn
    {
       $n = new static($b);
       if (!$n->isInt()) {
-         throw new MbnErr('.pow', 'only integer exponents supported', $n);
+         throw new MbnErr('pow.unsupported_exponent', $n);
       }
       $ns = $n->s;
       $n->s *= $n->s;
@@ -981,7 +1066,7 @@ class Mbn
    public function fact($m = false)
    {
       if (!$this->isInt() || $this->cmp(0) === -1) {
-         throw new MbnErr('.fact', 'only non-negative integers supported', $this);
+         throw new MbnErr('fact.invalid_value', $this);
       }
       $n = $this->sub(1);
       $r = new static($this);
@@ -1013,11 +1098,11 @@ class Mbn
    {
       $inv = false;
       if (!is_string($fn) || !isset(static::$fnReduce[$fn])) {
-         throw new MbnErr('.reduce', 'invalid function name', $fn);
+         throw new MbnErr('reduce.invalid_function', $fn);
       }
       if (!is_array($arr)) {
          if (!is_array($b)) {
-            throw new MbnErr('.reduce', 'argument is not array', $arr);
+            throw new MbnErr('reduce.no_array', $arr);
          }
          $inv = $b;
          $b = $arr;
@@ -1026,7 +1111,7 @@ class Mbn
       $mode = static::$fnReduce[$fn];
       $bmode = (func_num_args() === 3) ? (is_array($b) ? 2 : 1) : 0;
       if ($mode !== 2 && $bmode !== 0) {
-         throw new MbnErr('.reduce', 'two arguments can be used with two-argument functions');
+         throw new MbnErr('reduce.invalid_argument_count');
       }
       if ($mode === 2 && $bmode === 0) {
          $r = new static(0);
@@ -1043,7 +1128,10 @@ class Mbn
       } else {
          $r = [];
          if ($bmode === 2 && array_keys($arr) !== array_keys($b)) {
-            throw new MbnErr('.reduce', 'arrays have different length', $b);
+            if (count($arr) !== count($b)) {
+               throw new MbnErr('reduce.different_lengths', '(' . count($arr) . ' ' . count($arr) . ')');
+            }
+            throw new MbnErr('reduce.different_keys', '(' . implode(',', array_keys($arr)) . ' ' . implode(',', array_keys($arr)) . ')');
          }
          $bv = ($bmode === 1) ? (new static($b)) : null;
          foreach ($arr as $k => &$v) {
@@ -1080,23 +1168,23 @@ class Mbn
       if ($n === null) {
          return (isset($mc[$mx][$v]) || isset($mc[''][$v]));
       }
+      if (preg_match('/^[A-Za-z_]\\w*/', $n) !== 1) {
+         throw new MbnErr('def.invalid_name', $n);
+      }
       if ($v === null) {
          if (!isset($mc[$mx])) {
             $mc[$mx] = [];
          }
          if (!isset($mc[$mx][$n])) {
             if (!isset($mc[''][$n])) {
-               throw new MbnErr('.def', 'undefined constant', $n);
+               throw new MbnErr('def.undefined', $n);
             }
             $mc[$mx][$n] = ($n === 'eps') ? ((new static(10))->pow(-static::$MbnP)) : (new static($mc[''][$n]));
          }
          return new static($mc[$mx][$n]);
       }
       if (isset($mc[$mx][$n]) || isset($mc[''][$n])) {
-         throw new MbnErr('.def', 'constant already set', $n);
-      }
-      if (preg_match('/^[A-Za-z_]\\w*/', $n) !== 1) {
-         throw new MbnErr('.def', 'incorrect name', $n);
+         throw new MbnErr('def.already_set', $n);
       }
       $v = new static($v);
       $mc[$mx][$n] = $v;
@@ -1197,7 +1285,7 @@ class Mbn
                $tok = '*';
                $t = 'bop';
             } else {
-               throw new MbnErr('.calc', 'unexpected', $expr);
+               throw new MbnErr('calc.unexpected', $expr);
             }
          } else {
             $tok = $mtch[1];
@@ -1224,7 +1312,7 @@ class Mbn
                } elseif (static::def(null, $tok)) {
                   $rpns [] = static::def($tok);
                } else {
-                  throw new MbnErr('.calc', 'undefined', $tok);
+                  throw new MbnErr('calc.undefined', $tok);
                }
                break;
             case 'bop':
@@ -1249,7 +1337,7 @@ class Mbn
             case 'pc':
                while (($rolp = array_pop($rpno)) !== '(') {
                   if ($rolp === null) {
-                     throw new MbnErr('.calc', 'unexpected', ')');
+                     throw new MbnErr('calc.unexpected', ')');
                   }
                   $rpns[] = $rolp[2];
                }
@@ -1271,12 +1359,12 @@ class Mbn
       }
       while (($rolp = array_pop($rpno)) !== null) {
          if ($rolp === '(') {
-            throw new MbnErr('.calc', 'unexpected', '(');
+            throw new MbnErr('calc.unexpected', '(');
          }
          $rpns[] = $rolp[2];
       }
       if ($state !== 'endBop') {
-         throw new MbnErr('.calc', 'unexpected', 'END');
+         throw new MbnErr('calc.unexpected', 'END');
       }
 
       if ($onlyCheck) {

@@ -53,12 +53,16 @@ class MbnColon extends Mbn
 
 }
 
-
+MbnErr::translate(function ($key, $value) {
+   if ($key === 'mbn.invalid_argument') {
+      return str_replace('%a%', $value, 'Niepoprawny argument %a% dla konstruktora %v%');
+   }
+});
 
 function testMbn()
 {
    $phpCheckFile = 'release/php_check';
-   if (file_exists($phpCheckFile) &&  (time() - filectime($phpCheckFile)) < 100) {
+   if (file_exists($phpCheckFile) && (time() - filectime($phpCheckFile)) < 100) {
       return file_get_contents($phpCheckFile);
    }
 
@@ -80,6 +84,8 @@ function testMbn()
                $o = implode(',', $o);
             }
             $evv = (string)$o;
+         } catch (MbnErr $s) {
+            $evv = $s->errorKey . ' ' . $s->getMessage();
          } catch (Exception $s) {
             $evv = $s->getMessage();
          }
@@ -116,7 +122,7 @@ function testMbn()
       $jsonA = [];
       while (preg_match('/{[^}]*}/', $tst, $jsonA) === 1) {
          $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[0]);
-         $jsonArr = var_export(json_decode($json, true), true);
+         $jsonArr = str_replace([' ', "\r", "\n"], '', var_export(json_decode($json, true), true));
          $tst = str_replace($jsonA[0], $jsonArr, $tst);
       }
       $expArr = explode('; ', $tst);
