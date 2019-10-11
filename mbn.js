@@ -76,7 +76,7 @@ var Mbn = (function () {
          } catch (e) {
          }
       }
-      if(typeof msg !== "string") {
+      if (typeof msg !== "string") {
          var keyArr = key.split(".");
          var keyArrLength = keyArr.length;
          msg = "Mbn";
@@ -92,7 +92,7 @@ var Mbn = (function () {
             }
             subMessages = nextSubMessages;
          }
-         msg +=" error: " + subMessages;
+         msg += " error: " + subMessages;
       }
       this.message = msg.replace("%v%", val);
    };
@@ -1192,9 +1192,10 @@ var Mbn = (function () {
       /**
        * Check expression, get names of used vars
        * @param {string} exp Expression
+       * @param {boolean} omitConsts don't list already defined constants
        * @return {Array|boolean}
        */
-      Mbn.check = function (exp) {
+      Mbn.check = function (exp, omitConsts) {
          try {
             var varName, vars = mbnCalc(exp, false), varNames = [];
             var hasOwnProperty = varNames.hasOwnProperty;
@@ -1202,6 +1203,15 @@ var Mbn = (function () {
                if (hasOwnProperty.call(vars, varName)) {
                   varNames[vars[varName]] = varName;
                }
+            }
+            if (omitConsts === true) {
+               var pos = 0;
+               for (var i = 0; i < varNames.length; i++) {
+                  if (!Mbn.def(null, varNames[i])) {
+                     varNames[pos++] = varNames[i];
+                  }
+               }
+               varNames.length = pos;
             }
             return varNames;
          } catch (e) {

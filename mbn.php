@@ -1228,7 +1228,7 @@ class Mbn
    /**
     * Evaluate expression
     * @param string $exp Expression
-    * @param array|boolean $vars Array with vars for evaluation, default null
+    * @param array|bool $vars Array with vars for evaluation, default null
     * @return Mbn
     * @throws MbnErr syntax error, operation error
     * @throws MbnErr invalid argument format
@@ -1241,12 +1241,19 @@ class Mbn
    /**
     * Check expression, get names of used vars
     * @param string $exp Expression
+    * @param bool $omitConsts don't list already defined constants
     * @return array|boolean
     */
-   public static function check($exp)
+   public static function check($exp, $omitConsts = false)
    {
       try {
-         return array_keys(static::mbnCalc($exp, false));
+         $varNames = [];
+         foreach (static::mbnCalc($exp, false) as $varName => &$_) {
+            if ($omitConsts !== true || !static::def(null, $varName)) {
+               $varNames[] = $varName;
+            }
+         }
+         return $varNames;
       } catch (MbnErr $e) {
          return false;
       }

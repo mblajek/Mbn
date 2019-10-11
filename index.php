@@ -30,7 +30,7 @@ if (!empty($getFile)) {
       $disposition = null;
       $extension = pathinfo($getFile, PATHINFO_EXTENSION);
       if (filter_input(INPUT_GET, 'show') === null) {
-         switch ($extension){
+         switch ($extension) {
             case 'js':
             case 'ts':
                header('Content-Type: text/javascript');
@@ -77,101 +77,102 @@ if ($vString !== null) {
 }
 ?><!DOCTYPE html>
 <head>
-    <title>Mbn Librabry</title>
+    <title>Mbn Library</title>
     <meta charset="UTF-8">
     <link rel="icon" href="lib/icon" type="image/bmp"/>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        div, li {
+            margin: 0 4px 2px 4px;
+            border-radius: 2px;
+            padding: 2px 6px 2px 6px
+        }
+
+        .title1 {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .title2 {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-left: 2px solid gray;
+        }
+
+        .title3 {
+            font-size: 1.2em;
+        }
+
+        .mono {
+            font-family: "Consolas", monospace;
+            background-color: lightgray;
+            border: 1px solid gray;
+            white-space: pre-wrap;
+        }
+
+        .mono > span.lb:after {
+            color: gray;
+            content: ">| ";
+        }
+
+        .mono span.it {
+            font-style: italic;
+            color: gray;
+        }
+
+        .result {
+            font-family: "Consolas", monospace;
+            border: 1px solid gray;
+            display: inline-block;
+            font-weight: bold;
+            margin-right: 0px;
+            border-radius: 2px 0px 0px 2px;
+        }
+
+        .label {
+            font-family: "Consolas", monospace;
+            border: 1px solid gray;
+            display: inline-block;
+            margin-left: 0;
+            border-radius: 0 2px 2px 0;
+            border-left: 0;
+        }
+
+        table {
+            border: 1px solid gray;
+            width: 100%;
+            border-radius: 2px;
+            border-spacing: 0;
+        }
+
+        table tr:nth-child(odd) {
+            background-color: lightgray;
+        }
+
+        table td, table th {
+            width: calc(100% / 6);
+            font-family: "Consolas", monospace;
+            padding: 4px;
+            border-left: 1px solid gray;
+        }
+
+        table th:first-child, table td:first-child {
+            border-left: 0 solid gray;
+        }
+
+        table tr.hidden {
+            display: none
+        }
+    </style>
 </head>
 <body>
 <script><?php readfile('mbn.js') ?></script>
 
-<style>
-    body {
-        font-family: sans-serif;
-    }
 
-    div {
-        margin: 0px 4px 2px 4px;
-        border-radius: 2px;
-        padding: 2px 6px 2px 6px
-    }
-
-    .title1 {
-        font-size: 2em;
-        font-weight: bold;
-    }
-
-    .title2 {
-        margin-top: 20px;
-        font-size: 1.5em;
-        font-weight: bold;
-        border-left: 2px solid gray;
-    }
-
-    .title3 {
-        font-size: 1.2em;
-    }
-
-    .mono {
-        font-family: "Consolas", monospace;
-        background-color: lightgray;
-        border: 1px solid gray;
-        white-space: pre-wrap;
-    }
-
-    .mono > span.lb:after {
-        color: gray;
-        content: ">| ";
-    }
-
-    .mono span.it {
-        font-style: italic;
-        color: gray;
-    }
-
-    .result {
-        font-family: "Consolas", monospace;
-        border: 1px solid gray;
-        display: inline-block;
-        font-weight: bold;
-        margin-right: 0px;
-        border-radius: 2px 0px 0px 2px;
-    }
-
-    .label {
-        font-family: "Consolas", monospace;
-        border: 1px solid gray;
-        display: inline-block;
-        margin-left: 0px;
-        border-radius: 0px 2px 2px 0px;
-        border-left: 0px;
-    }
-
-    table {
-        border: 1px solid gray;
-        width: 100%;
-        border-radius: 2px;
-        border-spacing: 0;
-    }
-
-    table tr:nth-child(odd) {
-        background-color: lightgray;
-    }
-
-    table td, table th {
-        width: calc(100% / 6);
-        font-family: "Consolas", monospace;
-        padding: 4px;
-        border-left: 1px solid gray;
-    }
-
-    table th:first-child, table td:first-child {
-        border-left: 0px solid gray;
-    }
-
-    table tr.hidden {
-        display: none
-    }
-</style>
 <script>
    var titles2 = [];
 
@@ -196,6 +197,7 @@ if ($vString !== null) {
          var title = a.replace(/<.*/, "");
          id = title.toLowerCase().replace(/[^0-9a-z]/g, "_");
          titles2.push({id: id, title: title});
+         id = id.replace(/_+/g, "_");
       }
       document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + (id ? (" id=\"" + id + "\"") : "") + ">" + a + "</div>");
    }
@@ -222,7 +224,7 @@ if ($vString !== null) {
          var releaseBtn = document.getElementById("releaseBtn");
          releaseBtn.style.visibility = "visible";
          releaseBtn.onclick = function () {
-            releaseBtn.style.visibility = "hidden";
+            releaseBtn.style.color = "gray";
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.onreadystatechange = function () {
                if (xmlhttp.readyState === 4) {
@@ -239,13 +241,39 @@ if ($vString !== null) {
 
    var modify = false;
 
-   w("Mbn (Multi-byte number) Librabry", "title1");
-
-   w("About", "title2");
-   w("Library for PHP and JS to do calculations with any precision and correct (half-up) approximations. See <a href='calc'>calc examle</a>.");
-   w("Mbn is distributed under the <a href='https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'>MIT License</a>, see <a href='https://github.com/mblajek/Mbn'>Github page</a>.");
-   w("Available for PHP Composer via <a href='https://packagist.org/packages/mblajek/mbn'>Packagist</a>.");
-   w("Comatibitity: PHP 5.4+, JS ES3+ (IE6+)");
+</script>
+<div class="title1">Mbn (Multi-byte number) Library</div>
+<div>Library for PHP and JS to do calculations with any precision and correct (half-up) approximations.</div>
+<div class="title2">About</div>
+<div>Main job of the library is to regain control on numbers.</div>
+<div>Most of computer maths bases on float/double numbers which are fast and precise, but cause some problems in
+    fixed-precision (e.g. financial) calculations.
+</div>
+<div>Also it's easy to get unexpected some NaN and Infinity values. Usually results should be formatted in concrete way,
+    what is
+    more or less available in languages.
+</div>
+<div>In Mbn library:
+    <ul>
+        <li>fixed precision with any size of fractional part: from zero to thousands and more</li>
+        <li>parsing invalid strings, division by zero and many more problems are thrown as exceptions</li>
+        <li>all calculations have predictable results, 1.4 - 0.4 gives always 1, not 0.9999999999999999</li>
+        <li>almost identical syntax between JS and PHP, all operations supported by a single class</li>
+        <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 is parsed as 6, =2PI as 6.28, see <a href='calc'>calc
+                example</a></li>
+        <li>built in <a href="#other_methods_split">split</a> and <a href="#other_methods_reduce">reduce</a> functions
+            for some useful array operations
+        </li>
+        <li>custom formatting: dot/coma separator, grouping thousands, truncating trailing zeros</li>
+        <li>compatibility: PHP 5.4+, JS ES3+ (IE6+)</li>
+    </ul>
+</div>
+<div>Mbn is distributed under the <a href='https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'>MIT License</a>, see
+    <a href='https://github.com/mblajek/Mbn'>Github page</a>.
+</div>
+<div>Available for PHP Composer via <a href='https://packagist.org/packages/mblajek/mbn'>Packagist</a>.</div>
+<script>
+   w("");
 
    w('Tests and benchmark<span id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>', "title2");
    w('<strong id="resultJS">..</strong>', "mono");
@@ -264,30 +292,322 @@ if ($vString !== null) {
          w(["<strong>" + i + '</strong> [ <a href="lib/' + i + '&amp;show">show</a> | <a href="lib/' + i + '">download</a> ] (' + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
       }
    }
+</script>
+<div class="title2">Reference</div>
+<div class="title3">JS and Mbn code equivalents.<br>In most cases Mbn code in PHP and JS is identical - <span
+            class="mono">a.f()</span>
+    in JS is <span class="mono">$a-&gt;f()</span> in PHP
+</div>
+<div>
+    <table>
+        <tbody>
+        <tr>
+            <th>operation</th>
+            <th>JS (Number)</th>
+            <th>Mbn</th>
+            <th>JS (Number)</th>
+            <th>Mbn</th>
+            <th>return type</th>
+        </tr>
+        <tr>
+            <th>declare</th>
+            <td>a = b</td>
+            <td>a = new Mbn(b)</td>
+            <td>a = 0;<br>a = b;</td>
+            <td>a = new Mbn();<br>a.set(b);</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>add</th>
+            <td>a + b</td>
+            <td>a.add(b)</td>
+            <td>a += b</td>
+            <td>a.add(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>subtract</th>
+            <td>a - b</td>
+            <td>a.sub(b)</td>
+            <td>a -= b</td>
+            <td>a.sub(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>multiply</th>
+            <td>a * b</td>
+            <td>a.mul(b)</td>
+            <td>a *= b</td>
+            <td>a.mul(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>divide</th>
+            <td>a / b</td>
+            <td>a.div(b)</td>
+            <td>a /= b</td>
+            <td>a.div(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>modulo</th>
+            <td>a % b</td>
+            <td>a.mod(b)</td>
+            <td>a %= b</td>
+            <td>a.mod(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">result has same sign as the original number</td>
+        </tr>
+        <tr>
+            <th>minimum</th>
+            <td>Math.min(a, b)</td>
+            <td>a.min(b)</td>
+            <td>a = Math.min(a, b)</td>
+            <td>a.min(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>maximum</th>
+            <td>Math.max(a, b)</td>
+            <td>a.max(b)</td>
+            <td>a = Math.max(a, b)</td>
+            <td>a.max(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>power</th>
+            <td>Math.pow(a, b)</td>
+            <td>a.pow(b)</td>
+            <td>a = Math.pow(a, b)</td>
+            <td>a.pow(b, true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">integer exponent only</td>
+        </tr>
+        <tr>
+            <th>factorial</th>
+            <td></td>
+            <td>a.fact()</td>
+            <td></td>
+            <td>a.fact(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>round</th>
+            <td>Math.round(a)</td>
+            <td>a.round()</td>
+            <td>a = Math.round(a)</td>
+            <td>a.round(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>floor</th>
+            <td>Math.floor(a)</td>
+            <td>a.floor()</td>
+            <td>a = Math.floor(a)</td>
+            <td>a.floor(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>ceiling</th>
+            <td>Math.ceil(a)</td>
+            <td>a.ceil()</td>
+            <td>a = Math.ceil(a)</td>
+            <td>a.ceil(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>integer part of value</th>
+            <td>Math.trunc(a)</td>
+            <td>a.intp()</td>
+            <td>a = Math.trunc(a)</td>
+            <td>a.intp(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>absolute value</th>
+            <td>Math.abs(a)</td>
+            <td>a.abs()</td>
+            <td>a = Math.abs(a)</td>
+            <td>a.abs(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>additional inverse</th>
+            <td>-a</td>
+            <td>a.inva()</td>
+            <td>a = -a</td>
+            <td>a.inva(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>multiplicative inverse</th>
+            <td>1 / a</td>
+            <td>a.invm()</td>
+            <td>a = 1 / a</td>
+            <td>a.invm(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>square root</th>
+            <td>Math.sqrt(a)</td>
+            <td>a.sqrt()</td>
+            <td>a = Math.sqrt(a)</td>
+            <td>a.sqrt(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr>
+            <th>sign</th>
+            <td>Math.sign(a)</td>
+            <td>a.sgn()</td>
+            <td>a = Math.sign(a)</td>
+            <td>a.sgn(true)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">negative -&gt; -1, positive -&gt; 1, 0 -&gt; 0</td>
+        </tr>
+        <tr>
+            <th>clone</th>
+            <td>b = null<br/>b = a</td>
+            <td>b = null<br/>b = a.add(0)</td>
+            <td>b = 0;<br/>b = a;</td>
+            <td>b = new Mbn()<br/>b.set(a)</td>
+            <th>Mbn</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">'b = a' when 'a' is object, only passes reference to existing instance of object<br/>a.add(0)
+                is easiest way to create new instance the same Mbn class with the same value<br/>Mbn object has method
+                'set', so it can be modified to have specified value
+            </td>
+        </tr>
+        <tr>
+            <th>equals</th>
+            <td>a === b</td>
+            <td>a.eq(b)</td>
+            <td></td>
+            <td></td>
+            <th>boolean</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">'b === a' when 'a' and 'b' are objects, only checks, if both vars are references to the
+                same instance of object
+            </td>
+        </tr>
+        <tr>
+            <th>equals<br>with max diff</th>
+            <td>Math.abs(a - b) &lt;= 0.1</td>
+            <td>a.eq(b, 0.1)</td>
+            <td></td>
+            <td></td>
+            <th>boolean</th>
+        </tr>
+        <tr>
+            <th>compare</th>
+            <td>Math.sign(a - b)</td>
+            <td>a.cmp(b)</td>
+            <td></td>
+            <td></td>
+            <th>number [js]<br/>int [php]</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">a &lt; b -&gt; -1, a &gt; b -> 1, a === b -&gt; 0</td>
+        </tr>
+        <tr>
+            <th>compare<br>with max diff</th>
+            <td>Math.abs(a - b) &lt;= 0.1</td>
+            <td>a.cmp(b, 0.1)</td>
+            <td></td>
+            <td></td>
+            <th>number [js]<br/>int [php]</th>
+        </tr>
+        <tr>
+            <th>is integer</th>
+            <td>Math.round(a) === a</td>
+            <td>a.isInt()</td>
+            <td></td>
+            <td></td>
+            <th>boolean</th>
+        </tr>
+        <tr>
+            <th>to number</th>
+            <td>Number(a)</td>
+            <td>a.toNumber()</td>
+            <td></td>
+            <td></td>
+            <th>number [js]<br/>int/float [php]</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">Number(a) when 'a' is Mbn may cause errors for Mbn with comma separator, thousand formatting
+                etc.<br>when precision is 0, php toNumber returns int
+            </td>
+        </tr>
+        <tr>
+            <th>to string</th>
+            <td>a.toString()</td>
+            <td>a.toString()</td>
+            <td>String(a)</td>
+            <td>String(a)</td>
+            <th>string</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">gets default string representation of Mbn, based on Mbn* class params
+            </td>
+        </tr>
+        <tr>
+            <th>format</th>
+            <td></td>
+            <td>a.format()</td>
+            <td></td>
+            <td></td>
+            <th>string</th>
+        </tr>
+        <tr class="hidden"></tr>
+        <tr>
+            <td colspan="6">gets string representation with changed Mbn* class params<br>params: boolean - trigger
+                thousand formating (grouping), default true<br/>object - Mbn* params, truncation, formatting, precision,
+                separator; missing - inherit from class
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script>
 
    w("Class declarations in JS", "title2");
 
-   w(["//default: precission 2, dot separator, without trimming zeros", "//class allready defined in library", "//var Mbn = Mbn.extend();"], "mono");
+   w(["//default: precision 2, dot separator, without trimming zeros", "//class allready defined in library", "//var Mbn = Mbn.extend();"], "mono");
    we('new Mbn("12.1");');
 
    w();
    var Mbn0 = Mbn.extend(0);
-   w(["//precission 0", "var Mbn0 = Mbn.extend(0);"], "mono");
+   w(["//precision 0", "var Mbn0 = Mbn.extend(0);"], "mono");
    we('new Mbn0("12.2");');
 
    w();
    var Mbn3 = Mbn.extend(3);
-   w(['//precission 3', 'var Mbn3 = Mbn.extend(3);'], "mono");
+   w(['//precision 3', 'var Mbn3 = Mbn.extend(3);'], "mono");
    we('new Mbn3("12.1");');
 
    w();
    var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});
-   w(['//precission 4, coma output separator', 'var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});'], "mono");
+   w(['//precision 4, coma output separator', 'var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});'], "mono");
    we('new Mbn4c("12.1");');
 
    w();
    var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});
-   w(['//precission 5, trim zeros', 'var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});'], "mono");
+   w(['//precision 5, trim zeros', 'var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});'], "mono");
    we('new Mbn5t("12.1");');
 
    w("Class declarations in PHP", "title2");
@@ -329,7 +649,7 @@ if ($vString !== null) {
    we(['//another Mbn class object (any object convertible to numeric string)', 'new Mbn4c(new Mbn("1,2"));']);
 
    w();
-   we(['//called as funcion, calls itself as constructor (JS only)', 'Mbn(4);']);
+   we(['//called as function, calls itself as constructor (JS only)', 'Mbn(4);']);
 
    w('Mbn behaviour is similar to string', "title2");
 
@@ -589,214 +909,4 @@ if ($vString !== null) {
       });
    }, 100);
 </script>
-<div class="title2">Reference</div>
-<div class="title3">JS and Mbn code examples.<br>In most cases Mbn code in PHP and JS is identical - <span class="mono">a.f()</span>
-    in JS is <span class="mono">$a-&gt;f()</span> in PHP
-</div>
-<div>
-    <table>
-        <tbody>
-        <tr>
-            <th>operation</th>
-            <th>JS (Number)</th>
-            <th>Mbn</th>
-            <th>JS (Number)</th>
-            <th>Mbn</th>
-            <th>return type</th>
-        </tr>
-        <tr>
-            <th>declare</th>
-            <td>a = 4</td>
-            <td>a = new Mbn(4)</td>
-            <td>a = 0;<br>a = 4;</td>
-            <td>a = new Mbn();<br>a.set(4);</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>add</th>
-            <td>a + 3</td>
-            <td>a.add(3)</td>
-            <td>a += 3</td>
-            <td>a.add(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>subtract</th>
-            <td>a - 3</td>
-            <td>a.sub(3)</td>
-            <td>a -= 3</td>
-            <td>a.sub(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>multiply</th>
-            <td>a * 3</td>
-            <td>a.mul(3)</td>
-            <td>a *= 3</td>
-            <td>a.mul(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>divide</th>
-            <td>a / 3</td>
-            <td>a.div(3)</td>
-            <td>a /= 3</td>
-            <td>a.div(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>modulo</th>
-            <td>a % 3</td>
-            <td>a.mod(3)</td>
-            <td>a %= 3</td>
-            <td>a.mod(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr class="hidden"></tr>
-        <tr>
-            <td colspan="6">result has same sign as the original number</td>
-        </tr>
-        <tr>
-            <th>minimum</th>
-            <td>Math.min(a, 3)</td>
-            <td>a.min(3)</td>
-            <td>a = Math.min(a, 3)</td>
-            <td>a.min(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>maximum</th>
-            <td>Math.max(a, 3)</td>
-            <td>a.max(3)</td>
-            <td>a = Math.max(a, 3)</td>
-            <td>a.max(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>power</th>
-            <td>Math.pow(a, 3)</td>
-            <td>a.pow(3)</td>
-            <td>a = Math.pow(a, 3)</td>
-            <td>a.pow(3, true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr class="hidden"></tr>
-        <tr>
-            <td colspan="6">integer exponent only</td>
-        </tr>
-        <tr>
-            <th>factorial</th>
-            <td></td>
-            <td>a.fact()</td>
-            <td></td>
-            <td>a.fact(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>round</th>
-            <td>Math.round(a)</td>
-            <td>a.round()</td>
-            <td>a = Math.round(a)</td>
-            <td>a.round(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>floor</th>
-            <td>Math.floor(a)</td>
-            <td>a.floor()</td>
-            <td>a = Math.floor(a)</td>
-            <td>a.floor(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>ceiling</th>
-            <td>Math.ceil(a)</td>
-            <td>a.ceil()</td>
-            <td>a = Math.ceil(a)</td>
-            <td>a.ceil(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>integer part of value</th>
-            <td>Math.trunc(a)</td>
-            <td>a.intp()</td>
-            <td>a = Math.trunc(a)</td>
-            <td>a.intp(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>absolute value</th>
-            <td>Math.abs(a)</td>
-            <td>a.abs()</td>
-            <td>a = Math.abs(a)</td>
-            <td>a.abs(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>additional inverse</th>
-            <td>-a</td>
-            <td>a.inva()</td>
-            <td>a = -a</td>
-            <td>a.inva(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>multiplicative inverse</th>
-            <td>1 / a</td>
-            <td>a.invm()</td>
-            <td>a = 1 / a</td>
-            <td>a.invm(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>square root</th>
-            <td>Math.sqrt(a)</td>
-            <td>a.sqrt()</td>
-            <td>a = Math.sqrt(a)</td>
-            <td>a.sqrt(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>sign</th>
-            <td>Math.sign(a)</td>
-            <td>a.sgn()</td>
-            <td>a = Math.sign(a)</td>
-            <td>a.sgn(true)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr class="hidden"></tr>
-        <tr>
-            <td colspan="6">negative -&gt; -1, positive -&gt; 1, 0 -&gt; 0</td>
-        </tr>
-        <tr>
-            <th>clone</th>
-            <td>b = a</td>
-            <td>b = new Mbn(a)<br/>b = a.add(0)</td>
-            <td>b = 0;<br>b = a;</td>
-            <td>b = new Mbn()<br/>b.set(a)</td>
-            <th>Mbn</th>
-        </tr>
-        <tr>
-            <th>equals</th>
-            <td>a === 3</td>
-            <td>a.eq(3)</td>
-            <td>Math.abs(a - 3) &lt;= 0.1</td>
-            <td>a.eq(3, 0.1)</td>
-            <th>boolean</th>
-        </tr>
-        <tr>
-            <th>compare</th>
-            <td>Math.sign(a - 3)</td>
-            <td>a.cmp(3)</td>
-            <td></td>
-            <td>a.cmp(b, 0.1)</td>
-            <th>boolean</th>
-        </tr>
-        <tr class="hidden"></tr>
-        <tr>
-            <td colspan="6">a &lt; 3 -&gt; -1, a &gt; 3 -> 1, a === 3 -&gt; 0 (or Math.abs(a - 3) &lt;= 0.1 -&gt; 0)</td>
-        </tr>
-        </tbody>
-    </table>
-</div>
 </body>
