@@ -81,12 +81,33 @@ if ($vString !== null) {
     <style>
         body {
             font-family: sans-serif;
+            line-height: 1.4em;
         }
 
-        div, li {
-            margin: 0 4px 2px 4px;
+        a {
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #topBar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            background-color: lightgray;
+            margin: 0;
+        }
+
+        #topBar a {
+            display: inline-block;
+            color: black;
+        }
+
+        div {
             border-radius: 2px;
-            padding: 2px 6px 2px 6px
+            padding: 2px 6px 2px 6px;
         }
 
         .title1 {
@@ -103,6 +124,13 @@ if ($vString !== null) {
 
         .title3 {
             font-size: 1.2em;
+        }
+
+        .monoInline {
+            font-family: "Consolas", monospace;
+            color: dimgray;
+            font-weight: bold;
+            background-color: whitesmoke;
         }
 
         .mono {
@@ -172,74 +200,79 @@ if ($vString !== null) {
 
 
 <script>
-   var titles2 = [];
-
-   function w(a, c) {
-      if (a === undefined) {
-         a = "";
-      } else if (a instanceof Array) {
-         a = a.slice();
-         var al = a.length;
-         if (c === 'mono') {
-            for (var i = 0; i < al; i++) {
-               a[i] = "<span class=\"lb\"></span>" + a[i];
+    function w(a, c) {
+        if (a === undefined) {
+            a = "";
+        } else if (a instanceof Array) {
+            a = a.slice();
+            var al = a.length;
+            if (c === 'mono') {
+                for (var i = 0; i < al; i++) {
+                    a[i] = "<span class=\"lb\"></span>" + a[i];
+                }
             }
-         }
-         a = a.join("<br>");
-      } else if (c === 'mono') {
-         a = "<span class=\"lb\"></span>" + a;
-      }
-      a = a.replace(/((\()|(, ))(modify)(\))/g, "$2<span class=\"it\">$3$4</span>$5");
-      var id = false;
-      if (c === "title2") {
-         var title = a.replace(/<.*/, "");
-         id = title.toLowerCase().replace(/[^0-9a-z]/g, "_");
-         titles2.push({id: id, title: title});
-         id = id.replace(/_+/g, "_");
-      }
-      document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + (id ? (" id=\"" + id + "\"") : "") + ">" + a + "</div>");
-   }
+            a = a.join("<br>");
+        } else if (c === 'mono') {
+            a = "<span class=\"lb\"></span>" + a;
+        }
+        a = a.replace(/((\()|(, ))(modify)(\))/g, "$2<span class=\"it\">$3$4</span>$5");
+        var id = false;
+        if (c === "title2") {
+            var title = a.replace(/<.*/, "");
+            id = title.toLowerCase().replace(/[^0-9a-z]/g, "_");
+            id = id.replace(/_+/g, "_");
+        }
+        document.write("<div" + (c ? (" class=\"" + c + "\"") : "") + (id ? (" id=\"" + id + "\"") : "") + ">" + a + "</div>");
+    }
 
-   function we(a) {
-      w(a, "mono");
-      try {
-         var acode = (a instanceof Array) ? a.join("\n") : a;
-         var e = eval(acode);
-         w(String(e), "result");
-         w(typeof e, "label");
-      } catch (er) {
-         w(String(er), "result");
-         w("error", "label");
-      }
+    function we(a) {
+        w(a, "mono");
+        try {
+            var acode = (a instanceof Array) ? a.join("\n") : a;
+            var e = eval(acode);
+            w(String(e), "result");
+            w(typeof e, "label");
+        } catch (er) {
+            w(String(er), "result");
+            w("error", "label");
+        }
 
-   }
+    }
 
-   var passedTests = <?php echo $hashChanged ?>;
+    var passedTests = <?php echo $hashChanged ?>;
 
-   function showRelease() {
-      passedTests++;
-      if (passedTests === 3) {
-         var releaseBtn = document.getElementById("releaseBtn");
-         releaseBtn.style.visibility = "visible";
-         releaseBtn.onclick = function () {
-            releaseBtn.style.color = "gray";
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function () {
-               if (xmlhttp.readyState === 4) {
-                  alert(xmlhttp.responseText);
-                  location.reload();
-               }
+    function showRelease() {
+        passedTests++;
+        if (passedTests === 3) {
+            var releaseBtn = document.getElementById("releaseBtn");
+            releaseBtn.style.visibility = "visible";
+            releaseBtn.onclick = function () {
+                releaseBtn.style.color = "gray";
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState === 4) {
+                        alert(xmlhttp.responseText);
+                        location.reload();
+                    }
+                };
+                xmlhttp.open("POST", "mbn_release.php", true);
+                xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xmlhttp.send("");
             };
-            xmlhttp.open("POST", "mbn_release.php", true);
-            xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-            xmlhttp.send("");
-         };
-      }
-   }
+        }
+    }
 
-   var modify = false;
+    var modify = false;
 
 </script>
+<a id="about"></a>
+<div id="topBar">
+    <a href="#">about</a> |
+    <a href="#downloads">downloads</a> |
+    <a href="#reference">reference</a> |
+    <a href="#class_declarations">class declarations</a>
+
+</div>
 <div class="title1">Mbn (Multi-byte number) Library</div>
 <div>Library for PHP and JS to do calculations with any precision and correct (half-up) approximations.</div>
 <div class="title2">About</div>
@@ -252,10 +285,10 @@ if ($vString !== null) {
 </div>
 <div>In Mbn library:
     <ul>
-        <li>fixed precision with any size of fractional part: from zero to thousands and more</li>
         <li>parsing invalid strings, division by zero and many more problems are thrown as exceptions</li>
         <li>all calculations have predictable results, 1.4 - 0.4 gives always 1, not 0.9999999999999999</li>
         <li>almost identical syntax between JS and PHP, all operations supported by a single class</li>
+        <li>fixed precision with any size of fractional part: from zero to thousands and more</li>
         <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 is parsed as 6, =2PI as
             6.28, see <a href='calc'>calc example</a></li>
         <li>built in <a href="#other_methods_split">split</a> and <a href="#other_methods_reduce">reduce</a> functions
@@ -287,7 +320,7 @@ if ($vString !== null) {
 unset($relFile); ?>
 <div class="title2" id="reference">Reference</div>
 <div class="title3">JS and Mbn code equivalents.<br>In most cases Mbn code in PHP and JS is
-    identical - <span class="mono">a.f()</span> in JS is <span class="mono">$a-&gt;f()</span> in PHP
+    identical - <span class="monoInline">a.f()</span> in JS is <span class="monoInline">$a-&gt;f()</span> in PHP
 </div>
 <div>
     <table>
@@ -462,7 +495,7 @@ unset($relFile); ?>
         </tr>
         <tr class="hidden"></tr>
         <tr>
-            <td colspan="6">negative -&gt; -1, positive -&gt; 1, 0 -&gt; 0</td>
+            <td colspan="6">negative &#10132; -1, positive &#10132; 1, 0 &#10132; 0</td>
         </tr>
         <tr>
             <th>clone</th>
@@ -511,7 +544,7 @@ unset($relFile); ?>
         </tr>
         <tr class="hidden"></tr>
         <tr>
-            <td colspan="6">a &lt; b -&gt; -1, a &gt; b -> 1, a === b -&gt; 0</td>
+            <td colspan="6">a &lt; b &#10132; -1, a &gt; b &#10132; 1, a === b &#10132; 0</td>
         </tr>
         <tr>
             <th>compare<br>with max diff</th>
@@ -540,20 +573,21 @@ unset($relFile); ?>
         <tr class="hidden"></tr>
         <tr>
             <td colspan="6">Number(a) when 'a' is Mbn may cause errors for Mbn with comma separator, thousand formatting
-                etc.<br>when precision is 0, php toNumber returns int
+                etc.<br>when precision is 0, toNumber in PHP returns int
             </td>
         </tr>
         <tr>
             <th>to string</th>
             <td>a.toString()</td>
-            <td>a.toString()</td>
+            <td>a.toString()<br/>$a->__toString() [php]</td>
             <td>String(a)</td>
             <td>String(a)</td>
             <th>string</th>
         </tr>
         <tr class="hidden"></tr>
         <tr>
-            <td colspan="6">gets default string representation of Mbn, based on Mbn* class params
+            <td colspan="6">gets default string representation of Mbn, based on Mbn* class params<br>
+                JS toString() and PHP __toString() are used by these languages by default
             </td>
         </tr>
         <tr>
@@ -567,337 +601,405 @@ unset($relFile); ?>
         <tr class="hidden"></tr>
         <tr>
             <td colspan="6">gets string representation with changed Mbn* class params<br>params: boolean - trigger
-                thousand formating (grouping), default true<br/>object - Mbn* params, truncation, formatting, precision,
-                separator; missing - inherit from class
+                thousand formatting (grouping), default true<br/>object - Mbn* params, truncation, formatting,
+                precision, separator; missing - inherit from class
             </td>
         </tr>
         </tbody>
     </table>
 </div>
+<div class="title2" id="class_declarations">Class declarations</div>
+<div>Each Mbn class has few parameters defining it's precision, default format and behavior
+    <br/>Library in JS and PHP delivers single class named Mbn with default parameters. This class can be extended.
+    <br/>Available parameters:
+</div>
+<ul>
+    <li><strong>MbnP</strong> - precision - number of digits in fractional part, defines how many digits will be stored
+        <br>by default also defines string representation, MbnP=0 &#10132; "0", MbnP=2 &#10132; "0.00"
+        <ul>
+            <li>Default: 2</li>
+        </ul>
+    </li>
+    <li>
+        <strong>MbnS</strong> - separator - dot or comma, separator in string representation
+        <ul>
+            <li>Default: . (dot)</li>
+        </ul>
+    </li>
+    <li>
+        <strong>MbnT</strong> - truncation - true or false, truncation of trailing zeros in string representation
+        <br>for MbnP=2 and MbnT=true: 1.12 &#10132; "1.12", 1.10 &#10132; "1.1", 1.00 &#10132; "1"
+        <ul>
+            <li>Default: false (no truncation)</li>
+        </ul>
+    </li>
+    <li>
+        <strong>MbnE</strong> - evaluating - true, false or null, triggers usage of expression parser
+        <ul>
+            <li>true: all expressions are evaluated</li>
+            <li>null: expressions starting with "=", like "=2+3" ale evaluated</li>
+            <li>false: no expressions ale evaluated, "=2+3" causes invalid format exception</li>
+            <li><span class="monoInline">new Mbn("=2+3", true)</span> is parsed always regardless of MbnE</li>
+            <li><span class="monoInline">new Mbn("=2+3", false)</span> is never parsed regardless of MbnE</li>
+            <li>When object [js] or array [php] is passed as second argument, also expression is parsed:
+                <br><span class="monoInline">new Mbn("=2a", {a: 1})</span> [js] / <span class="monoInline">new Mbn('=2a', ['a' => 1])</span>
+                [php]
+            </li>
+            <li>MbnE doesn't affect <span class="monoInline">Mbn.calc("2+3")</span> [js] / <span class="monoInline">Mbn::calc("2+3")</span>
+                [php]
+            </li>
+            <li>Default: null</li>
+        </ul>
+    </li>
+    <li>
+        <strong>MbnF</strong> - formatting - true or false, grouping thousands (with space) in string representation
+        <br>for MbnP=5 and MbnF=true 12345.12345 &#10132; "12 345.12345"
+        <ul>
+            <li>Default: false (no formatting)</li>
+        </ul>
+    </li>
+    <li>
+        <strong>MbnL</strong> - limit - number of digits, that will cause limit_exceeded exception
+        <br>some short expressions like "=9!!" or "=9^9^9" can have really big results and take much time
+        <br>MbnL can avoid interface freeze or server overload
+        <br>hint: some operations like power, may exceed limit when result shouldn't, because of storing exact result
+        during calculations
+        <ul>
+            <li>Default: 1000</li>
+        </ul>
+    </li>
+</ul>
+<div class="title2" id="class_declarations_js">Class declarations in JS</div>
+<div>Default Mbn class can be extended with <span class="monoInline">.extend()</span> method
+    <br/>Single precision as number, or object with Mbn* parameters can be passed.
+    <br/>hint: Mbn in JS is not exactly class, it's a class, function and object
+    <br/>Derived classes cannot be extended
+</div>
 <script>
+    w(["//default: precision 2, dot separator, ...", "//class already defined in library", "//var Mbn = Mbn.extend();"], "mono");
+    we('new Mbn("12.1");');
 
-   w("Class declarations in JS", "title2");
+    w();
+    var Mbn0 = Mbn.extend(0);
+    w(["//precision 0", "var Mbn0 = Mbn.extend(0);"], "mono");
+    we('new Mbn0("12.2");');
 
-   w(["//default: precision 2, dot separator, without trimming zeros", "//class allready defined in library", "//var Mbn = Mbn.extend();"], "mono");
-   we('new Mbn("12.1");');
+    w();
+    var Mbn3 = Mbn.extend(3);
+    w(['//precision 3', 'var Mbn3 = Mbn.extend(3);'], "mono");
+    we('new Mbn3("12.1");');
 
-   w();
-   var Mbn0 = Mbn.extend(0);
-   w(["//precision 0", "var Mbn0 = Mbn.extend(0);"], "mono");
-   we('new Mbn0("12.2");');
+    w();
+    var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});
+    w(['//precision 4, coma output separator', 'var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});'], "mono");
+    we('new Mbn4c("12.1");');
 
-   w();
-   var Mbn3 = Mbn.extend(3);
-   w(['//precision 3', 'var Mbn3 = Mbn.extend(3);'], "mono");
-   we('new Mbn3("12.1");');
+    w();
+    var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});
+    w(['//precision 5, truncate zeros', 'var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});'], "mono");
+    we('new Mbn5t("12.1");');
+</script>
+<div class="title2" id="class_declarations_php">Class declarations in PHP</div>
+<div>Default Mbn class can be extended standard inheritance by overriding protected static fields
+    <br/>Mbn* fields which are not overridden, have default value
+    <br/>Derived classes shouldn't be extended
+</div>
+<script>
+    w(['class Mbn0 extends Mbn {', '  protected static $MbnP = 0;', '}'], "mono");
 
-   w();
-   var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});
-   w(['//precision 4, coma output separator', 'var Mbn4c = Mbn.extend({MbnP: 4, MbnS: ","});'], "mono");
-   we('new Mbn4c("12.1");');
+    w();
+    w(['class Mbn4c extends Mbn {', '  protected static $MbnP = 4;', "  protected static $MbnS = ',';", '}'], "mono");
 
-   w();
-   var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});
-   w(['//precision 5, trim zeros', 'var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});'], "mono");
-   we('new Mbn5t("12.1");');
+    w();
+    w(['class Mbn5t extends Mbn {', '  protected static $MbnP = 5;', "  protected static $MbnT = true;", '}'], "mono");
 
-   w("Class declarations in PHP", "title2");
+    w("Constructor calls", "title2");
 
-   w(['class Mbn0 extends Mbn {', '  protected static $MbnP = 0;', '}'], "mono");
+    we(["//empty", 'new Mbn();']);
 
-   w();
-   w(['class Mbn4c extends Mbn {', '  protected static $MbnP = 4;', "  protected static $MbnS = ',';", '}'], "mono");
+    w();
+    we(["//number", 'new Mbn(1.2);']);
 
-   w();
-   w(['class Mbn5t extends Mbn {', '  protected static $MbnP = 5;', "  protected static $MbnT = true;", '}'], "mono");
+    w();
+    we(["//boolean", 'new Mbn(true);']);
 
-   w("Constructor calls", "title2");
+    w();
+    we(["//string with dot", 'new Mbn("1.2");']);
 
-   we(["//empty", 'new Mbn();']);
+    w();
+    we(['//string with coma', 'new Mbn("1,2");']);
 
-   w();
-   we(["//number", 'new Mbn(1.2);']);
+    w();
+    we(['//string without fractional part', 'new Mbn("1.");']);
 
-   w();
-   we(["//boolean", 'new Mbn(true);']);
+    w();
+    we(['//string without integer part', 'new Mbn(".2");']);
 
-   w();
-   we(["//string with dot", 'new Mbn("1.2");']);
+    w();
+    we(['//another Mbn object', 'new Mbn(new Mbn("1,2"));']);
 
-   w();
-   we(['//string with coma', 'new Mbn("1,2");']);
+    w();
+    we(['//another Mbn class object (any object convertible to numeric string)', 'new Mbn4c(new Mbn("1,2"));']);
 
-   w();
-   we(['//string without fractional part', 'new Mbn("1.");']);
+    w();
+    we(['//called as function, calls itself as constructor (JS only)', 'Mbn(4);']);
 
-   w();
-   we(['//string without integer part', 'new Mbn(".2");']);
+    w('Mbn behaviour is similar to string', "title2");
 
-   w();
-   we(['//another Mbn object', 'new Mbn(new Mbn("1,2"));']);
+    we('new Mbn("1,2") + "txt";');
 
-   w();
-   we(['//another Mbn class object (any object convertible to numeric string)', 'new Mbn4c(new Mbn("1,2"));']);
+    w();
+    we('new Mbn("1,2") + new Mbn("1,2");');
 
-   w();
-   we(['//called as function, calls itself as constructor (JS only)', 'Mbn(4);']);
+    w();
+    we('new Mbn("1,2") + 2;');
 
-   w('Mbn behaviour is similar to string', "title2");
+    w('Conversion to string and number', "title2");
 
-   we('new Mbn("1,2") + "txt";');
+    we(['//correct, same as (new Mbn4c("1,2")).toString()', 'String(new Mbn4c("1,2"));']);
 
-   w();
-   we('new Mbn("1,2") + new Mbn("1,2");');
+    w();
+    we(['//incorrect for coma separator, same as Number("1,2000")', 'Number(new Mbn4c("1,2"));']);
 
-   w();
-   we('new Mbn("1,2") + 2;');
+    w();
+    we(['//correct', '(new Mbn4c("1,2")).toNumber();']);
 
-   w('Conversion to string and number', "title2");
+    w('Hint: operator precedence difference between JS and PHP', "title2");
 
-   we(['//correct, same as (new Mbn4c("1,2")).toString()', 'String(new Mbn4c("1,2"));']);
+    w(['//correct in JS', 'new Mbn("1.12").toNumber();'], "mono");
 
-   w();
-   we(['//incorrect for coma separator, same as Number("1,2000")', 'Number(new Mbn4c("1,2"));']);
+    w();
+    w(['//incorrect in PHP', 'new Mbn("1.12")->toNumber();'], "mono");
 
-   w();
-   we(['//correct', '(new Mbn4c("1,2")).toNumber();']);
+    w();
+    w(['//correct in PHP', '(new Mbn("1.12"))->toNumber();'], "mono");
 
-   w('Hint: operator precedence difference between JS and PHP', "title2");
+    w('Standard rules for operations', "title2");
 
-   w(['//correct in JS', 'new Mbn("1.12").toNumber();'], "mono");
+    we(['//all numbers are rounded with half-up rule', 'new Mbn("1.125");']);
 
-   w();
-   w(['//incorrect in PHP', 'new Mbn("1.12")->toNumber();'], "mono");
+    w();
+    we('new Mbn0("-1.5");');
 
-   w();
-   w(['//correct in PHP', '(new Mbn("1.12"))->toNumber();'], "mono");
+    w();
+    we(['//all numeric arguments converted to Mbn', 'new Mbn("1.125").add("1.125");']);
+    we(['//because', 'new Mbn("1.13").add(new Mbn("1.13"));']);
+    we(['//expected precission should be used', 'new Mbn(new Mbn3("1.125").add("1.125"));']);
 
-   w('Standard rules for operations', "title2");
+    w();
+    we(['//by default original value remains unchanged', 'var a = new Mbn("1.12");', 'a.add("1.12");', 'a;']);
 
-   we(['//all numbers are rounded with half-up rule', 'new Mbn("1.125");']);
+    w();
+    we(['//last argument (=== true) triggers modification of original variable', 'var a = new Mbn("1.12");', 'a.add("1.12", true);', 'a;']);
 
-   w();
-   we('new Mbn0("-1.5");');
+    w();
+    we(['//returned values are Mbn objects, what enables method chaining', 'new Mbn("1.12").add("1.12").add("9");']);
 
-   w();
-   we(['//all numeric arguments converted to Mbn', 'new Mbn("1.125").add("1.125");']);
-   we(['//because', 'new Mbn("1.13").add(new Mbn("1.13"));']);
-   we(['//expected precission should be used', 'new Mbn(new Mbn3("1.125").add("1.125"));']);
+    w();
+    we(['var a = new Mbn("1.12");', 'a.add("1.12", true).add("9", true);', 'a;']);
 
-   w();
-   we(['//by default original value remains unchanged', 'var a = new Mbn("1.12");', 'a.add("1.12");', 'a;']);
+    w();
+    we(['//exceptions like wrong formats, division by zero and other are thrown', 'new Mbn("1.x12");', 'new Mbn("1.12");']);
 
-   w();
-   we(['//last argument (=== true) triggers modification of original variable', 'var a = new Mbn("1.12");', 'a.add("1.12", true);', 'a;']);
 
-   w();
-   we(['//returned values are Mbn objects, what enables method chaining', 'new Mbn("1.12").add("1.12").add("9");']);
+    w('Basic methods, return number as Mbn object', "title2");
 
-   w();
-   we(['var a = new Mbn("1.12");', 'a.add("1.12", true).add("9", true);', 'a;']);
+    we(['//add', 'new Mbn(5, modify).add(2);']);
 
-   w();
-   we(['//exceptions like wrong formats, division by zero and other are thrown', 'new Mbn("1.x12");', 'new Mbn("1.12");']);
+    w();
+    we(['//subtract', 'new Mbn(5).sub(2, modify);']);
 
+    w();
+    we(['//multiply', 'new Mbn(5).mul(2, modify);']);
 
-   w('Basic methods, return number as Mbn object', "title2");
+    w();
+    we(['//divide', 'new Mbn(5).div(2, modify);']);
 
-   we(['//add', 'new Mbn(5, modify).add(2);']);
+    w();
+    we(['//modulo (result has same sign as the original number)', 'new Mbn(5).mod(-2.1, modify);']);
 
-   w();
-   we(['//subtract', 'new Mbn(5).sub(2, modify);']);
+    w();
+    we(['//power (integer exponent only)', 'new Mbn(5).pow(2, modify);']);
 
-   w();
-   we(['//multiply', 'new Mbn(5).mul(2, modify);']);
+    w();
+    we(['//square root', 'new Mbn(2).sqrt(modify);']);
 
-   w();
-   we(['//divide', 'new Mbn(5).div(2, modify);']);
+    w();
+    we(['//minimum', 'new Mbn(5).min(2, modify);']);
 
-   w();
-   we(['//modulo (result has same sign as the original number)', 'new Mbn(5).mod(-2.1, modify);']);
+    w();
+    we(['//maximum', 'new Mbn(5).max(2, modify);']);
 
-   w();
-   we(['//power (integer exponent only)', 'new Mbn(5).pow(2, modify);']);
+    w();
+    we(['//round', 'new Mbn(5.5).round(modify);']);
 
-   w();
-   we(['//square root', 'new Mbn(2).sqrt(modify);']);
+    w();
+    we(['//ceiling', 'new Mbn(-5.6).ceil(modify);']);
 
-   w();
-   we(['//minimum', 'new Mbn(5).min(2, modify);']);
+    w();
+    we(['//floor', 'new Mbn(-5.4).floor(modify);']);
 
-   w();
-   we(['//maximum', 'new Mbn(5).max(2, modify);']);
+    w();
+    we(['//integer part of number', 'new Mbn(-5.6).intp(modify);']);
 
-   w();
-   we(['//round', 'new Mbn(5.5).round(modify);']);
+    w();
+    we(['//absolute value', 'new Mbn(-5.4).abs(modify);']);
 
-   w();
-   we(['//ceiling', 'new Mbn(-5.6).ceil(modify);']);
+    w();
+    we(['//additional inverse of number', 'new Mbn(5).inva(modify);']);
 
-   w();
-   we(['//floor', 'new Mbn(-5.4).floor(modify);']);
+    w();
+    we(['//multiplicative inverse', 'new Mbn(5).invm(modify);']);
 
-   w();
-   we(['//integer part of number', 'new Mbn(-5.6).intp(modify);']);
+    w();
+    we(['//sign of number (-1, 0, 1)', 'new Mbn(0.5).sgn(modify);']);
 
-   w();
-   we(['//absolute value', 'new Mbn(-5.4).abs(modify);']);
+    w("Other methods", "title2");
 
-   w();
-   we(['//additional inverse of number', 'new Mbn(5).inva(modify);']);
+    we(['//set value', 'new Mbn(0.5).set(4);']);
 
-   w();
-   we(['//multiplicative inverse', 'new Mbn(5).invm(modify);']);
+    we(['//standard set, using =, sets reference to existing object', 'var a = new Mbn(2);', 'var b = new Mbn();', 'var c = new Mbn();', 'b = a;', 'c.set(a);', 'a.add(3, true);', 'b + " " + c;']);
 
-   w();
-   we(['//sign of number (-1, 0, 1)', 'new Mbn(0.5).sgn(modify);']);
+    w("Other methods - cmp, eq", "title2");
 
-   w("Other methods", "title2");
+    we(['//compare with other number, returns number', '//1 if number is greater than other value, 0 if equals, -1 if is lower', 'new Mbn(0.5).cmp(4);']);
 
-   we(['//set value', 'new Mbn(0.5).set(4);']);
+    w();
+    we(['//second argumend defines maximum difference still treated as equality', 'new Mbn(1.5).cmp(1.7, 0.2);']);
 
-   we(['//standard set, using =, sets reference to existing object', 'var a = new Mbn(2);', 'var b = new Mbn();', 'var c = new Mbn();', 'b = a;', 'c.set(a);', 'a.add(3, true);', 'b + " " + c;']);
+    w();
+    we(['//check if numbers are equal, also maximum difference can be passed', 'new Mbn(1.9).eq(1.7, 0.2);']);
 
-   w("Other methods - cmp, eq", "title2");
+    w("Other methods - split", "title2");
 
-   we(['//compare with other number, returns number', '//1 if number is greater than other value, 0 if equals, -1 if is lower', 'new Mbn(0.5).cmp(4);']);
+    we(['//split value to numbers, which sum correctly to it', '//returns array of Mbn objects', '//number of parts (default 2) or array with ratios can be given', 'new Mbn(3).split();']);
 
-   w();
-   we(['//second argumend defines maximum difference still treated as equality', 'new Mbn(1.5).cmp(1.7, 0.2);']);
+    we('new Mbn(3).split().join(" ");');
 
-   w();
-   we(['//check if numbers are equal, also maximum difference can be passed', 'new Mbn(1.9).eq(1.7, 0.2);']);
+    we('new Mbn(5).split([1, 1, 2]).join(" ");');
 
-   w("Other methods - split", "title2");
+    we('new Mbn(2.02).split([1, 1, 2]).join(" ");');
 
-   we(['//split value to numbers, which sum correctly to it', '//returns array of Mbn objects', '//number of parts (default 2) or array with ratios can be given', 'new Mbn(3).split();']);
+    w();
+    w(['//in PHP works with assocjative arrays', "(new Mbn(2.02))->split(['a' => 1, 'c' => 1, 'b' => 2])", "//gives array ['a' => 0.51, 'c' => 0.50, 'b' => 1.01]"], 'mono');
 
-   we('new Mbn(3).split().join(" ");');
+    w("Other methods - format", "title2");
 
-   we('new Mbn(5).split([1, 1, 2]).join(" ");');
+    we(["//output can be formatted, with thousands grouping", "Mbn('12345678').format();"], "mono");
+    we(["//input can contain some spaces in integer part", "Mbn('123 45 678.12');"], "mono");
 
-   we('new Mbn(2.02).split([1, 1, 2]).join(" ");');
+    w("Other methods - reduce", "title2");
+    we(['//reduce array to value or invoke single argument function on each element (typically called map)', '//2-argument functions: add, mul, min, max', 'Mbn.reduce("add", [2.5, 1.5, 3.4, -4.4]);']);
 
-   w();
-   w(['//in PHP works with assocjative arrays', "(new Mbn(2.02))->split(['a' => 1, 'c' => 1, 'b' => 2])", "//gives array ['a' => 0.51, 'c' => 0.50, 'b' => 1.01]"], 'mono');
+    w();
+    we(['//1-argument functions: set (simply make array of Mbn objects), abs, inva, invm, ceil, floor, sqrt, round, sgn, intp', 'Mbn.reduce("set", [2.5, 1.5, 3.4, -4.4]);']);
+    we(['Mbn.reduce("inva", [2.5, 1.5, 3.4, -4.4]).join(" ");']);
 
-   w("Other methods - format", "title2");
+    w();
+    w(["//in PHP works with assocjative arrays", "Mbn::reduce('sqrt', ['a'=>4, 'b'=>9])", "//gives array ['a'=>2.00, 'b'=>3.00]"], "mono");
 
-   we(["//output can be formatted, with thousands grouping", "Mbn('12345678').format();"], "mono");
-   we(["//input can contain some spaces in integer part", "Mbn('123 45 678.12');"], "mono");
+    w("Other methods - calc", "title2");
 
-   w("Other methods - reduce", "title2");
-   we(['//reduce array to value or invoke single argument function on each element (typically called map)', '//2-argument functions: add, mul, min, max', 'Mbn.reduce("add", [2.5, 1.5, 3.4, -4.4]);']);
+    we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);
 
-   w();
-   we(['//1-argument functions: set (simply make array of Mbn objects), abs, inva, invm, ceil, floor, sqrt, round, sgn, intp', 'Mbn.reduce("set", [2.5, 1.5, 3.4, -4.4]);']);
-   we(['Mbn.reduce("inva", [2.5, 1.5, 3.4, -4.4]).join(" ");']);
+    w();
+    we(['//standard operators work typically, also with power evaluated right-to-left', 'Mbn.calc("3 ^ 3 ^ 3") + " " + Mbn.calc("(3 ^ 3) ^ 3");']);
 
-   w();
-   w(["//in PHP works with assocjative arrays", "Mbn::reduce('sqrt', ['a'=>4, 'b'=>9])", "//gives array ['a'=>2.00, 'b'=>3.00]"], "mono");
+    w();
+    we(['//it is posible, to use percentage values', 'Mbn.calc("200 * 123%");']);
 
-   w("Other methods - calc", "title2");
+    w();
+    we(['//modulo has # operator', 'Mbn.calc("245 # 100");']);
 
-   we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);
+    w();
+    we(['//min and max use & and | symbols, and therefore work like logical operators or/and on 0/1 values', 'Mbn.calc("(1 | 0) & 0");']);
 
-   w();
-   we(['//standard operators work typically, also with power evaluated right-to-left', 'Mbn.calc("3 ^ 3 ^ 3") + " " + Mbn.calc("(3 ^ 3) ^ 3");']);
+    w();
+    w(['//operator priorities high to low (in partenthesis with the same priority): ^, (*, /, #), (+, -), &amp;, |'], "mono");
 
-   w();
-   we(['//it is posible, to use percentage values', 'Mbn.calc("200 * 123%");']);
+    w();
+    we(['//single argument functions abs, ceil, floor, round, sqrt, sgn, int (=intp) are accesible', 'Mbn.calc("((sqrt(5) + 1) / 2)^2");']);
 
-   w();
-   we(['//modulo has # operator', 'Mbn.calc("245 # 100");']);
+    w();
+    we(['//there are 3 standard constants: PI, E (with 40 digits precission) and eps (epsilon, distance to next number)', 'Mbn5t.calc("PI");']);
+    we(['Mbn5t.calc("eps");']);
 
-   w();
-   we(['//min and max use & and | symbols, and therefore work like logical operators or/and on 0/1 values', 'Mbn.calc("(1 | 0) & 0");']);
+    w();
+    we(["//variables can be passed as second argument", 'Mbn.calc("a / b", {a: 7, b: 3});']);
+    w(["//php", "Mbn::calc('a / b', ['a' => 7, 'b' => 3]);"], "mono");
 
-   w();
-   w(['//operator priorities high to low (in partenthesis with the same priority): ^, (*, /, #), (+, -), &amp;, |'], "mono");
+    w();
+    we(["//calc() is called when constructor is called with string begnning with =", 'new Mbn("=x*x", {x: 2});']);
 
-   w();
-   we(['//single argument functions abs, ceil, floor, round, sqrt, sgn, int (=intp) are accesible', 'Mbn.calc("((sqrt(5) + 1) / 2)^2");']);
+    w("Defining constants", "title2");
 
-   w();
-   we(['//there are 3 standard constants: PI, E (with 40 digits precission) and eps (epsilon, distance to next number)', 'Mbn5t.calc("PI");']);
-   we(['Mbn5t.calc("eps");']);
+    we(['//constants can be get by name', 'Mbn.def("PI");']);
 
-   w();
-   we(["//variables can be passed as second argument", 'Mbn.calc("a / b", {a: 7, b: 3});']);
-   w(["//php", "Mbn::calc('a / b', ['a' => 7, 'b' => 3]);"], "mono");
+    w();
+    we(['//constants can be defined, have to start from letter or _', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
 
-   w();
-   we(["//calc() is called when constructor is called with string begnning with =", 'new Mbn("=x*x", {x: 2});']);
+    w();
+    we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");']);
 
-   w("Defining constants", "title2");
+    w();
+    we(['//constant can be checked if is defined', 'Mbn.def(null, "Q");']);
 
-   we(['//constants can be get by name', 'Mbn.def("PI");']);
+    w("Other methods - check", "title2");
+    we(['//incorrect expressions return false', 'Mbn.check("a * b *");']);
 
-   w();
-   we(['//constants can be defined, have to start from letter or _', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
+    w();
+    we(['//correct expressions return list of used vars, also already defined - not needed', 'Mbn.check("a * b * PI");']);
 
-   w();
-   we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");']);
+    w("Examples of calculations, that give wrong results, and can be easily corrected with Mbn", "title2");
 
-   w();
-   we(['//constant can be checked if is defined', 'Mbn.def(null, "Q");']);
+    we("(1.4 - 0.4) === 1;");
 
-   w("Other methods - check", "title2");
-   we(['//incorrect expressions return false', 'Mbn.check("a * b *");']);
+    we("new Mbn(1.4).sub(0.4).eq(1);");
 
-   w();
-   we(['//correct expressions return list of used vars, also already defined - not needed', 'Mbn.check("a * b * PI");']);
+    w();
+    we(["//correct in IE", "(315.5 * 1.23).toFixed(2);"]);
 
-   w("Examples of calculations, that give wrong results, and can be easily corrected with Mbn", "title2");
+    we('new Mbn(315.5).mul(1.23);');
 
-   we("(1.4 - 0.4) === 1;");
+    w();
+    we(["//correct in IE", "(13492105 / 1000).toFixed(2);"]);
 
-   we("new Mbn(1.4).sub(0.4).eq(1);");
-
-   w();
-   we(["//correct in IE", "(315.5 * 1.23).toFixed(2);"]);
-
-   we('new Mbn(315.5).mul(1.23);');
-
-   w();
-   we(["//correct in IE", "(13492105 / 1000).toFixed(2);"]);
-
-   we('new Mbn(13492105).div(1000);');
+    we('new Mbn(13492105).div(1000);');
 
 </script>
 <script src="mbn_test.js"></script>
 <script>
-   setTimeout(function () {
-      function displayTestStatus(lng, result) {
-         var resultSpan = document.getElementById("result" + lng);
-         try {
-            var res = JSON.parse(result);
-            var txt = lng + " v" + res.MbnV + ": " + res.status + " (" + res.count + " tests, " + res.time + " ms)";
-            for (var i = 0; i < res.errors.length; i++) {
-               var error = res.errors[i];
-               txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;
+    setTimeout(function () {
+        function displayTestStatus(lng, result) {
+            var resultSpan = document.getElementById("result" + lng);
+            try {
+                var res = JSON.parse(result);
+                var txt = lng + " v" + res.MbnV + ": " + res.status + " (" + res.count + " tests, " + res.time + " ms)";
+                for (var i = 0; i < res.errors.length; i++) {
+                    var error = res.errors[i];
+                    txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;
+                }
+                resultSpan.innerText = txt;
+                if (res.status === "OK") {
+                    showRelease();
+                }
+            } catch (ex) {
+                resultSpan.innerText = result;
             }
-            resultSpan.innerText = txt;
-            if (res.status === "OK") {
-               showRelease();
-            }
-         } catch (ex) {
-            resultSpan.innerText = result;
-         }
-      }
+        }
 
-      var xmlhttp = new XMLHttpRequest();
-      xmlhttp.onreadystatechange = function () {
-         if (xmlhttp.readyState === 4) {
-            displayTestStatus("PHP", xmlhttp.responseText);
-         }
-      };
-      xmlhttp.open("POST", "mbn_test.php", true);
-      xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      testMbn(function (responseText) {
-         displayTestStatus("JS", responseText);
-         xmlhttp.send("");
-      });
-   }, 100);
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState === 4) {
+                displayTestStatus("PHP", xmlhttp.responseText);
+            }
+        };
+        xmlhttp.open("POST", "mbn_test.php", true);
+        xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        testMbn(function (responseText) {
+            displayTestStatus("JS", responseText);
+            xmlhttp.send("");
+        });
+    }, 100);
 </script>
 </body>
