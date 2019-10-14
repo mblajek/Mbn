@@ -1,59 +1,24 @@
 <?php
 $relFiles = [
-    'mbn.js' => ['Library in JS'],
-    'mbn.php' => ['Library in PHP'],
-    'mbn.min.js' => ['Minified library in JS'],
-    'mbn.min.php' => ['Minified library in PHP'],
-    'mbn.d.ts' => ['TypeScript declaration file'],
-    'Mbn.php' => ['Mbn class in PHP (with namespace, without MbnErr class)'],
-    'MbnErr.php' => ['MbnErr class in PHP (with namespace)'],
+    'mbn.js' => ['desc' => 'Library in JS'],
+    'mbn.php' => ['desc' => 'Library in PHP'],
+    'mbn.min.js' => ['desc' => 'Minified library in JS'],
+    'mbn.min.php' => ['desc' => 'Minified library in PHP'],
+    'mbn.d.ts' => ['desc' => 'TypeScript declaration file'],
+    'Mbn.php' => ['desc' => 'Mbn class in PHP (with namespace, without MbnErr class)'],
+    'MbnErr.php' => ['desc' => 'MbnErr class in PHP (with namespace)'],
 ];
 foreach ($relFiles as $n => &$relFile) {
    if ($n === ucfirst($n)) {
       $n = '_' . $n;
    }
-   $relFile[] = filesize('release/' . $n);
+   $relFile['path'] = 'release/' . $n;
 }
 unset($relFile);
 
-$vString = null;
-if (file_exists('release/v')) {
-   $vString = file_get_contents('release/v');
-}
-
 $getFile = filter_input(INPUT_GET, 'gf');
 if (!empty($getFile)) {
-   $getFileLower = strtolower($getFile);
-   $isLowerCase = $getFile === $getFileLower;
-   $isInArray = isset($relFiles[$getFile]);
-   if ($isInArray || (isset($relFiles[$getFileLower]) && $getFile === ucfirst($getFileLower))) {
-      $disposition = null;
-      $extension = pathinfo($getFile, PATHINFO_EXTENSION);
-      if (filter_input(INPUT_GET, 'show') === null) {
-         switch ($extension) {
-            case 'js':
-            case 'ts':
-               header('Content-Type: text/javascript');
-               break;
-            case 'php':
-               header('Content-Type: application/php');
-               break;
-            default:
-               header('Content-Type: text/plain');
-         }
-         $disposition = 'attachment';
-      } else {
-         header('Content-Type: text/plain');
-         $disposition = 'inline';
-      }
-      header('Content-Disposition: ' . $disposition . '; filename="' . $getFile . '"');
-      $realFilePath = 'release/' . strtolower($getFile);
-      if (!$isLowerCase && $isInArray) {
-         readfile('release/_' . $getFile);
-      } else {
-         readfile('release/' . $getFileLower);
-      }
-   } elseif ($getFile === 'icon') {
+   if ($getFile === 'icon') {
       header('Content-Type: image/bmp');
       echo gzinflate(base64_decode(
           'c/KtY4AAOyDWAGIBKGYEQhBwAOLDfBCMDP7//w/EDAwNQGX//0Lw/rcMDPPPMjCsX8vAsD2XgWEdkD8XiFe9hfBB4iB5kDqQXgA='));
@@ -61,9 +26,42 @@ if (!empty($getFile)) {
       header('Content-Type: text/json');
       echo $vString;
    } else {
-      header('HTTP/1.0 404 Not Found');
+      $getFileLower = strtolower($getFile);
+      $isUcFirstOrLower = ($getFile === $getFileLower) || ($getFile === ucfirst($getFile));
+      if ($isUcFirstOrLower && (isset($relFiles[$getFile]) || isset($relFiles[$getFileLower]))) {
+         $relFile = isset($relFiles[$getFile]) ? $relFiles[$getFile] : $relFiles[$getFileLower];
+         $relFilePath = $relFile['path'];
+         $disposition = null;
+         $extension = pathinfo($relFilePath, PATHINFO_EXTENSION);
+         if (filter_input(INPUT_GET, 'show') === null) {
+            switch ($extension) {
+               case 'js':
+               case 'ts':
+                  header('Content-Type: text/javascript');
+                  break;
+               case 'php':
+                  header('Content-Type: application/php');
+                  break;
+               default:
+                  header('Content-Type: text/plain');
+            }
+            $disposition = 'attachment';
+         } else {
+            header('Content-Type: text/plain');
+            $disposition = 'inline';
+         }
+         header('Content-Disposition: ' . $disposition . '; filename="' . $getFile . '"');
+         readfile($relFilePath);
+      } else {
+         header('HTTP/1.0 404 Not Found');
+      }
    }
    die;
+}
+require 'mbn.php';
+$vString = null;
+if (file_exists('release/v')) {
+   $vString = file_get_contents('release/v');
 }
 $hashChanged = 1;
 if ($vString !== null) {
@@ -250,8 +248,7 @@ if ($vString !== null) {
     fixed-precision (e.g. financial) calculations.
 </div>
 <div>Also it's easy to get unexpected some NaN and Infinity values. Usually results should be formatted in concrete way,
-    what is
-    more or less available in languages.
+    what is more or less available in languages.
 </div>
 <div>In Mbn library:
     <ul>
@@ -259,8 +256,8 @@ if ($vString !== null) {
         <li>parsing invalid strings, division by zero and many more problems are thrown as exceptions</li>
         <li>all calculations have predictable results, 1.4 - 0.4 gives always 1, not 0.9999999999999999</li>
         <li>almost identical syntax between JS and PHP, all operations supported by a single class</li>
-        <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 is parsed as 6, =2PI as 6.28, see <a href='calc'>calc
-                example</a></li>
+        <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 is parsed as 6, =2PI as
+            6.28, see <a href='calc'>calc example</a></li>
         <li>built in <a href="#other_methods_split">split</a> and <a href="#other_methods_reduce">reduce</a> functions
             for some useful array operations
         </li>
@@ -272,31 +269,25 @@ if ($vString !== null) {
     <a href='https://github.com/mblajek/Mbn'>Github page</a>.
 </div>
 <div>Available for PHP Composer via <a href='https://packagist.org/packages/mblajek/mbn'>Packagist</a>.</div>
-<script>
-   w("");
 
-   w('Tests and benchmark<span id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>', "title2");
-   w('<strong id="resultJS">..</strong>', "mono");
-   w('<strong id="resultPHP">..</strong>', "mono");
-
-   w("Downloads", "title2");
-
-   w("//minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a>", "mono");
-   w(["//minified PHP is made with php_strip_whitespace() and text replacements", "//dont't trust it to much, intended to use for testing in online PHP sandboxes"], "mono");
-   w("//code is optimized for speed and size; not for readability", "mono");
-
-   var relFiles = JSON.parse("<?php echo addslashes(json_encode($relFiles)); ?>");
-   for (var i in relFiles) {
-      if (relFiles.hasOwnProperty(i)) {
-         var f = relFiles[i];
-         w(["<strong>" + i + '</strong> [ <a href="lib/' + i + '&amp;show">show</a> | <a href="lib/' + i + '">download</a> ] (' + (new Mbn(f[1])).div(1024) + " kB)", f[0]], "mono");
-      }
-   }
-</script>
-<div class="title2">Reference</div>
-<div class="title3">JS and Mbn code equivalents.<br>In most cases Mbn code in PHP and JS is identical - <span
-            class="mono">a.f()</span>
-    in JS is <span class="mono">$a-&gt;f()</span> in PHP
+<div class="title2" id="tests_and_benchmark">Tests and benchmark<span id="releaseBtn"
+                                                                      style="cursor:pointer; visibility:hidden;"> &#8635;</span>
+</div>
+<div class="mono"><span class="lb"></span><strong id="resultJS">..</strong></div>
+<div class="mono"><span class="lb"></span><strong id="resultPHP">..</strong></div>
+<div class="title2" id="downloads">Downloads</div>
+<div>minified JS is made with <a href='http://closure-compiler.appspot.com'>Google Closure api</a></div>
+<div>minified PHP is made with custom text replacements, intended to be used for testing in online PHP sandboxes</div>
+<div>generally code is optimized for speed and size; not for readability</div>
+<?php foreach ($relFiles as $n => &$relFile) { ?>
+    <div class="mono"><span class="lb"></span><strong><?= $n ?></strong> [ <a href="lib/<?= $n ?>&amp;show">show<!--
+    --></a> | <a href="lib/<?= $n ?>">download</a> ] (<?= (new Mbn(filesize($relFile['path'])))->div(1024) ?> kB)<!--
+    --><br><span class="lb"></span><?= $relFile['desc'] ?></div>
+<?php }
+unset($relFile); ?>
+<div class="title2" id="reference">Reference</div>
+<div class="title3">JS and Mbn code equivalents.<br>In most cases Mbn code in PHP and JS is
+    identical - <span class="mono">a.f()</span> in JS is <span class="mono">$a-&gt;f()</span> in PHP
 </div>
 <div>
     <table>

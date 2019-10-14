@@ -2,20 +2,21 @@ var testMbn = function (displayResp) {
    var runTestMbn = function (tests) {
       var ret = [];
       var tl = tests.length;
+      var evv;
       for (var i = 0; i < tests.length; i++) {
          var test = tests[i];
          var raw = test[0];
          var req = test[1];
          var exp = test[2];
 
-         var evv;
+
          try {
             evv = String(eval(exp));
          } catch (ex) {
             if (ex instanceof Mbn.MbnErr) {
                evv = String(ex.errorKey) + " " + String(ex);
             } else {
-               evv += String(ex);
+               evv = String(ex);
             }
          }
 

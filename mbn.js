@@ -355,7 +355,7 @@ var Mbn = (function () {
        * @return {string}
        */
       var mbnToString = function (a, p, s, t, f) {
-         var v = a, li = a._d.length - MbnP;
+         var v = a, li = a._d.length - MbnP, i;
          if (p < MbnP) {
             var b = new Mbn(a);
             var bl = b._d.length;

@@ -70,6 +70,7 @@ function testMbn()
    {
       $ret = array();
       $i = 0;
+      $evv = null;
       foreach ($tests as $test) {
          list($raw, $req, $exp) = $test;
          try {
