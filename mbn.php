@@ -318,7 +318,7 @@ class Mbn
    private function mbnFromNumber($nn)
    {
       if (!is_finite($nn)) {
-         throw new MbnErr('limit_exceeded', $nn);
+         throw new MbnErr('limit_exceeded', static::$MbnL);
       }
       if ($nn < 0) {
          $nn = -$nn;

@@ -127,8 +127,8 @@ if ($vString !== null) {
             border: 1px solid gray;
             display: inline-block;
             font-weight: bold;
-            margin-right: 0px;
-            border-radius: 2px 0px 0px 2px;
+            margin-right: 0;
+            border-radius: 2px 0 0 2px;
         }
 
         .label {
