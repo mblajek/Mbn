@@ -1,8 +1,6 @@
 <?php
 
 function releaseMbn() {
-    $err = [];
-
     if (!is_dir('release') && !mkdir('release') && !is_dir('release')) {
         return 'cannot create release folder';
     }
@@ -126,6 +124,7 @@ function releaseMbn() {
         require_once 'mbn_test.php';
         $minPhpObj = json_decode(ob_get_clean());
         if ($minPhpObj->status !== 'OK') {
+            $errors[] = ['PHP' => 'Status !== OK'];
             foreach ($minPhpObj->errors as $error) {
                 $errors[] = [$error->id . ') ' => $error->raw,
                    '!) ' => $error->correct,

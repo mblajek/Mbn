@@ -16,6 +16,10 @@ foreach ($relFiles as $n => &$relFile) {
 }
 unset($relFile);
 
+$vString = null;
+if (file_exists('release/v')) {
+    $vString = file_get_contents('release/v');
+}
 $getFile = filter_input(INPUT_GET, 'gf');
 if (!empty($getFile)) {
     if ($getFile === 'icon') {
@@ -59,10 +63,6 @@ if (!empty($getFile)) {
     die;
 }
 require 'mbn.php';
-$vString = null;
-if (file_exists('release/v')) {
-    $vString = file_get_contents('release/v');
-}
 $hashChanged = 1;
 if ($vString !== null) {
     $oldHash = json_decode($vString)->hash;
@@ -273,7 +273,8 @@ if ($vString !== null) {
     <a href="#reference">reference</a> |
     <a href="#class_declarations">class declarations</a> |
     <a href="#object_declarations">object declarations</a> |
-    <a href="#exceptions">exceptions</a>
+    <a href="#exceptions">exceptions</a> |
+    <a href="#changelog">changelog</a>
 </div>
 <div class="title1">Mbn (Multi-byte number) Library</div>
 <div>Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.</div>
@@ -793,6 +794,47 @@ unset($relFile); ?>
 
 <div class="title2" id="exceptions">Exceptions</div>
 <div>All exceptions are instances of MbnErr class</div>
+
+<div class="title2" id="changelog">Changelog</div>
+
+<ul>
+    <li>15.10.2019 - all code reformatted to 4-space indents</li>
+    <li>14.10.2019 - fixed wrong message for limit_exceeded (since 10.10.2019)</li>
+    <li>14.10.2019 - fixed JS formatting bug - undeclared variable (since 08.01.2018)</li>
+    <li>11.10.2019 - added omitConsts param to Mbn.check()</li>
+    <li>11.10.2019 - added MbnErr.translate() - error translation function</li>
+    <li>10.10.2019 - added errorKey / errorValue fields to MbnErr <strong>(1.46)</strong></li>
+    <li>10.10.2019 - JS: MbnErr accessible as Mbn.MbnErr</li>
+    <li>10.10.2019 - fixed JS bug for constant named "hasOwnProperty"</li>
+    <li>23.09.2019 - PHP: Mbn and MbnErr published separately with namespace</li>
+    <li>19.09.2019 - minor changes and optimisations in Mbn.calc()</li>
+    <li>18.09.2019 - added Mbn.check() - check and get list of used variables <strong>(1.45)</strong></li>
+    <li>18.09.2019 - fixed JS bug for variable named "hasOwnProperty" passed to Mbn.calc()</strong></li>
+    <li>24.05.2019 - fixed PHP split bug for mixed positive/negative parts (since 26.02.2019) <strong>(1.44)</strong>
+        [php]
+    </li>
+    <li>23.05.2019 - fixed JS split bug for mixed positive/negative parts (since 26.02.2019) <strong>(1.44)</strong>
+        [js]
+    </li>
+    <li>26.02.2019 - allow split with positive and negative parts <strong>(1.43)</strong></li>
+    <li>05.02.2019 - added MbnL - digit limit <strong>(1.42)</strong></li>
+    <li>05.02.2019 - fixed Mbn.calc() (%!) vs unary operator operator order (since 09.01.2019)</li>
+    <li>22.01.2019 - PHP: added formatting with Mbn* params <strong>(1.41)</strong> [php]</li>
+    <li>22.01.2019 - fixed PHP factorial - Mbn instead of static (since 09.01.2019)</li>
+    <li>21.01.2019 - fixed (%!) operation order (since 09.01.2019)</li>
+    <li>18.01.2019 - PHP: Mbn.prop() checks Mbn* params</li>
+    <li>09.01.2019 - PHP: factorial</li>
+    <li>08.01.2019 - JS: added formatting with Mbn* params <strong>(1.41)</strong> [js]</li>
+    <li>08.01.2019 - JS: factorial</li>
+    <li>08.08.2018 - minor changes <strong>(1.40)</strong></li>
+    <li>03.04.2018 - added @return and @throws annotations<strong>(1.39)</strong></li>
+    <li>03.04.2018 - allow constants starting with lower case</li>
+    <li>22.03.2018 - fixed PHP that toString() wasn't public (__toString() was public)</li>
+    <li>11.03.2018 - PHP: tri-state MbnE, Mbn.calc("==5") is simply parsed as string <strong>(1.38)</strong> [php]</li>
+    <li>09.03.2018 - JS: tri-state MbnE, Mbn.calc("==5") is simply parsed as string <strong>(1.38)</strong> [js]</li>
+    <li>07.03.2018 - allow Mbn.calc("=4") <strong>(1.37)</strong></li>
+    <li>07.03.2018 - fixed errors for MbnE=false <strong>(1.36)</strong></li>
+</ul>
 
 
 <script>
