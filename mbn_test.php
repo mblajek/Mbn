@@ -113,10 +113,10 @@ function testMbn() {
     foreach ($tests as &$test) {
         $tst = $test[0];
         $jsonA = [];
-        while (preg_match('/{[^}]*}/', $tst, $jsonA) === 1) {
-            $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[0]);
+        while (preg_match('/[^)]({[^}]*})/', $tst, $jsonA) === 1) {
+            $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[1]);
             $jsonArr = str_replace([' ', "\r", "\n"], '', var_export(json_decode($json, true), true));
-            $tst = str_replace($jsonA[0], $jsonArr, $tst);
+            $tst = str_replace($jsonA[1], $jsonArr, $tst);
         }
         $expArr = explode('; ', $tst);
         $expArr[count($expArr) - 1] = 'return ' . $expArr[count($expArr) - 1] . ';';

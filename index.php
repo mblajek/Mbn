@@ -794,10 +794,84 @@ unset($relFile); ?>
 
 <div class="title2" id="exceptions">Exceptions</div>
 <div>All exceptions are instances of MbnErr class</div>
+<div>JS: MbnErr has field "message", and method "toString" returns that message <span
+       class="monoInline">ex.message</span>, <span class="monoInline">String(ex)</span></div>
+<div>PHP: MbnErr extends Exception, message available with <span class="monoInline">$es->getMessage()</span></div>
+<div>Moreover MbnErr has fields "errorKey" and "errorValue" which represent concrete situation.</div>
+<div>Field "errorValue" contains string representation of value to message or is null, when there is no value to pass</div>
+<div>Possible values of errorKey:</div>
+<ul>
+    <li><span class="monoInline">mbn.invalid_argument</span> - value passed to Mbn constructor is in wrong type, e.g. function, array, ..</li>
+    <ul>
+        <li>errorValue is string representation of value</li>
+        <li><span class="monoInline">new Mbn(function(){})</span>, <span class="monoInline">new Mbn([1,2])</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.invalid_format</span> - string value passed to Mbn constructor is invalid</li>
+    <ul>
+        <li>errorValue is passed string value or string value of passed object</li>
+        <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
+        <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.limit_exceeded</span> - value reaches limit of digits from MbnL</li>
+    <ul>
+        <li>errorValue is MbnL, exact value which caused exception is unknown</li>
+        <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
+        <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
+    </ul>
+
+    <!--
+    calc: {
+    undefined: "undefined: %v%",
+    unexpected: "unexpected: %v%"
+    },
+    cmp: {
+    negative_diff: "negative maximal difference: %v%"
+    },
+    def: {
+    undefined: "undefined constant: %v%",
+    already_set: "constant already set: %v%",
+    invalid_name: "invalid name for constant: %v%"
+    },
+    div: {
+    zero_divisor: "division by zero"
+    },
+    extend: {
+    invalid_precision: "invalid_precision (non-negative integer): %v%",
+    invalid_separator: "invalid separator (dot, comma): %v%",
+    invalid_truncation: "invalid truncation (bool): %v%",
+    invalid_evaluating: "invalid evaluating (bool, null): %v%",
+    invalid_formatting: "invalid formatting (bool): %v%",
+    invalid_limit: "invalid digit limit (positive int): %v%"
+    },
+    fact: {
+    invalid_value: "factorial of invalid value (non-negative integer): %v%"
+    },
+    format: {_: "extend"},
+    pow: {
+    unsupported_exponent: "only integer exponents supported: %v%"
+    },
+    reduce: {
+    invalid_function: "invalid function name: %v%",
+    no_array: "no array given",
+    invalid_argument_count: "two arguments can be used only with two-argument functions",
+    different_lengths: "arrays have different lengths: %v%",
+    different_keys: "arrays have different keys: %v%"
+    },
+    split: {
+    invalid_part_count: "only positive integer number of parts supported: %v%",
+    zero_part_sum: "cannot split value when sum of parts is zero"
+    },
+    sqrt: {
+    negative_value: "square root of negative value: %v%"
+    }
+    -->
+</ul>
+<div>..in progress..</div>
 
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
+    <li>17.10.2019 - better representation of passed invalid values <strong>(1.47)</strong></li>
     <li>15.10.2019 - all code reformatted to 4-space indents</li>
     <li>14.10.2019 - fixed wrong message for limit_exceeded (since 10.10.2019)</li>
     <li>14.10.2019 - fixed JS formatting bug - undeclared variable (since 08.01.2018)</li>

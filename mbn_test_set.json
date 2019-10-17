@@ -68,6 +68,8 @@
         ["new Mbn(' - .6 ')", "-0.60"],
         ["new Mbn(' + .6 ')", "0.60"],
         ["new Mbn([5, 7])", "mbn.invalid_argument Niepoprawny argument [5,7] dla konstruktora [5,7]"],
+        ["new Mbn(function(){})", "mbn.invalid_argument Niepoprawny*"],
+        ["new Mbn([1,2,[3,4],5])", "mbn.invalid_argument Niepoprawny argument [1,2,[..],5]*"],
         ["new Mbn20u()", "0"],
         ["new Mbn20u('0,000000000000000000005')", "0,00000000000000000001"],
         ["new Mbn20u('-0,000000000000000000005')", "-0,00000000000000000001"],

@@ -61,6 +61,28 @@ class MbnErr extends Exception {
     }
 
     /**
+     * Convert value to readable string
+     * @param mixed $val value to stringify
+     * @param bool $implodeArr implode array (first level) or replace contents with ".."
+     * @return string
+     */
+    private static function valToMsgString($val, $implodeArr = true) {
+        if ($val === null) {
+            return 'null';
+        }
+        if (is_scalar($val)) {
+            return is_bool($val) ? ($val ? 'true' : 'false') : (string)$val;
+        }
+        if (is_array($val)) {
+            return '[' . ($implodeArr ? implode(',', array_map('MbnErr::valToMsgString', $val, [false])) : '..') . ']';
+        }
+        if (is_object($val) && method_exists($val, '__toString')) {
+            return (string)$val;
+        }
+        return '(' . gettype($val) . (is_object($val) ? (' ' . get_class($val)) : '') . ')';
+    }
+
+    /**
      * @export
      * @constructor
      * @param string $key key error code
@@ -68,7 +90,7 @@ class MbnErr extends Exception {
      */
     public function __construct($key, $val = null) {
         if ($val !== null) {
-            $val = is_array($val) ? ('[' . implode(',', $val) . ']') : (string)$val;
+            $val = static::valToMsgString($val);
             $val = ((strlen($val) > 20) ? (substr($val, 0, 18) . '..') : $val);
         }
         $this->errorKey = 'mbn.' . $key;
@@ -107,7 +129,7 @@ class MbnErr extends Exception {
 
 class Mbn {
     //version of Mbn library
-    protected static $MbnV = '1.46';
+    protected static $MbnV = '1.47';
     //default precision
     protected static $MbnP = 2;
     //default separator
@@ -395,12 +417,12 @@ class Mbn {
     public function __construct($n = 0, $v = null) {
         if (is_float($n) || is_int($n)) {
             $this->mbnFromNumber($n);
-        } elseif (is_object($n) || is_string($n)) {
+        } elseif (is_string($n) || (is_object($n) && method_exists($n, '__toString'))) {
             if ($n instanceof static) {
                 $this->set($n);
                 return;
             }
-            $this->fromString($n, $v);
+            $this->fromString((string)$n, $v);
         } elseif (is_bool($n) || $n === null) {
             $this->mbnFromNumber((int)$n);
         } else {

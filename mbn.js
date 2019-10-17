@@ -52,6 +52,27 @@ var Mbn = (function () {
     };
     var hasOwnProperty = {}.hasOwnProperty;
     var errTranslation = null;
+
+    /**
+     * Convert value to readable string
+     * @param {*} val value to stringify
+     * @param {boolean=} implodeArr implode array (first level) or replace contents with ".."
+     * @returns {string}
+     */
+    var valToMsgString = function (val, implodeArr) {
+        if (val instanceof Array) {
+            var valArr = [];
+            if (implodeArr === undefined || implodeArr === true) {
+                for (var i = 0; i < val.length; i++) {
+                    valArr.push(valToMsgString(val[i], false));
+                }
+            } else {
+                valArr.push("..");
+            }
+            return "[" + valArr.join(',') + "]";
+        }
+        return String(val);
+    };
     /**
      * Common error message object
      * @export
@@ -61,7 +82,7 @@ var Mbn = (function () {
      */
     var MbnErr = function (key, val) {
         if (arguments.length === 2) {
-            val = (val instanceof Array) ? ("[" + String(val) + "]") : String(val);
+            val = valToMsgString(val);
             val = ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
         } else {
             val = null;
@@ -104,7 +125,7 @@ var Mbn = (function () {
     };
 
     //version of Mbn library
-    var MbnV = "1.46";
+    var MbnV = "1.47";
     //default precision
     var MbnDP = 2;
     //default separator
@@ -426,7 +447,7 @@ var Mbn = (function () {
                     } else if (n instanceof Array) {
                         throw new MbnErr("invalid_argument", n);
                     }
-                    n = (n !== null) ? n.toString() : "0";
+                    n = (n !== null) ? String(n) : "0";
                 case "string":
                     mbnFromString(this, n, v);
                     break;
