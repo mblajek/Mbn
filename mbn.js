@@ -21,7 +21,7 @@ var Mbn = (function () {
             zero_divisor: "division by zero"
         },
         extend: {
-            invalid_precision: "invalid_precision (non-negative integer): %v%",
+            invalid_precision: "invalid precision (non-negative integer): %v%",
             invalid_separator: "invalid separator (dot, comma): %v%",
             invalid_truncation: "invalid truncation (bool): %v%",
             invalid_evaluating: "invalid evaluating (bool, null): %v%",
@@ -369,10 +369,10 @@ var Mbn = (function () {
         /**
          * Private function, returns string value
          * @param {Mbn} a
-         * @param {number} p Target precision
-         * @param {string} s Separator
-         * @param {boolean} t Trim zeros
-         * @param {boolean} f Format thousands
+         * @param {number} p target precision
+         * @param {string} s target separator
+         * @param {boolean=} t truncation
+         * @param {boolean=} f formatting
          * @return {string}
          */
         var mbnToString = function (a, p, s, t, f) {
@@ -391,7 +391,7 @@ var Mbn = (function () {
                 v = b;
             }
             var di = v._d.slice(0, li);
-            if (f === true) {
+            if (f) {
                 var dl = di.length;
                 for (i = 0; 3 * i < dl - 3; i++) {
                     di.splice(-3 - 4 * i, 0, " ");
@@ -495,7 +495,7 @@ var Mbn = (function () {
          */
         Mbn.prototype.format = function (opt) {
             if (typeof opt !== "object") {
-                opt = {MbnF: opt === true || opt === undefined};
+                opt = {MbnF: arguments.length === 0 ? true : opt};
             }
             opt = prepareOpt(opt, MbnP, MbnS, MbnT, MbnE, MbnF, MbnL, "format.");
             return mbnToString(this, opt.MbnP, opt.MbnS, opt.MbnT, opt.MbnF);
@@ -506,7 +506,7 @@ var Mbn = (function () {
          * @return {number}
          */
         Mbn.prototype.toNumber = function () {
-            return Number(mbnToString(this, MbnP, ".", false, false));
+            return Number(mbnToString(this, MbnP, "."));
         };
 
         /**

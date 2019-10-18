@@ -22,7 +22,7 @@ class MbnErr extends Exception {
           'zero_divisor' => 'division by zero'
        ],
        'extend' => [
-          'invalid_precision' => 'invalid_precision (non-negative integer): %v%',
+          'invalid_precision' => 'invalid precision (non-negative integer): %v%',
           'invalid_separator' => 'invalid separator (dot, comma): %v%',
           'invalid_truncation' => 'invalid truncation (bool): %v%',
           'invalid_evaluating' => 'invalid evaluating (bool, null): %v%',
@@ -356,13 +356,13 @@ class Mbn {
 
     /**
      * Private function, returns string value
-     * @param int $p Target precision
-     * @param string $s Separator
-     * @param boolean $t Trim zeros
-     * @param boolean $f Format thousands
+     * @param int $p target precision
+     * @param string $s target separator
+     * @param boolean $t truncation
+     * @param boolean $f formatting
      * @return string
      */
-    private function mbnToString($p, $s, $t, $f) {
+    private function mbnToString($p, $s, $t = false, $f = false) {
         $v = $this;
         $li = count($this->d) - static::$MbnP;
         if ($p < static::$MbnP) {
@@ -379,7 +379,7 @@ class Mbn {
             $v = $b;
         }
         $di = array_slice($v->d, 0, $li);
-        if ($f === true) {
+        if ($f) {
             $dl = count($di);
             for ($i = 0; 3 * $i < $dl - 3; $i++) {
                 array_splice($di, -3 - 4 * $i, 0, ' ');
@@ -437,7 +437,7 @@ class Mbn {
      */
     public static function prop() {
         return static::prepareOpt(['MbnV' => static::$MbnV, 'MbnP' => static::$MbnP, 'MbnS' => static::$MbnS, 'MbnT' => static::$MbnT,
-           'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF, 'MbnL' => static::$MbnL], 0, 0, 0, 0, 0, 0, 'prop.');
+           'MbnE' => static::$MbnE, 'MbnF' => static::$MbnF, 'MbnL' => static::$MbnL], 0, 0, 0, 0, 0, 0, 'extend.');
     }
 
     /**
@@ -472,7 +472,7 @@ class Mbn {
      */
     public function format($opt = true) {
         if (!is_array($opt)) {
-            $opt = ['MbnF' => $opt === true];
+            $opt = ['MbnF' => $opt];
         }
         $opt = static::prepareOpt($opt, static::$MbnP, static::$MbnS, static::$MbnT, static::$MbnE, static::$MbnF, static::$MbnL, 'format.');
         return $this->mbnToString($opt['MbnP'], $opt['MbnS'], $opt['MbnT'], $opt['MbnF']);
@@ -491,7 +491,7 @@ class Mbn {
      * @return int|float|double
      */
     public function toNumber() {
-        $v = $this->mbnToString(static::$MbnP, '.', false, false);
+        $v = $this->mbnToString(static::$MbnP, '.');
         return (static::$MbnP === 0) ? (int)$v : (float)$v;
     }
 

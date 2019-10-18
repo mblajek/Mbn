@@ -679,7 +679,7 @@ unset($relFile); ?>
 </ul>
 
 <div class="title2" id="class_declarations_js">Class declarations in JS</div>
-<div>Default Mbn class can be extended with <span class="monoInline">.extend()</span> method
+<div>Default Mbn class can be extended with <span class="monoInline">Mbn.extend()</span> method
     <br/>Single precision as number, or object with Mbn* parameters can be passed.
     <br/>hint: Mbn in JS is not exactly class, it's a class, function and object
     <br/>Derived classes cannot be extended
@@ -818,38 +818,62 @@ unset($relFile); ?>
         <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
         <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
     </ul>
+    <li><span class="monoInline">mbn.div.zero_divisor</span> - division by zero</li>
+    <ul>
+        <li>errorValue null</li>
+        <li><span class="monoInline">a.div(0)</span>, <span class="monoInline">a.mod(0)</span>, <span class="monoInline">(new Mbn(0)).invm()</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.pow.unsupported_exponent</span> - only integer exponents are supported</li>
+    <ul>
+        <li>errorValue is given exponent</li>
+        <li><span class="monoInline">a.pow(0.5)</span>, <span class="monoInline">a.pow(1.5)</span>, <span class="monoInline">Mbn.calc("2^.5")</li>
+    </ul>
+    <li><span class="monoInline">mbn.fact.invalid_value</span> - factorial can be calculated only for non-negative integers</li>
+    <ul>
+        <li>errorValue is current value</li>
+        <li><span class="monoInline">(new Mbn(-2)).fact()</span>, <span class="monoInline">Mbn.calc("0.5!")</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.sqrt.negative_value</span> - square root can be calculated only for non-negative numbers</li>
+    <ul>
+        <li>errorValue is current value</li>
+        <li><span class="monoInline">(new Mbn(-2)).sqrt()</span>, <span class="monoInline">Mbn.calc("sqrt(-2)")</span>, <span class="monoInline">Mbn.reduce("sqrt", [2, -2])</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.cmp.negative_diff</span> - maximal difference cannot be negative</li>
+    <ul>
+        <li>errorValue is current value</li>
+        <li><span class="monoInline">(new Mbn(2)).cmp(3, -1)</span>, <span class="monoInline">(new Mbn(2)).eq(3, -1)</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.extend.invalid_precision</span> - invalid value for precision (MbnP)</li>
+    <ul>
+        <li>errorValue is given precision</li>
+        <li><span class="monoInline">Mbn.extend(-2)</span>, <span class="monoInline">Mbn.extend({MbnP: 0.5})</span></li>
+        <li>PHP: derived classes are not checked in runtime, but method <span class="monoInline">Mbn::prop()</span> checks it</li>
+        <li><span class="monoInline">class Mbn_5 extends Mbn {protected static $MbnP = 0.5;} Mbn_5::prop();</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.format.invalid_precision</span> - invalid value for precision (MbnP)</li>
+    <ul>
+        <li>errorValue is given precision</li>
+        <li><span class="monoInline">a.format({MbnP: 0.5})</span></li>
+    </ul>
 
     <!--
     calc: {
     undefined: "undefined: %v%",
     unexpected: "unexpected: %v%"
     },
-    cmp: {
-    negative_diff: "negative maximal difference: %v%"
-    },
     def: {
     undefined: "undefined constant: %v%",
     already_set: "constant already set: %v%",
     invalid_name: "invalid name for constant: %v%"
     },
-    div: {
-    zero_divisor: "division by zero"
-    },
     extend: {
-    invalid_precision: "invalid_precision (non-negative integer): %v%",
     invalid_separator: "invalid separator (dot, comma): %v%",
     invalid_truncation: "invalid truncation (bool): %v%",
     invalid_evaluating: "invalid evaluating (bool, null): %v%",
     invalid_formatting: "invalid formatting (bool): %v%",
     invalid_limit: "invalid digit limit (positive int): %v%"
     },
-    fact: {
-    invalid_value: "factorial of invalid value (non-negative integer): %v%"
-    },
     format: {_: "extend"},
-    pow: {
-    unsupported_exponent: "only integer exponents supported: %v%"
-    },
     reduce: {
     invalid_function: "invalid function name: %v%",
     no_array: "no array given",
@@ -861,9 +885,7 @@ unset($relFile); ?>
     invalid_part_count: "only positive integer number of parts supported: %v%",
     zero_part_sum: "cannot split value when sum of parts is zero"
     },
-    sqrt: {
-    negative_value: "square root of negative value: %v%"
-    }
+
     -->
 </ul>
 <div>..in progress..</div>
@@ -871,6 +893,8 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
+    <li>18.10.2019 - format(5) worked as format(false), now throws mbn.format.invalid_formatting exception</li>
+    <li>18.10.2019 - PHP: Mbn::prop() throws mbn.extend, not Mbn.prop exceptions, also mbn.prop exceptions were broken</li>
     <li>17.10.2019 - better representation of passed invalid values <strong>(1.47)</strong></li>
     <li>15.10.2019 - all code reformatted to 4-space indents</li>
     <li>14.10.2019 - fixed wrong message for limit_exceeded (since 10.10.2019)</li>

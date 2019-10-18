@@ -17,7 +17,7 @@
         ["gettype((new Mbn(1.2))->toNumber())", "double"],
         ["gettype((new Mbn(1))->toNumber())", "double"],
         ["gettype((new Mbn0(1.2))->toNumber())", "integer"],
-        ["MbnColon::prop()", "mbn.prop.invalid_separator Mbn.prop error*"],
+        ["MbnColon::prop()", "mbn.extend.invalid_separator Mbn.extend error*"],
         ["0", "0"]
     ],
     "js": [
@@ -430,6 +430,8 @@
         ["(new Mbn(123.12))->format()", "123.12"],
         ["(new Mbn(1234))->format()", "1 234.00"],
         ["(new Mbn(-1234))->format()", "-1 234.00"],
+        ["(new Mbn(1234567.12))->format(false)", "1234567.12"],
+        ["(new Mbn(1234567.12))->format(5)", "mbn.format.invalid_formatting Mbn.format error*"],
         ["(new Mbn(1234567.12))->format()", "1 234 567.12"],
         ["(new Mbn(1234567.12))->format({MbnF:2})", "mbn.format.invalid_formatting Mbn.format error*"],
         ["(new Mbn('-12 345.13'))", "-12345.13"],
