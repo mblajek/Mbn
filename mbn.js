@@ -186,7 +186,7 @@ var Mbn = (function () {
         }
         if (opt.hasOwnProperty("MbnL")) {
             MbnL = opt.MbnL;
-            if (typeof MbnL !== "number" || MbnL <= 0 || !isFinite(MbnP) || Math.round(MbnL) !== MbnL) {
+            if (typeof MbnL !== "number" || MbnL <= 0 || !isFinite(MbnL) || Math.round(MbnL) !== MbnL) {
                 throw new MbnErr(fname + "invalid_limit", MbnL);
             }
         }
@@ -341,6 +341,9 @@ var Mbn = (function () {
          */
         var mbnFromNumber = function (a, nn) {
             if (!isFinite(nn)) {
+                if (isNaN(nn)) {
+                    throw new MbnErr("invalid_argument", nn);
+                }
                 throw new MbnErr("limit_exceeded", MbnL);
             }
             if (nn < 0) {

@@ -77,7 +77,7 @@ if ($vString !== null) {
 <head>
     <title>Mbn Library</title>
     <meta charset="UTF-8">
-    <link rel="icon" href="lib/icon" type="image/bmp"/>
+    <link rel="icon" href="icon" type="image/bmp"/>
     <style>
         body {
             font-family: sans-serif;
@@ -115,6 +115,7 @@ if ($vString !== null) {
         .title1 {
             font-size: 2em;
             font-weight: bold;
+            margin-top: 32px;
         }
 
         .title2 {
@@ -732,7 +733,7 @@ unset($relFile); ?>
 <ul>
     <li>none - <span class="monoInline">new Mbn()</span> &rarr; 0</li>
     <li>boolean - <span class="monoInline">new Mbn(true / false)</span> &rarr; 1 / 0</li>
-    <li>string - value from string, examples ov valid arguments for default Mbn</li>
+    <li>string - value from string, examples of valid arguments for default Mbn</li>
     <ul>
         <li>dot/coma decimal separator: "12.123", "12,123"</li>
         <li>missing fractional or integer part: ".123" &rarr; "0.12", "12." &rarr; "12.00"</li>
@@ -798,13 +799,13 @@ unset($relFile); ?>
        class="monoInline">ex.message</span>, <span class="monoInline">String(ex)</span></div>
 <div>PHP: MbnErr extends Exception, message available with <span class="monoInline">$es->getMessage()</span></div>
 <div>Moreover MbnErr has fields "errorKey" and "errorValue" which represent concrete situation.</div>
-<div>Field "errorValue" contains string representation of value to message or is null, when there is no value to pass</div>
+<div>Field errorValue contains string representation of value to message or is null, when there is no value to pass</div>
 <div>Possible values of errorKey:</div>
 <ul>
     <li><span class="monoInline">mbn.invalid_argument</span> - value passed to Mbn constructor is in wrong type, e.g. function, array, ..</li>
     <ul>
         <li>errorValue is string representation of value</li>
-        <li><span class="monoInline">new Mbn(function(){})</span>, <span class="monoInline">new Mbn([1,2])</span></li>
+        <li><span class="monoInline">new Mbn(function(){})</span>, <span class="monoInline">new Mbn([1,2])</span>, <span class="monoInline">new Mbn(NaN)</span></li>
     </ul>
     <li><span class="monoInline">mbn.invalid_format</span> - string value passed to Mbn constructor is invalid</li>
     <ul>
@@ -853,9 +854,65 @@ unset($relFile); ?>
     <li><span class="monoInline">mbn.format.invalid_precision</span> - invalid value for precision (MbnP)</li>
     <ul>
         <li>errorValue is given precision</li>
-        <li><span class="monoInline">a.format({MbnP: 0.5})</span></li>
+        <li><span class="monoInline">a.format({MbnP: 0.5})</span> [js], <span class="monoInline">$a->format(['MbnP' => 0.5])</span> [php]</li>
     </ul>
-
+    <li><span class="monoInline">mbn.extend.invalid_separator</span> - invalid value for decimal separator (MbnS)</li>
+    <ul>
+        <li>errorValue is given separator</li>
+        <li><span class="monoInline">Mbn.extend({MbnS: 1})</span>, <span class="monoInline">Mbn.extend({MbnS: ':'})</span></li>
+        <li><span class="monoInline">class MbnCol extends Mbn {protected static $MbnS = ':';} MbnCol::prop();</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.format.invalid_separator</span> - invalid value for decimal separator (MbnS)</li>
+    <ul>
+        <li>errorValue is given separator</li>
+        <li><span class="monoInline">a.format({MbnS: 1})</span> [js], <span class="monoInline">$a->format(['MbnS' => 1])</span> [php]</li>
+    </ul>
+    <li><span class="monoInline">mbn.extend.invalid_truncation</span> - invalid value for truncation of trailing zeros (MbnT)</li>
+    <ul>
+        <li>errorValue is given truncation</li>
+        <li><span class="monoInline">Mbn.extend({MbnT: 1})</span></span></li>
+        <li><span class="monoInline">class MbnT1 extends Mbn {protected static $MbnT = 1;} MbnT1::prop();</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.format.invalid_truncation</span> - invalid value for truncation of trailing zeros (MbnT)</li>
+    <ul>
+        <li>errorValue is given truncation</li>
+        <li><span class="monoInline">a.format({MbnT: 1})</span> [js], <span class="monoInline">$a->format(['MbnT' => 1])</span> [php]</li>
+    </ul>
+    <li><span class="monoInline">mbn.extend.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)</li>
+    <ul>
+        <li>errorValue is given evaluating trigger</li>
+        <li><span class="monoInline">Mbn.extend({MbnE: 1})</span></li>
+        <li><span class="monoInline">class MbnE1 extends Mbn {protected static $MbnE = 1;} MbnE1::prop();</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.format.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)</li>
+    <ul>
+        <li>hint: MbnE doesn't affect format(), but is validated; this behavior may be changed</li>
+        <li>errorValue is given evaluating trigger</li>
+        <li><span class="monoInline">a.format({MbnE: 1})</span> [js], <span class="monoInline">$a->format(['MbnE' => 1])</span> [php]</li>
+    </ul>
+    <li><span class="monoInline">mbn.extend.invalid_formatting</span> - invalid value for formatting (MbnF)</li>
+    <ul>
+        <li>errorValue is given formatting</li>
+        <li><span class="monoInline">Mbn.extend({MbnF: 1})</span></span></li>
+        <li><span class="monoInline">class MbnF1 extends Mbn {protected static $MbnF = 1;} MbnF1::prop();</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.format.invalid_formatting</span> - invalid value for formatting (MbnF)</li>
+    <ul>
+        <li>errorValue is given formatting</li>
+        <li><span class="monoInline">a.format({MbnF: 1})</span> [js], <span class="monoInline">$a->format(['MbnF' => 1])</span> [php]</li>
+    </ul>
+    <li><span class="monoInline">mbn.extend.invalid_limit</span> - invalid value digit limit (MbnL)</li>
+    <ul>
+        <li>errorValue is given limit</li>
+        <li><span class="monoInline">Mbn.extend({MbnE: Infinity})</span>, <span class="monoInline">Mbn.extend({MbnE: -1})</span></li>
+        <li><span class="monoInline">class MbnLm1 extends Mbn {protected static $MbnL = -1;} MbnLm1::prop();</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.format.invalid_limit</span> - invalid value digit limit (MbnL)</li>
+    <ul>
+        <li>hint: MbnL doesn't affect format(), but is validated; this behavior may be changed</li>
+        <li>errorValue is given limit</li>
+        <li><span class="monoInline">a.format({MbnL: -1})</span> [js], <span class="monoInline">$a->format(['MbnL' => -1])</span> [php]</li>
+    </ul>
     <!--
     calc: {
     undefined: "undefined: %v%",
@@ -866,14 +923,6 @@ unset($relFile); ?>
     already_set: "constant already set: %v%",
     invalid_name: "invalid name for constant: %v%"
     },
-    extend: {
-    invalid_separator: "invalid separator (dot, comma): %v%",
-    invalid_truncation: "invalid truncation (bool): %v%",
-    invalid_evaluating: "invalid evaluating (bool, null): %v%",
-    invalid_formatting: "invalid formatting (bool): %v%",
-    invalid_limit: "invalid digit limit (positive int): %v%"
-    },
-    format: {_: "extend"},
     reduce: {
     invalid_function: "invalid function name: %v%",
     no_array: "no array given",
@@ -893,6 +942,8 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
+    <li>20.10.2019 - NaN as argument throws mbn.invalid_argument exception instead of mbn.limit_exceeded</li>
+    <li>20.10.2019 - fixed MbnL validation</li>
     <li>18.10.2019 - format(5) worked as format(false), now throws mbn.format.invalid_formatting exception</li>
     <li>18.10.2019 - PHP: Mbn::prop() throws mbn.extend, not Mbn.prop exceptions, also mbn.prop exceptions were broken</li>
     <li>17.10.2019 - better representation of passed invalid values <strong>(1.47)</strong></li>

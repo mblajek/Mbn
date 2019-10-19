@@ -1,6 +1,7 @@
 {
     "php": [
         ["0", "0"],
+        ["new Mbn(NAN)", "mbn.invalid_argument Niepoprawny argument NAN*"],
         ["new Mbn(INF)", "mbn.limit_exceeded Mbn error*"],
         ["array_values((new Mbn('42'))->split(5))", "8.40,8.40,8.40,8.40,8.40"],
         ["array_keys((new Mbn('42'))->split(5))", "0,1,2,3,4"],
@@ -22,6 +23,7 @@
     ],
     "js": [
         ["0", "0"],
+        ["new Mbn(NaN)", "mbn.invalid_argument Niepoprawny argument NaN*"],
         ["new Mbn(Infinity)", "mbn.limit_exceeded Mbn error*"],
         ["typeof ((new Mbn(1))->toNumber())", "number"],
         ["typeof ((new Mbn0(1.2))->toNumber())", "number"],

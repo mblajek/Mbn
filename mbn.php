@@ -197,8 +197,8 @@ class Mbn {
         }
         if (array_key_exists('MbnL', $opt)) {
             $MbnL = $opt['MbnL'];
-            if (!(is_int($MbnL) || is_float($MbnL)) || $MbnL < 0 || is_infinite($MbnP) || (float)(int)$MbnP !== (float)$MbnP) {
-                throw new MbnErr($fname . 'invalid_limit', $MbnP);
+            if (!(is_int($MbnL) || is_float($MbnL)) || $MbnL < 0 || is_infinite($MbnL) || (float)(int)$MbnL !== (float)$MbnL) {
+                throw new MbnErr($fname . 'invalid_limit', $MbnL);
             }
         }
         return ['MbnV' => static::$MbnV, 'MbnP' => $MbnP, 'MbnS' => $MbnS, 'MbnT' => $MbnT, 'MbnE' => $MbnE, 'MbnF' => $MbnF, 'MbnL' => $MbnL];
@@ -330,6 +330,9 @@ class Mbn {
      */
     private function mbnFromNumber($nn) {
         if (!is_finite($nn)) {
+            if (is_nan($nn)) {
+                throw new MbnErr('invalid_argument', $nn);
+            }
             throw new MbnErr('limit_exceeded', static::$MbnL);
         }
         if ($nn < 0) {

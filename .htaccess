@@ -1,7 +1,9 @@
 RewriteEngine On
 RewriteRule ^$ /n/lib [R]
-RewriteRule ^(?:release/)?(v|[Mm]bn(?:Err)?(?:\.min)?\.(?:js|php))(.*)$ /n/lib/$1$2 [R]
-RewriteRule ^(.*)/$ /n/$1 [R]
+RewriteRule ^release/? /n/lib [R=302]
+RewriteRule ^lib/(?:icon)?$ /n/lib [R=302]
 
-RewriteRule ^lib(?:/(.*))?$ index.php?gf=$1
+RewriteRule ^(?:lib/)?LICENSE(?:.txt)?$ https://github.com/mblajek/Mbn/blob/master/LICENSE.txt [R=302]
+
+RewriteRule ^(?:(icon)|lib(?:/(.*))?)$ index.php?gf=$1$2
 RewriteRule ^calc$ calc.php

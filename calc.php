@@ -13,12 +13,12 @@ if ($q !== null) {
 ?><!DOCTYPE html>
 <head>
     <title>MbnCalc</title>
-    <link rel="icon" href="index.php?gf=icon" type="image/bmp"/>
+    <link rel="icon" href="icon" type="image/bmp"/>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
 </head>
 <body style="margin:2px;">
-<script src="release/mbn.min.js"></script>
+<script src="lib/mbn.min.js"></script>
 <div style="border:2px solid green; max-width:512px; margin-left:auto; margin-right:auto; padding:2px;">
     <a href="https://mirkl.es"><img src="https://mirkl.es/favicon.ico"
                                     style="float:left; margin:-4px 2px 0px -4px"/></a>

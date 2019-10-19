@@ -159,8 +159,8 @@ function releaseMbn() {
         return 'v' . (isset($varr[1]) ? $varr[1] : '');
     }
 
-    $license = '/* Mbn {V} | https://mirkl.es/n/lib | Copyright (c) 2016-' . date('Y')
-       . ' Mikołaj Błajek | https://github.com/mblajek/Mbn/blob/master/LICENSE.txt */' . PHP_EOL;
+    $license = '/* Mbn {V} / ' . date('d.m.Y') . ' | https://mirkl.es/n/lib | Copyright (c) 2016-' . date('Y')
+       . ' Mikołaj Błajek | https://mirkl.es/n/LICENSE */' . PHP_EOL;
 
     $versionJs = getVersion($mbn_js);
     $versionPhp = getVersion($mbn_php);
