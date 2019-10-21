@@ -786,7 +786,7 @@ unset($relFile); ?>
     <li>because results are Mbn objects, it's possible to make method chaining</li>
     <ul>
         <li>sum of 3 numbers: <span class="monoInline">b = a.add(b).add(c)</span>
-            <br/>ad 2 numbers to "a": <span class="monoInline">a.add(b, true).add(c, true)</li>
+            <br/>ad 2 numbers to "a": <span class="monoInline">a.add(b, true).add(c, true)</span></li>
         <li>sum of 2 numbers, but lot less than zero: <span class="monoInline">b = a.add(x).max(0)</span>
             <br/>limit "a" to be between two and three: a.max(2, true).min(3, true)
         </li>
@@ -827,7 +827,7 @@ unset($relFile); ?>
     <li><span class="monoInline">mbn.pow.unsupported_exponent</span> - only integer exponents are supported</li>
     <ul>
         <li>errorValue is given exponent</li>
-        <li><span class="monoInline">a.pow(0.5)</span>, <span class="monoInline">a.pow(1.5)</span>, <span class="monoInline">Mbn.calc("2^.5")</li>
+        <li><span class="monoInline">a.pow(0.5)</span>, <span class="monoInline">a.pow(1.5)</span>, <span class="monoInline">Mbn.calc("2^.5")</span></li>
     </ul>
     <li><span class="monoInline">mbn.fact.invalid_value</span> - factorial can be calculated only for non-negative integers</li>
     <ul>
@@ -870,7 +870,7 @@ unset($relFile); ?>
     <li><span class="monoInline">mbn.extend.invalid_truncation</span> - invalid value for truncation of trailing zeros (MbnT)</li>
     <ul>
         <li>errorValue is given truncation</li>
-        <li><span class="monoInline">Mbn.extend({MbnT: 1})</span></span></li>
+        <li><span class="monoInline">Mbn.extend({MbnT: 1})</span></li>
         <li><span class="monoInline">class MbnT1 extends Mbn {protected static $MbnT = 1;} MbnT1::prop();</span></li>
     </ul>
     <li><span class="monoInline">mbn.format.invalid_truncation</span> - invalid value for truncation of trailing zeros (MbnT)</li>
@@ -893,7 +893,7 @@ unset($relFile); ?>
     <li><span class="monoInline">mbn.extend.invalid_formatting</span> - invalid value for formatting (MbnF)</li>
     <ul>
         <li>errorValue is given formatting</li>
-        <li><span class="monoInline">Mbn.extend({MbnF: 1})</span></span></li>
+        <li><span class="monoInline">Mbn.extend({MbnF: 1})</span></li>
         <li><span class="monoInline">class MbnF1 extends Mbn {protected static $MbnF = 1;} MbnF1::prop();</span></li>
     </ul>
     <li><span class="monoInline">mbn.format.invalid_formatting</span> - invalid value for formatting (MbnF)</li>
@@ -996,7 +996,7 @@ unset($relFile); ?>
     <li>23.09.2019 - PHP: Mbn and MbnErr published separately with namespace</li>
     <li>19.09.2019 - minor changes and optimisations in Mbn.calc()</li>
     <li>18.09.2019 - added Mbn.check() - check and get list of used variables <strong>(1.45)</strong></li>
-    <li>18.09.2019 - fixed JS bug for variable named "hasOwnProperty" passed to Mbn.calc()</strong></li>
+    <li>18.09.2019 - fixed JS bug for variable named "hasOwnProperty" passed to Mbn.calc()</li>
     <li>24.05.2019 - fixed PHP split bug for mixed positive/negative parts (since 26.02.2019) <strong>(1.44)</strong>
         [php]
     </li>
