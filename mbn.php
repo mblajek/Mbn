@@ -1146,13 +1146,15 @@ class Mbn {
      * @throws MbnErr invalid argument format
      */
     public static function def($n, $v = null) {
-        $mc = &static::$MbnConst;
-        $mx = get_class(new static());
-        if ($n === null) {
-            return (isset($mc[$mx][$v]) || isset($mc[''][$v]));
+        $check = ($n === null);
+        if (preg_match('/^[A-Za-z_]\\w*/', $check ? $v : $n) !== 1) {
+            throw new MbnErr('def.invalid_name', $check ? $v : $n);
         }
-        if (preg_match('/^[A-Za-z_]\\w*/', $n) !== 1) {
-            throw new MbnErr('def.invalid_name', $n);
+        $res = new static();
+        $mc = &static::$MbnConst;
+        $mx = get_class($res);
+        if ($check) {
+            return (isset($mc[$mx][$v]) || isset($mc[''][$v]));
         }
         if ($v === null) {
             if (!isset($mc[$mx])) {
@@ -1164,14 +1166,13 @@ class Mbn {
                 }
                 $mc[$mx][$n] = ($n === 'eps') ? ((new static(10))->pow(-static::$MbnP)) : (new static($mc[''][$n]));
             }
-            return new static($mc[$mx][$n]);
+            return $res->set($mc[$mx][$n]);
         }
         if (isset($mc[$mx][$n]) || isset($mc[''][$n])) {
             throw new MbnErr('def.already_set', $n);
         }
-        $v = new static($v);
-        $mc[$mx][$n] = $v;
-        return new static($v);
+        $mc[$mx][$n] = $res->set($v)->add(0);
+        return $res;
     }
 
     protected static $fnEval = [

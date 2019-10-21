@@ -821,7 +821,7 @@ unset($relFile); ?>
     </ul>
     <li><span class="monoInline">mbn.div.zero_divisor</span> - division by zero</li>
     <ul>
-        <li>errorValue null</li>
+        <li>errorValue is null</li>
         <li><span class="monoInline">a.div(0)</span>, <span class="monoInline">a.mod(0)</span>, <span class="monoInline">(new Mbn(0)).invm()</span></li>
     </ul>
     <li><span class="monoInline">mbn.pow.unsupported_exponent</span> - only integer exponents are supported</li>
@@ -913,16 +913,33 @@ unset($relFile); ?>
         <li>errorValue is given limit</li>
         <li><span class="monoInline">a.format({MbnL: -1})</span> [js], <span class="monoInline">$a->format(['MbnL' => -1])</span> [php]</li>
     </ul>
+    <li><span class="monoInline">mbn.calc.undefined</span> - undefined variable in expression</li>
+    <ul>
+        <li>errorValue is name of undefined variable</li>
+        <li><span class="monoInline">Mbn.calc("a*b", {a: 5})</span> [js], <span class="monoInline">Mbn::calc("a*b", ['a' => 5])</span> [php]</li>
+    </ul>
+    <li><span class="monoInline">mbn.calc.unexpected</span> - unexpected token in expression</li>
+    <ul>
+        <li>errorValue is unexpected token or rest of expression starting with that token</li>
+        <li><span class="monoInline">Mbn.calc("/ 2")</span>, <span class="monoInline">Mbn.calc("(2 * 3")</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.def.undefined</span> - constant is not defined</li>
+    <ul>
+        <li>errorValue is name of undefined constant</li>
+        <li><span class="monoInline">Mbn.def("A")</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.def.already_set</span> - constant already has a value</li>
+    <ul>
+        <li>errorValue is name of constant with value e.g. "A=2.00"</li>
+        <li><span class="monoInline">Mbn.def("PI", 2)</span>, <span class="monoInline">Mbn.def("A", 2); Mbn.def("A", 2)</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.def.invalid_name</span> - invalid name for constant</li>
+    <ul>
+        <li>errorValue is name of constant</li>
+        <li><span class="monoInline">Mbn.def("2", 2)</span>, <span class="monoInline">Mbn.def("2")</span>, <span class="monoInline">Mbn.def(null, "2")</span></li>
+    </ul>
+
     <!--
-    calc: {
-    undefined: "undefined: %v%",
-    unexpected: "unexpected: %v%"
-    },
-    def: {
-    undefined: "undefined constant: %v%",
-    already_set: "constant already set: %v%",
-    invalid_name: "invalid name for constant: %v%"
-    },
     reduce: {
     invalid_function: "invalid function name: %v%",
     no_array: "no array given",
@@ -942,6 +959,7 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
+    <li>21.10.2019 - validating constant name also for checking of existence e.g. Mbn::def(null, "2")</li>
     <li>20.10.2019 - NaN as argument throws mbn.invalid_argument exception instead of mbn.limit_exceeded</li>
     <li>20.10.2019 - fixed MbnL validation</li>
     <li>18.10.2019 - format(5) worked as format(false), now throws mbn.format.invalid_formatting exception</li>

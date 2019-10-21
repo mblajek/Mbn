@@ -343,6 +343,7 @@
         ["Mbn0::def('E')", "3"],
         ["Mbn0::def('2', 3)", "mbn.def.invalid_name Mbn.def error*"],
         ["Mbn0::def('2')", "mbn.def.invalid_name Mbn.def error*"],
+        ["Mbn0::def(null, '2')", "mbn.def.invalid_name Mbn.def error*"],
         ["Mbn3c::def('E')", "2,718"],
         ["Mbn20u::def('E')", "2,71828182845904523536"],
         ["Mbn::def(null, 'PI')", "true"],
