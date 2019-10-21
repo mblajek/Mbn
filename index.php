@@ -938,24 +938,43 @@ unset($relFile); ?>
         <li>errorValue is name of constant</li>
         <li><span class="monoInline">Mbn.def("2", 2)</span>, <span class="monoInline">Mbn.def("2")</span>, <span class="monoInline">Mbn.def(null, "2")</span></li>
     </ul>
-
-    <!--
-    reduce: {
-    invalid_function: "invalid function name: %v%",
-    no_array: "no array given",
-    invalid_argument_count: "two arguments can be used only with two-argument functions",
-    different_lengths: "arrays have different lengths: %v%",
-    different_keys: "arrays have different keys: %v%"
-    },
-    split: {
-    invalid_part_count: "only positive integer number of parts supported: %v%",
-    zero_part_sum: "cannot split value when sum of parts is zero"
-    },
-
-    -->
+    <li><span class="monoInline">mbn.split.invalid_part_count</span> - invalid number of parts, should be positive integer</li>
+    <ul>
+        <li>errorValue is number of parts</li>
+        <li><span class="monoInline">a.split(0)</span>, <span class="monoInline">a.split(-0.5)</span>, <span class="monoInline">a.split([])</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.split.zero_part_sum</span> - sum of parts is zero, value cannot be split</li>
+    <ul>
+        <li>errorValue is null</li>
+        <li><span class="monoInline">a.split([-1, 1])</span>, <span class="monoInline">a.split([1, -2, 1])</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.reduce.invalid_function</span> - invalid function name passed to "reduce"</li>
+    <ul>
+        <li>errorValue is given function name</li>
+        <li><span class="monoInline">a.reduce("x", [1])</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.reduce.no_array</span> - no array given</li>
+    <ul>
+        <li>errorValue is null</li>
+        <li><span class="monoInline">a.reduce("sqrt", 1)</span>, <span class="monoInline">a.reduce("add", 1, 2)</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.reduce.invalid_argument_count</span> - two arguments passed to single-argument function</li>
+    <ul>
+        <li>errorValue is null</li>
+        <li><span class="monoInline">a.reduce("sqrt", [1, 2], [3, 4])</span>, <span class="monoInline">a.reduce("inva", [1, 2], 3)</span>, <span class="monoInline">a.reduce("abs", 1, [2, 3])</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.reduce.different_lengths</span> - given arrays have different lengths</li>
+    <ul>
+        <li>errorValue is information about lengths, e.g. "(1 2)"</li>
+        <li><span class="monoInline">a.reduce("add", [1, 2], [3])</span></li>
+    </ul>
+    <li><span class="monoInline">mbn.reduce.different_keys</span> - given arrays have different keys</li>
+    <ul>
+        <li>hint: only may be thrown in PHP</li>
+        <li>errorValue is information about lengths, e.g. "(0,a 0,1)"</li>
+        <li><span class="monoInline">a::reduce("add", [1, 'a' => 2], [3, 4])</span></li>
+    </ul>
 </ul>
-<div>..in progress..</div>
-
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>

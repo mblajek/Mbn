@@ -1113,9 +1113,9 @@ class Mbn {
             $r = [];
             if ($bmode === 2 && array_keys($arr) !== array_keys($b)) {
                 if (count($arr) !== count($b)) {
-                    throw new MbnErr('reduce.different_lengths', '(' . count($arr) . ' ' . count($arr) . ')');
+                    throw new MbnErr('reduce.different_lengths', '(' . count($arr) . ' ' . count($b) . ')');
                 }
-                throw new MbnErr('reduce.different_keys', '(' . implode(',', array_keys($arr)) . ' ' . implode(',', array_keys($arr)) . ')');
+                throw new MbnErr('reduce.different_keys', '(' . implode(',', array_keys($arr)) . ' ' . implode(',', array_keys($b)) . ')');
             }
             $bv = ($bmode === 1) ? (new static($b)) : null;
             foreach ($arr as $k => &$v) {
