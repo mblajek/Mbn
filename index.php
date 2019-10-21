@@ -797,7 +797,7 @@ unset($relFile); ?>
 <div>All exceptions are instances of MbnErr class</div>
 <div>JS: MbnErr has field "message", and method "toString" returns that message <span
        class="monoInline">ex.message</span>, <span class="monoInline">String(ex)</span></div>
-<div>PHP: MbnErr extends Exception, message available with <span class="monoInline">$es->getMessage()</span></div>
+<div>PHP: MbnErr extends Exception, message available with <span class="monoInline">$ex->getMessage()</span></div>
 <div>Moreover MbnErr has fields "errorKey" and "errorValue" which represent concrete situation.</div>
 <div>Field errorValue contains string representation of value to message or is null, when there is no value to pass</div>
 <div>Possible values of errorKey:</div>
@@ -978,6 +978,7 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
+    <li>21.10.2019 - wrong errorValue for reduce.different_keys</li>
     <li>21.10.2019 - validating constant name also for checking of existence e.g. Mbn::def(null, "2")</li>
     <li>20.10.2019 - NaN as argument throws mbn.invalid_argument exception instead of mbn.limit_exceeded</li>
     <li>20.10.2019 - fixed MbnL validation</li>
