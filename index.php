@@ -326,8 +326,8 @@ if ($vString !== null) {
 unset($relFile); ?>
 
 <div class="title2" id="reference">Reference</div>
-<div class="title3">JS and Mbn code equivalents.<br>In most cases Mbn code in PHP and JS is
-    identical - <span class="monoInline">a.f()</span> in JS is <span class="monoInline">$a-&gt;f()</span> in PHP
+<div>JS and Mbn code equivalents.</div>
+<div>In most cases Mbn code in PHP and JS is identical - <span class="monoInline">a.f()</span> in JS is <span class="monoInline">$a-&gt;f()</span> in PHP
 </div>
 <div>
     <table>
@@ -978,7 +978,7 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
-    <li>21.10.2019 - wrong errorValue for reduce.different_keys</li>
+    <li>21.10.2019 - fixed wrong errorValue for reduce.different_keys</li>
     <li>21.10.2019 - validating constant name also for checking of existence e.g. Mbn::def(null, "2")</li>
     <li>20.10.2019 - NaN as argument throws mbn.invalid_argument exception instead of mbn.limit_exceeded</li>
     <li>20.10.2019 - fixed MbnL validation</li>
