@@ -98,6 +98,7 @@ if ($vString !== null) {
             right: 0;
             background-color: lightgray;
             margin: 0;
+            color: black;
         }
 
         #topBar a {
@@ -196,6 +197,26 @@ if ($vString !== null) {
         table tr.hidden {
             display: none
         }
+        body.dark {
+            background-color: #111;
+            color: #ccc;
+        }
+        body.dark pre, body.dark div.mono {
+            background-color: #333;
+        }
+        body.dark .monoInline{
+            background-color: #333;
+            color: #aaa;
+        }
+        body.dark table tr:nth-child(2n+1){
+            background-color: #333;
+        }
+        body.dark a{
+            color: #55e
+        }
+        body.dark a:visited{
+            color: #c5c
+        }
     </style>
 </head>
 <body>
@@ -275,7 +296,8 @@ if ($vString !== null) {
     <a href="#class_declarations">class declarations</a> |
     <a href="#object_declarations">object declarations</a> |
     <a href="#exceptions">exceptions</a> |
-    <a href="#changelog">changelog</a>
+    <a href="#changelog">changelog</a> |
+    <a href="#dark_mode" id="darkMode">&#x263D;</a>
 </div>
 <div class="title1">Mbn (Multi-byte number) Library</div>
 <div>Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.</div>
@@ -1172,5 +1194,14 @@ unset($relFile); ?>
             requestTestPhp.send("");
         });
     }, 250);
+    document.getElementById("darkMode").onclick = function () {
+        var dark = document.body.classList.toggle("dark");
+        if(localStorage){
+            localStorage.setItem("dark", String(Number(dark)));
+        }
+    };
+    if(localStorage && localStorage.getItem("dark") === "1") {
+        document.body.classList.add("dark");
+    }
 </script>
 </body>
