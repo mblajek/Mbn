@@ -1000,7 +1000,9 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
-    <li>21.10.2019 - fixed wrong errorValue for reduce.different_keys</li>
+    <li>20.11.2019 - fixed PHP 5.4 compatibility</li>
+    <li>20.11.2019 - fixed PHP bug when creating basic Mbn object from object of derived class (since 28.09.2017) </li>
+    <li>21.10.2019 - fixed PHP wrong errorValue for reduce.different_keys</li>
     <li>21.10.2019 - validating constant name also for checking of existence e.g. Mbn::def(null, "2")</li>
     <li>20.10.2019 - NaN as argument throws mbn.invalid_argument exception instead of mbn.limit_exceeded</li>
     <li>20.10.2019 - fixed MbnL validation</li>
