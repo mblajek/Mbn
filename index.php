@@ -576,6 +576,14 @@ unset($relFile); ?>
             <td colspan="6">a &lt; b &rarr; -1, a &gt; b &rarr; 1, a === b &rarr; 0</td>
         </tr>
         <tr>
+            <th>comparing</th>
+            <td>a &lt; b<br>a &lt;= b<br>a &gt;= b<br>a &gt; b</td>
+            <td>a.cmp(b) &lt; 0<br>a.cmp(b) &lt;= 0<br>a.cmp(b) &gt;= 0<br>a.cmp(b) &gt; 0</td>
+            <td></td>
+            <td></td>
+            <th>boolean</th>
+        </tr>
+        <tr>
             <th>compare<br>with max diff</th>
             <td>Math.abs(a - b) &lt;= 0.1</td>
             <td>a.cmp(b, 0.1)</td>
@@ -608,15 +616,16 @@ unset($relFile); ?>
         <tr>
             <th>to string</th>
             <td>a.toString()</td>
-            <td>a.toString()<br/>$a->__toString() [php]</td>
-            <td>String(a)</td>
-            <td>String(a)</td>
+            <td>a.toString() [js,php]<br/>$a->__toString() [php]</td>
+            <td></td>
+            <td></td>
             <th>string</th>
         </tr>
         <tr class="hidden"></tr>
         <tr>
             <td colspan="6">gets default string representation of Mbn, based on Mbn* class params<br>
-                JS toString() and PHP __toString() are used by these languages by default
+                JS toString() and PHP __toString() are used by these languages by default while casting<br>
+                (string)$a, ' '.$a [php], String(a), " "+a [js]
             </td>
         </tr>
         <tr>
@@ -805,12 +814,12 @@ unset($relFile); ?>
             reference to "a"
         </li>
     </ul>
-    <li>because results are Mbn objects, it's possible to make method chaining</li>
+    <li>because results are Mbn objects, it's possible to use method chaining</li>
     <ul>
-        <li>sum of 3 numbers: <span class="monoInline">b = a.add(b).add(c)</span>
+        <li>sum of 3 numbers: <span class="monoInline">a = b.add(c).add(d)</span>
             <br/>ad 2 numbers to "a": <span class="monoInline">a.add(b, true).add(c, true)</span></li>
         <li>sum of 2 numbers, but lot less than zero: <span class="monoInline">b = a.add(x).max(0)</span>
-            <br/>limit "a" to be between two and three: a.max(2, true).min(3, true)
+            <br/>limit "a" to be between two and three: <span class="monoInline">a.max(2, true).min(3, true)</span>
         </li>
     </ul>
 </ul>
@@ -1104,7 +1113,7 @@ unset($relFile); ?>
     we(['//it is posible, to use percentage values', 'Mbn.calc("200 * 123%");']);
 
     w();
-    we(['//modulo has # operator', 'Mbn.calc("245 # 100");']);
+    we(['//modulo uses # operator', 'Mbn.calc("245 # 100");']);
 
     w();
     we(['//min and max use & and | symbols, and therefore work like logical operators or/and on 0/1 values', 'Mbn.calc("(1 | 0) & 0");']);
@@ -1149,17 +1158,17 @@ unset($relFile); ?>
 
     we("(1.4 - 0.4) === 1;");
 
-    we("new Mbn(1.4).sub(0.4).eq(1);");
+    we("(new Mbn(1.4)).sub(0.4).eq(1);");
 
     w();
     we(["//correct in IE", "(315.5 * 1.23).toFixed(2);"]);
 
-    we('new Mbn(315.5).mul(1.23);');
+    we('(new Mbn(315.5)).mul(1.23);');
 
     w();
     we(["//correct in IE", "(13492105 / 1000).toFixed(2);"]);
 
-    we('new Mbn(13492105).div(1000);');
+    we('(new Mbn(13492105)).div(1000);');
 
 </script>
 <script>
