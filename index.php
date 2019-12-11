@@ -197,24 +197,30 @@ if ($vString !== null) {
         table tr.hidden {
             display: none
         }
+
         body.dark {
             background-color: #111;
             color: #ccc;
         }
+
         body.dark pre, body.dark div.mono {
             background-color: #333;
         }
-        body.dark .monoInline{
+
+        body.dark .monoInline {
             background-color: #333;
             color: #aaa;
         }
-        body.dark table tr:nth-child(2n+1){
+
+        body.dark table tr:nth-child(2n+1) {
             background-color: #333;
         }
-        body.dark a{
+
+        body.dark a {
             color: #55e
         }
-        body.dark a:visited{
+
+        body.dark a:visited {
             color: #c5c
         }
     </style>
@@ -337,7 +343,8 @@ if ($vString !== null) {
 
 <div class="title2" id="downloads">Downloads</div>
 <div>Minified JS is created with <a href='http://closure-compiler.appspot.com'>Google Closure api</a></div>
-<div>Minified PHP is created with custom text replacements, intended to be used for testing in online PHP sandboxes
+<div>Minified PHP is created with custom text replacements, intended to be used in online PHP sandboxes like <a
+       href="https://3v4l.org/">3v4l.org</a>
 </div>
 <div>Generally code is optimized for speed and size; not for readability</div>
 <?php foreach ($relFiles as $n => &$relFile) { ?>
@@ -349,7 +356,8 @@ unset($relFile); ?>
 
 <div class="title2" id="reference">Reference</div>
 <div>JS and Mbn code equivalents.</div>
-<div>In most cases Mbn code in PHP and JS is identical - <span class="monoInline">a.f()</span> in JS is <span class="monoInline">$a-&gt;f()</span> in PHP
+<div>In most cases Mbn code in PHP and JS is identical - <span class="monoInline">a.f()</span> in JS is <span
+       class="monoInline">$a-&gt;f()</span> in PHP
 </div>
 <div>
     <table>
@@ -764,15 +772,16 @@ unset($relFile); ?>
 <ul>
     <li>none - <span class="monoInline">new Mbn()</span> &rarr; 0</li>
     <li>boolean - <span class="monoInline">new Mbn(true / false)</span> &rarr; 1 / 0</li>
-    <li>string - value from string, examples of valid arguments for default Mbn</li>
-    <ul>
-        <li>dot/coma decimal separator: "12.123", "12,123"</li>
-        <li>missing fractional or integer part: ".123" &rarr; "0.12", "12." &rarr; "12.00"</li>
-        <li>number with formatted integer part: "12 345,123" &rarr; "12345.12"</li>
-        <li>expression, like mentioned in <a href="#class_declarations_mbne">class declarations</a> and <a
-               href="#other_methods_calc">expression parser</a> sections
-        </li>
-    </ul>
+    <li>string - value from string, examples of valid arguments for default Mbn
+        <ul>
+            <li>dot/coma decimal separator: "12.123", "12,123"</li>
+            <li>missing fractional or integer part: ".123" &rarr; "0.12", "12." &rarr; "12.00"</li>
+            <li>number with formatted integer part: "12 345,123" &rarr; "12345.12"</li>
+            <li>expression, like mentioned in <a href="#class_declarations_mbne">class declarations</a> and <a
+                   href="#other_methods_calc">expression parser</a> sections
+            </li>
+        </ul>
+    </li>
     <li>object - if can be casted to valid string, it's parsed<br>e.g. instance of another Mbn class</li>
     <li>Mbn object - if object is instance of the same Mbn class, operation is faster</li>
     <li>cannot be array - array <span class="monoInline">[1, 2]</span> has valid string representation "1,2", but
@@ -793,35 +802,38 @@ unset($relFile); ?>
         <br/><span class="monoInline">(new Mbn(2)) + "x"</span> [js] / <span
            class="monoInline">(new Mbn(2)) . 'x'</span> [php] gives "2.00x"
     </li>
-    <li>value passed as first argument, to two-argument function is firstly converted to Mbn class of object</li>
-    <ul>
-        <li>two-argument functions: add, sub, mul, div, mod, min, max, pow</li>
-        <li>invalid value passed as this argument causes exception
-            <br><span class="monoInline">(new Mbn(2)).add("x")</span></li>
-        <li>value with bigger precision is firstly truncated to precision
-            <br><span class="monoInline">(new Mbn(2)).add("1.999")</span>
-            &rarr; <span class="monoInline">(new Mbn(2)).add(new Mbn("1.999"))</span> &rarr; "4.00"
-        </li>
-    </ul>
-    <li>value passed as last a argument, to all standard functions triggers modification of original object (=== true)
+    <li>value passed as first argument, to two-argument function is firstly converted to Mbn class of object
+        <ul>
+            <li>two-argument functions: add, sub, mul, div, mod, min, max, pow</li>
+            <li>invalid value passed as this argument causes exception
+                <br><span class="monoInline">(new Mbn(2)).add("x")</span></li>
+            <li>value with bigger precision is firstly truncated to precision
+                <br><span class="monoInline">(new Mbn(2)).add("1.999")</span>
+                &rarr; <span class="monoInline">(new Mbn(2)).add(new Mbn("1.999"))</span> &rarr; "4.00"
+            </li>
+        </ul>
     </li>
-    <ul>
-        <li>standard functions: two-argument functions and round, floor ceil, intp, abs, inva, invm, sqrt, sgn</li>
-        <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1);</span> "a" stays unchanged and "b" is set to
-            result
-        </li>
-        <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1, true);</span> "a" is changed, but "b" gets simply
-            reference to "a"
-        </li>
-    </ul>
-    <li>because results are Mbn objects, it's possible to use method chaining</li>
-    <ul>
-        <li>sum of 3 numbers: <span class="monoInline">a = b.add(c).add(d)</span>
-            <br/>ad 2 numbers to "a": <span class="monoInline">a.add(b, true).add(c, true)</span></li>
-        <li>sum of 2 numbers, but lot less than zero: <span class="monoInline">b = a.add(x).max(0)</span>
-            <br/>limit "a" to be between two and three: <span class="monoInline">a.max(2, true).min(3, true)</span>
-        </li>
-    </ul>
+    <li>value passed as last a argument, to all standard functions triggers modification of original object (=== true)
+        <ul>
+            <li>standard functions: two-argument functions and round, floor ceil, intp, abs, inva, invm, sqrt, sgn</li>
+            <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1);</span> "a" stays unchanged and "b" is set to
+                result
+            </li>
+            <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1, true);</span> "a" is changed, but "b" gets
+                simply
+                reference to "a"
+            </li>
+        </ul>
+    </li>
+    <li>because results are Mbn objects, it's possible to use method chaining
+        <ul>
+            <li>sum of 3 numbers: <span class="monoInline">a = b.add(c).add(d)</span>
+                <br/>ad 2 numbers to "a": <span class="monoInline">a.add(b, true).add(c, true)</span></li>
+            <li>sum of 2 numbers, but lot less than zero: <span class="monoInline">b = a.add(x).max(0)</span>
+                <br/>limit "a" to be between two and three: <span class="monoInline">a.max(2, true).min(3, true)</span>
+            </li>
+        </ul>
+    </li>
 </ul>
 
 <div class="title2" id="exceptions">Exceptions</div>
@@ -829,194 +841,279 @@ unset($relFile); ?>
 <div>JS: MbnErr has field "message", and method "toString" returns that message <span
        class="monoInline">ex.message</span>, <span class="monoInline">String(ex)</span></div>
 <div>PHP: MbnErr extends Exception, message available with <span class="monoInline">$ex->getMessage()</span></div>
-<div>Moreover MbnErr has fields "errorKey" and "errorValue" which represent concrete situation.</div>
-<div>Field errorValue contains string representation of value to message or is null, when there is no value to pass</div>
+<div>Moreover MbnErr has fields "errorKey" and "errorValues" which represent concrete situation.</div>
+<div>Field errorValues contains string representations of values to message or is empty, when there is no value to pass
+</div>
 <div>Possible values of errorKey:</div>
 <ul>
-    <li><span class="monoInline">mbn.invalid_argument</span> - value passed to Mbn constructor is in wrong type, e.g. function, array, ..</li>
-    <ul>
-        <li>errorValue is string representation of value</li>
-        <li><span class="monoInline">new Mbn(function(){})</span>, <span class="monoInline">new Mbn([1,2])</span>, <span class="monoInline">new Mbn(NaN)</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.invalid_format</span> - string value passed to Mbn constructor is invalid</li>
-    <ul>
-        <li>errorValue is passed string value or string value of passed object</li>
-        <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
-        <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.limit_exceeded</span> - value reaches limit of digits from MbnL</li>
-    <ul>
-        <li>errorValue is MbnL, exact value which caused exception is unknown</li>
-        <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
-        <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.div.zero_divisor</span> - division by zero</li>
-    <ul>
-        <li>errorValue is null</li>
-        <li><span class="monoInline">a.div(0)</span>, <span class="monoInline">a.mod(0)</span>, <span class="monoInline">(new Mbn(0)).invm()</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.pow.unsupported_exponent</span> - only integer exponents are supported</li>
-    <ul>
-        <li>errorValue is given exponent</li>
-        <li><span class="monoInline">a.pow(0.5)</span>, <span class="monoInline">a.pow(1.5)</span>, <span class="monoInline">Mbn.calc("2^.5")</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.fact.invalid_value</span> - factorial can be calculated only for non-negative integers</li>
-    <ul>
-        <li>errorValue is current value</li>
-        <li><span class="monoInline">(new Mbn(-2)).fact()</span>, <span class="monoInline">Mbn.calc("0.5!")</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.sqrt.negative_value</span> - square root can be calculated only for non-negative numbers</li>
-    <ul>
-        <li>errorValue is current value</li>
-        <li><span class="monoInline">(new Mbn(-2)).sqrt()</span>, <span class="monoInline">Mbn.calc("sqrt(-2)")</span>, <span class="monoInline">Mbn.reduce("sqrt", [2, -2])</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.cmp.negative_diff</span> - maximal difference cannot be negative</li>
-    <ul>
-        <li>errorValue is current value</li>
-        <li><span class="monoInline">(new Mbn(2)).cmp(3, -1)</span>, <span class="monoInline">(new Mbn(2)).eq(3, -1)</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.extend.invalid_precision</span> - invalid value for precision (MbnP)</li>
-    <ul>
-        <li>errorValue is given precision</li>
-        <li><span class="monoInline">Mbn.extend(-2)</span>, <span class="monoInline">Mbn.extend({MbnP: 0.5})</span></li>
-        <li>PHP: derived classes are not checked in runtime, but method <span class="monoInline">Mbn::prop()</span> checks it</li>
-        <li><span class="monoInline">class Mbn_5 extends Mbn {protected static $MbnP = 0.5;} Mbn_5::prop();</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.format.invalid_precision</span> - invalid value for precision (MbnP)</li>
-    <ul>
-        <li>errorValue is given precision</li>
-        <li><span class="monoInline">a.format({MbnP: 0.5})</span> [js], <span class="monoInline">$a->format(['MbnP' => 0.5])</span> [php]</li>
-    </ul>
-    <li><span class="monoInline">mbn.extend.invalid_separator</span> - invalid value for decimal separator (MbnS)</li>
-    <ul>
-        <li>errorValue is given separator</li>
-        <li><span class="monoInline">Mbn.extend({MbnS: 1})</span>, <span class="monoInline">Mbn.extend({MbnS: ':'})</span></li>
-        <li><span class="monoInline">class MbnCol extends Mbn {protected static $MbnS = ':';} MbnCol::prop();</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.format.invalid_separator</span> - invalid value for decimal separator (MbnS)</li>
-    <ul>
-        <li>errorValue is given separator</li>
-        <li><span class="monoInline">a.format({MbnS: 1})</span> [js], <span class="monoInline">$a->format(['MbnS' => 1])</span> [php]</li>
-    </ul>
-    <li><span class="monoInline">mbn.extend.invalid_truncation</span> - invalid value for truncation of trailing zeros (MbnT)</li>
-    <ul>
-        <li>errorValue is given truncation</li>
-        <li><span class="monoInline">Mbn.extend({MbnT: 1})</span></li>
-        <li><span class="monoInline">class MbnT1 extends Mbn {protected static $MbnT = 1;} MbnT1::prop();</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.format.invalid_truncation</span> - invalid value for truncation of trailing zeros (MbnT)</li>
-    <ul>
-        <li>errorValue is given truncation</li>
-        <li><span class="monoInline">a.format({MbnT: 1})</span> [js], <span class="monoInline">$a->format(['MbnT' => 1])</span> [php]</li>
-    </ul>
-    <li><span class="monoInline">mbn.extend.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)</li>
-    <ul>
-        <li>errorValue is given evaluating trigger</li>
-        <li><span class="monoInline">Mbn.extend({MbnE: 1})</span></li>
-        <li><span class="monoInline">class MbnE1 extends Mbn {protected static $MbnE = 1;} MbnE1::prop();</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.format.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)</li>
-    <ul>
-        <li>hint: MbnE doesn't affect format(), but is validated; this behavior may be changed</li>
-        <li>errorValue is given evaluating trigger</li>
-        <li><span class="monoInline">a.format({MbnE: 1})</span> [js], <span class="monoInline">$a->format(['MbnE' => 1])</span> [php]</li>
-    </ul>
-    <li><span class="monoInline">mbn.extend.invalid_formatting</span> - invalid value for formatting (MbnF)</li>
-    <ul>
-        <li>errorValue is given formatting</li>
-        <li><span class="monoInline">Mbn.extend({MbnF: 1})</span></li>
-        <li><span class="monoInline">class MbnF1 extends Mbn {protected static $MbnF = 1;} MbnF1::prop();</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.format.invalid_formatting</span> - invalid value for formatting (MbnF)</li>
-    <ul>
-        <li>errorValue is given formatting</li>
-        <li><span class="monoInline">a.format({MbnF: 1})</span> [js], <span class="monoInline">$a->format(['MbnF' => 1])</span> [php]</li>
-    </ul>
-    <li><span class="monoInline">mbn.extend.invalid_limit</span> - invalid value digit limit (MbnL)</li>
-    <ul>
-        <li>errorValue is given limit</li>
-        <li><span class="monoInline">Mbn.extend({MbnE: Infinity})</span>, <span class="monoInline">Mbn.extend({MbnE: -1})</span></li>
-        <li><span class="monoInline">class MbnLm1 extends Mbn {protected static $MbnL = -1;} MbnLm1::prop();</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.format.invalid_limit</span> - invalid value digit limit (MbnL)</li>
-    <ul>
-        <li>hint: MbnL doesn't affect format(), but is validated; this behavior may be changed</li>
-        <li>errorValue is given limit</li>
-        <li><span class="monoInline">a.format({MbnL: -1})</span> [js], <span class="monoInline">$a->format(['MbnL' => -1])</span> [php]</li>
-    </ul>
-    <li><span class="monoInline">mbn.calc.undefined</span> - undefined variable in expression</li>
-    <ul>
-        <li>errorValue is name of undefined variable</li>
-        <li><span class="monoInline">Mbn.calc("a*b", {a: 5})</span> [js], <span class="monoInline">Mbn::calc("a*b", ['a' => 5])</span> [php]</li>
-    </ul>
-    <li><span class="monoInline">mbn.calc.unexpected</span> - unexpected token in expression</li>
-    <ul>
-        <li>errorValue is unexpected token or rest of expression starting with that token</li>
-        <li><span class="monoInline">Mbn.calc("/ 2")</span>, <span class="monoInline">Mbn.calc("(2 * 3")</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.def.undefined</span> - constant is not defined</li>
-    <ul>
-        <li>errorValue is name of undefined constant</li>
-        <li><span class="monoInline">Mbn.def("A")</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.def.already_set</span> - constant already has a value</li>
-    <ul>
-        <li>errorValue is name of constant with value e.g. "A=2.00"</li>
-        <li><span class="monoInline">Mbn.def("PI", 2)</span>, <span class="monoInline">Mbn.def("A", 2); Mbn.def("A", 2)</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.def.invalid_name</span> - invalid name for constant</li>
-    <ul>
-        <li>errorValue is name of constant</li>
-        <li><span class="monoInline">Mbn.def("2", 2)</span>, <span class="monoInline">Mbn.def("2")</span>, <span class="monoInline">Mbn.def(null, "2")</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.split.invalid_part_count</span> - invalid number of parts, should be positive integer</li>
-    <ul>
-        <li>errorValue is number of parts</li>
-        <li><span class="monoInline">a.split(0)</span>, <span class="monoInline">a.split(-0.5)</span>, <span class="monoInline">a.split([])</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.split.zero_part_sum</span> - sum of parts is zero, value cannot be split</li>
-    <ul>
-        <li>errorValue is null</li>
-        <li><span class="monoInline">a.split([-1, 1])</span>, <span class="monoInline">a.split([1, -2, 1])</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.reduce.invalid_function</span> - invalid function name passed to "reduce"</li>
-    <ul>
-        <li>errorValue is given function name</li>
-        <li><span class="monoInline">a.reduce("x", [1])</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.reduce.no_array</span> - no array given</li>
-    <ul>
-        <li>errorValue is null</li>
-        <li><span class="monoInline">a.reduce("sqrt", 1)</span>, <span class="monoInline">a.reduce("add", 1, 2)</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.reduce.invalid_argument_count</span> - two arguments passed to single-argument function</li>
-    <ul>
-        <li>errorValue is null</li>
-        <li><span class="monoInline">a.reduce("sqrt", [1, 2], [3, 4])</span>, <span class="monoInline">a.reduce("inva", [1, 2], 3)</span>, <span class="monoInline">a.reduce("abs", 1, [2, 3])</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.reduce.different_lengths</span> - given arrays have different lengths</li>
-    <ul>
-        <li>errorValue is information about lengths, e.g. "(1 2)"</li>
-        <li><span class="monoInline">a.reduce("add", [1, 2], [3])</span></li>
-    </ul>
-    <li><span class="monoInline">mbn.reduce.different_keys</span> - given arrays have different keys</li>
-    <ul>
-        <li>hint: only may be thrown in PHP</li>
-        <li>errorValue is information about lengths, e.g. "(0,a 0,1)"</li>
-        <li><span class="monoInline">a::reduce("add", [1, 'a' => 2], [3, 4])</span></li>
-    </ul>
+    <li><span class="monoInline">mbn.invalid_argument</span> - value passed to Mbn constructor is in wrong type, e.g.
+        function, array, ..
+        <ul>
+            <li>errorValues.v is string representation of value</li>
+            <li><span class="monoInline">new Mbn(function(){})</span>, <span class="monoInline">new Mbn([1,2])</span>,
+                <span
+                   class="monoInline">new Mbn(NaN)</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.invalid_format</span> - string value passed to Mbn constructor is invalid
+        <ul>
+            <li>errorValues.v is passed string value or string value of passed object</li>
+            <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
+            <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.limit_exceeded</span> - value reaches limit of digits from MbnL
+        <ul>
+            <li>errorValues.v is MbnL, exact value which caused exception is unknown</li>
+            <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
+            <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.div.zero_divisor</span> - division by zero
+        <ul>
+            <li>errorValues is empty</li>
+            <li><span class="monoInline">a.div(0)</span>, <span class="monoInline">a.mod(0)</span>, <span
+                   class="monoInline">(new Mbn(0)).invm()</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.pow.unsupported_exponent</span> - only integer exponents are supported
+        <ul>
+            <li>errorValues.v is given exponent</li>
+            <li><span class="monoInline">a.pow(0.5)</span>, <span class="monoInline">a.pow(1.5)</span>, <span
+                   class="monoInline">Mbn.calc("2^.5")</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.fact.invalid_value</span> - factorial can be calculated only for non-negative
+        integers
+        <ul>
+            <li>errorValues.v is current value</li>
+            <li><span class="monoInline">(new Mbn(-2)).fact()</span>, <span class="monoInline">Mbn.calc("0.5!")</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.sqrt.negative_value</span> - square root can be calculated only for non-negative
+        numbers
+        <ul>
+            <li>errorValues.v is current value</li>
+            <li><span class="monoInline">(new Mbn(-2)).sqrt()</span>, <span
+                   class="monoInline">Mbn.calc("sqrt(-2)")</span>,
+                <span class="monoInline">Mbn.reduce("sqrt", [2, -2])</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.cmp.negative_diff</span> - maximal difference cannot be negative
+        <ul>
+            <li>errorValues.v is current value</li>
+            <li><span class="monoInline">(new Mbn(2)).cmp(3, -1)</span>, <span
+                   class="monoInline">(new Mbn(2)).eq(3, -1)</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.extend.invalid_precision</span> - invalid value for precision (MbnP)
+        <ul>
+            <li>errorValues.v is given precision</li>
+            <li><span class="monoInline">Mbn.extend(-2)</span>, <span class="monoInline">Mbn.extend({MbnP: 0.5})</span>
+            </li>
+            <li>PHP: derived classes are not checked in runtime, but method <span class="monoInline">Mbn::prop()</span>
+                checks it
+            </li>
+            <li><span class="monoInline">class Mbn_5 extends Mbn {protected static $MbnP = 0.5;} Mbn_5::prop();</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.format.invalid_precision</span> - invalid value for precision (MbnP)
+        <ul>
+            <li>errorValues.v is given precision</li>
+            <li><span class="monoInline">a.format({MbnP: 0.5})</span> [js], <span class="monoInline">$a->format(['MbnP' => 0.5])</span>
+                [php]
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.extend.invalid_separator</span> - invalid value for decimal separator (MbnS)
+        <ul>
+            <li>errorValues.v is given separator</li>
+            <li><span class="monoInline">Mbn.extend({MbnS: 1})</span>, <span
+                   class="monoInline">Mbn.extend({MbnS: ':'})</span></li>
+            <li><span class="monoInline">class MbnCol extends Mbn {protected static $MbnS = ':';} MbnCol::prop();</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.format.invalid_separator</span> - invalid value for decimal separator (MbnS)
+        <ul>
+            <li>errorValues.v is given separator</li>
+            <li><span class="monoInline">a.format({MbnS: 1})</span> [js], <span
+                   class="monoInline">$a->format(['MbnS' => 1])</span> [php]
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.extend.invalid_truncation</span> - invalid value for truncation of trailing zeros
+        (MbnT)
+        <ul>
+            <li>errorValues.v is given truncation</li>
+            <li><span class="monoInline">Mbn.extend({MbnT: 1})</span></li>
+            <li><span class="monoInline">class MbnT1 extends Mbn {protected static $MbnT = 1;} MbnT1::prop();</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.format.invalid_truncation</span> - invalid value for truncation of trailing zeros
+        (MbnT)
+        <ul>
+            <li>errorValues.v is given truncation</li>
+            <li><span class="monoInline">a.format({MbnT: 1})</span> [js], <span
+                   class="monoInline">$a->format(['MbnT' => 1])</span> [php]
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.extend.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)
+        <ul>
+            <li>errorValues.v is given evaluating trigger</li>
+            <li><span class="monoInline">Mbn.extend({MbnE: 1})</span></li>
+            <li><span class="monoInline">class MbnE1 extends Mbn {protected static $MbnE = 1;} MbnE1::prop();</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.format.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)
+        <ul>
+            <li>hint: MbnE doesn't affect format(), but is validated; this behavior may be changed</li>
+            <li>errorValues.v is given evaluating trigger</li>
+            <li><span class="monoInline">a.format({MbnE: 1})</span> [js], <span
+                   class="monoInline">$a->format(['MbnE' => 1])</span> [php]
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.extend.invalid_formatting</span> - invalid value for formatting (MbnF)
+        <ul>
+            <li>errorValues.v is given formatting</li>
+            <li><span class="monoInline">Mbn.extend({MbnF: 1})</span></li>
+            <li><span class="monoInline">class MbnF1 extends Mbn {protected static $MbnF = 1;} MbnF1::prop();</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.format.invalid_formatting</span> - invalid value for formatting (MbnF)
+        <ul>
+            <li>errorValues.v is given formatting</li>
+            <li><span class="monoInline">a.format({MbnF: 1})</span> [js], <span
+                   class="monoInline">$a->format(['MbnF' => 1])</span> [php]
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.extend.invalid_limit</span> - invalid value digit limit (MbnL)
+        <ul>
+            <li>errorValues.v is given limit</li>
+            <li><span class="monoInline">Mbn.extend({MbnE: Infinity})</span>, <span class="monoInline">Mbn.extend({MbnE: -1})</span>
+            </li>
+            <li><span class="monoInline">class MbnLm1 extends Mbn {protected static $MbnL = -1;} MbnLm1::prop();</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.format.invalid_limit</span> - invalid value digit limit (MbnL)
+        <ul>
+            <li>hint: MbnL doesn't affect format(), but is validated; this behavior may be changed</li>
+            <li>errorValues.v is given limit</li>
+            <li><span class="monoInline">a.format({MbnL: -1})</span> [js], <span class="monoInline">$a->format(['MbnL' => -1])</span>
+                [php]
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.calc.undefined</span> - undefined variable in expression
+        <ul>
+            <li>errorValues.v is name of undefined variable</li>
+            <li><span class="monoInline">Mbn.calc("a*b", {a: 5})</span> [js], <span class="monoInline">Mbn::calc("a*b", ['a' => 5])</span>
+                [php]
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.calc.unexpected</span> - unexpected token in expression
+        <ul>
+            <li>errorValues.v is unexpected token or rest of expression starting with that token</li>
+            <li><span class="monoInline">Mbn.calc("/ 2")</span>, <span class="monoInline">Mbn.calc("(2 * 3")</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.def.undefined</span> - constant is not defined
+        <ul>
+            <li>errorValues.v is name of undefined constant</li>
+            <li><span class="monoInline">Mbn.def("A")</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.def.already_set</span> - constant already has a value
+        <ul>
+            <li>errorValues.v is name of constant</li>
+            <li>errorValues.w is current value of constant</li>
+            <li><span class="monoInline">Mbn.def("PI", 2)</span>, <span
+                   class="monoInline">Mbn.def("A", 2); Mbn.def("A", 2)</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.def.invalid_name</span> - invalid name for constant
+        <ul>
+            <li>errorValues.v is name of constant</li>
+            <li><span class="monoInline">Mbn.def("2", 2)</span>, <span class="monoInline">Mbn.def("2")</span>, <span
+                   class="monoInline">Mbn.def(null, "2")</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.split.invalid_part_count</span> - invalid number of parts, should be positive
+        integer
+        <ul>
+            <li>errorValues.v is number of parts</li>
+            <li><span class="monoInline">a.split(0)</span>, <span class="monoInline">a.split(-0.5)</span>, <span
+                   class="monoInline">a.split([])</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.split.zero_part_sum</span> - sum of parts is zero, value cannot be split
+        <ul>
+            <li>errorValues is empty</li>
+            <li><span class="monoInline">a.split([-1, 1])</span>, <span class="monoInline">a.split([1, -2, 1])</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.reduce.invalid_function</span> - invalid function name passed to "reduce"
+        <ul>
+            <li>errorValues.v is given function name</li>
+            <li><span class="monoInline">a.reduce("x", [1])</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.reduce.no_array</span> - no array given
+        <ul>
+            <li>errorValues is empty</li>
+            <li><span class="monoInline">a.reduce("sqrt", 1)</span>, <span
+                   class="monoInline">a.reduce("add", 1, 2)</span>
+            </li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.reduce.invalid_argument_count</span> - two arguments passed to single-argument
+        function
+        <ul>
+            <li>errorValues is empty</li>
+            <li><span class="monoInline">a.reduce("sqrt", [1, 2], [3, 4])</span>, <span class="monoInline">a.reduce("inva", [1, 2], 3)</span>,
+                <span class="monoInline">a.reduce("abs", 1, [2, 3])</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.reduce.different_lengths</span> - given arrays have different lengths
+        <ul>
+            <li>errorValues.v is length of first array</li>
+            <li>errorValues.w is length of second array</li>
+            <li><span class="monoInline">a.reduce("add", [1, 2], [3])</span></li>
+        </ul>
+    </li>
+    <li><span class="monoInline">mbn.reduce.different_keys</span> - given arrays have different keys
+        <ul>
+            <li>hint: only may be thrown in PHP</li>
+            <li>errorValues.v is keys of first array, e.g. "0,a"</li>
+            <li>errorValues.w is keys of second array"</li>
+            <li><span class="monoInline">a::reduce("add", [1, 'a' => 2], [3, 4])</span></li>
+        </ul>
+    </li>
 </ul>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
-    <li>20.11.2019 - fixed PHP 5.4 compatibility</li>
-    <li>20.11.2019 - fixed PHP bug when creating basic Mbn object from object of derived class (since 28.09.2017) </li>
+    <li>11.12.2019 - changed MbnErr.errorValue (string|null) to errorValues (array[php], object[js]) <strong>(1.49)</strong></li>
+    <li>20.11.2019 - fixed PHP 5.4 compatibility <strong>(1.48)</strong></li>
+    <li>20.11.2019 - fixed PHP bug when creating basic Mbn object from object of derived class (since 28.09.2017)</li>
     <li>21.10.2019 - fixed PHP wrong errorValue for reduce.different_keys</li>
     <li>21.10.2019 - validating constant name also for checking of existence e.g. Mbn::def(null, "2")</li>
     <li>20.10.2019 - NaN as argument throws mbn.invalid_argument exception instead of mbn.limit_exceeded</li>
     <li>20.10.2019 - fixed MbnL validation</li>
     <li>18.10.2019 - format(5) worked as format(false), now throws mbn.format.invalid_formatting exception</li>
-    <li>18.10.2019 - PHP: Mbn::prop() throws mbn.extend, not Mbn.prop exceptions, also mbn.prop exceptions were broken</li>
+    <li>18.10.2019 - PHP: Mbn::prop() throws mbn.extend, not Mbn.prop exceptions, also mbn.prop exceptions were broken
+    </li>
     <li>17.10.2019 - better representation of passed invalid values <strong>(1.47)</strong></li>
     <li>15.10.2019 - all code reformatted to 4-space indents</li>
     <li>14.10.2019 - fixed wrong message for limit_exceeded (since 10.10.2019)</li>
@@ -1207,11 +1304,11 @@ unset($relFile); ?>
     }, 250);
     document.getElementById("darkMode").onclick = function () {
         var dark = document.body.classList.toggle("dark");
-        if(localStorage){
+        if (localStorage) {
             localStorage.setItem("dark", String(Number(dark)));
         }
     };
-    if(localStorage && localStorage.getItem("dark") === "1") {
+    if (localStorage && localStorage.getItem("dark") === "1") {
         document.body.classList.add("dark");
     }
 </script>

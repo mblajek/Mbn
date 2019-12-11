@@ -14,7 +14,7 @@ var Mbn = (function () {
         },
         def: {
             undefined: "undefined constant: %v%",
-            already_set: "constant already set: %v%",
+            already_set: "constant already set: %v% = %w%",
             invalid_name: "invalid name for constant: %v%"
         },
         div: {
@@ -39,8 +39,8 @@ var Mbn = (function () {
             invalid_function: "invalid function name: %v%",
             no_array: "no array given",
             invalid_argument_count: "two arguments can be used only with two-argument functions",
-            different_lengths: "arrays have different lengths: %v%",
-            different_keys: "arrays have different keys: %v%"
+            different_lengths: "arrays have different lengths: %v%, %w%",
+            different_keys: "arrays have different keys: [%v%], [%w%]"
         },
         split: {
             invalid_part_count: "only positive integer number of parts supported: %v%",
@@ -78,22 +78,30 @@ var Mbn = (function () {
      * @export
      * @constructor
      * @param {string} key error code
-     * @param {*=} val incorrect value to message
+     * @param {*=} values incorrect value to message
+     * @param {boolean=} multi passing array with multiple values
      */
-    var MbnErr = function (key, val) {
-        if (arguments.length === 2) {
-            val = valToMsgString(val);
-            val = ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
-        } else {
-            val = null;
+    var MbnErr = function (key, values, multi) {
+        var valObj = {};
+        var i, val;
+        if (arguments.length !== 1) {
+            if (typeof values !== "object" || multi !== true) {
+                values = {v: values};
+            }
+            for (i in values) {
+                if (values.hasOwnProperty(i)) {
+                    val = valToMsgString(values[i]);
+                    valObj[i] = ((val.length > 20) ? (val.slice(0, 18) + "..") : val);
+                }
+            }
         }
         this.errorKey = "mbn." + key;
-        this.errorValue = val;
+        this.errorValues = valObj;
 
         var msg = null;
         if (typeof errTranslation === "function") {
             try {
-                msg = errTranslation(this.errorKey, this.errorValue)
+                msg = errTranslation(this.errorKey, valObj)
             } catch (e) {
             }
         }
@@ -105,7 +113,7 @@ var Mbn = (function () {
                 msg += "." + keyArr[0];
             }
             var subMessages = messages;
-            for (var i = 0; i < keyArrLength; i++) {
+            for (i = 0; i < keyArrLength; i++) {
                 var word = keyArr[i];
                 var nextSubMessages = subMessages[word];
                 if (typeof nextSubMessages === "object" && nextSubMessages.hasOwnProperty("_")) {
@@ -115,7 +123,12 @@ var Mbn = (function () {
             }
             msg += " error: " + subMessages;
         }
-        this.message = msg.replace("%v%", val);
+        for (i in valObj) {
+            if (valObj.hasOwnProperty(i)) {
+                msg = msg.replace("%" + i + "%", valObj[i]);
+            }
+        }
+        this.message = msg;
     };
     MbnErr.prototype.toString = function () {
         return this.message;
@@ -125,7 +138,7 @@ var Mbn = (function () {
     };
 
     //version of Mbn library
-    var MbnV = "1.48";
+    var MbnV = "1.49";
     //default precision
     var MbnDP = 2;
     //default separator
@@ -1113,7 +1126,7 @@ var Mbn = (function () {
             } else {
                 r = [];
                 if (bmode === 2 && arrl !== b.length) {
-                    throw new MbnErr("reduce.different_lengths", "(" + arrl + " " + b.length + ")");
+                    throw new MbnErr("reduce.different_lengths", {'v': arrl, 'w': b.length}, true);
                 }
                 var bv = (bmode === 1) ? (new Mbn(b)) : null;
                 for (i = 0; i < arrl; i++) {
@@ -1161,7 +1174,7 @@ var Mbn = (function () {
                 return new Mbn(MbnConst[n]);
             }
             if (hasOwnProperty.call(MbnConst, n)) {
-                throw new MbnErr("def.already_set", n + "=" + new Mbn(MbnConst[n]));
+                throw new MbnErr("def.already_set", {v: n, w: new Mbn(MbnConst[n])}, true);
             }
             v = new Mbn(v);
             MbnConst[n] = v;

@@ -42,7 +42,7 @@ var testMbn = function (displayResp) {
 
     Mbn.MbnErr.translate(function (key, value) {
         if (key === "mbn.invalid_argument") {
-            return "Niepoprawny argument %a% dla konstruktora %v%".replace("%a%", value);
+            return "Niepoprawny argument %a% dla konstruktora %v%".replace("%a%", value.v);
         }
     });
 

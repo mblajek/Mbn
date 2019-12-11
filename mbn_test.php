@@ -49,7 +49,7 @@ class MbnColon extends Mbn {
 
 MbnErr::translate(function ($key, $value) {
     if ($key === 'mbn.invalid_argument') {
-        return str_replace('%a%', $value, 'Niepoprawny argument %a% dla konstruktora %v%');
+        return str_replace('%a%', $value['v'], 'Niepoprawny argument %a% dla konstruktora %v%');
     }
 });
 
