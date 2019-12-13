@@ -55,7 +55,7 @@ MbnErr::translate(function ($key, $value) {
 
 function testMbn() {
     $phpCheckFile = 'release/php_check';
-    if (file_exists($phpCheckFile) && (time() - filectime($phpCheckFile)) < 100) {
+    if (file_exists($phpCheckFile) && (time() - filemtime($phpCheckFile)) < 100) {
         return file_get_contents($phpCheckFile);
     }
 

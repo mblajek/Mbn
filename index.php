@@ -1104,6 +1104,7 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
+    <li>13.12.2019 - minor PHP code changes</li>
     <li>11.12.2019 - changed MbnErr.errorValue (string|null) to errorValues (array[php], object[js]) <strong>(1.49)</strong></li>
     <li>20.11.2019 - fixed PHP 5.4 compatibility <strong>(1.48)</strong></li>
     <li>20.11.2019 - fixed PHP bug when creating basic Mbn object from object of derived class (since 28.09.2017)</li>
