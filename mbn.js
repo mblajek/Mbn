@@ -1082,7 +1082,7 @@ var Mbn = (function () {
         };
 
         var fnReduce = {
-            set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1,
+            set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1, fact: 1,
             min: 2, max: 2, add: 2, sub: 2, mul: 2, div: 2, mod: 2, pow: 2
         };
         /**

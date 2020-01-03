@@ -327,6 +327,7 @@ if ($vString !== null) {
             for some useful array operations
         </li>
         <li>custom formatting: dot/coma separator, grouping thousands, truncating trailing zeros</li>
+        <li>exception messages can be easily translated</li>
         <li>compatibility: PHP 5.4+, JS ES3+ (IE6+)</li>
     </ul>
 </div>
@@ -347,11 +348,14 @@ if ($vString !== null) {
        href="https://3v4l.org/">3v4l.org</a>
 </div>
 <div>Generally code is optimized for speed and size; not for readability</div>
-<?php foreach ($relFiles as $n => &$relFile) { ?>
-    <pre><span class="lb"></span><strong><?= $n ?></strong> [ <a href="lib/<?= $n ?>&amp;show">show</a> | <a
-           href="lib/<?= $n ?>">download</a> ] (<?= (new Mbn(filesize($relFile['path'])))->div(1024) ?> kB)<!--
+<?php try {
+    foreach ($relFiles as $n => &$relFile) { ?>
+        <pre><span class="lb"></span><strong><?= $n ?></strong> [ <a href="lib/<?= $n ?>&amp;show">show</a> | <a
+               href="lib/<?= $n ?>">download</a> ] (<?= (new Mbn(filesize($relFile['path'])))->div(1024) ?> kB)<!--
 --><br/><span class="lb"></span><?= $relFile['desc'] ?></pre>
-<?php }
+    <?php }
+} catch (MbnErr $e) {
+}
 unset($relFile); ?>
 
 <div class="title2" id="reference">Reference</div>
@@ -834,6 +838,21 @@ unset($relFile); ?>
             </li>
         </ul>
     </li>
+    <li>loosing / keeping precision
+        <ul>
+            <li>results of operations are predictable, but in some cases may lead to loose of precision, what is not implementation problem, result of 0.01*0.01 may be 0.00001, but this number doesn't exist in Mbn class with 2 digits of fractional part</li>
+            <li>some Mbn functions never lead to loss of precision: add, sub, mod, min, max, fact, inva</li>
+            <li>for mul (and precision = 2) it depends on number of size of arguments fractional parts, 1.23*5 or 1.2*3.4 never looses precision, 1.23*4.5 always looses</li>
+            <li>for div (and precision = 2) it depends, e.g. division of integer by 100 or by it's own divisor never looses precision</li>
+            <li>pow and sqrt should be used with care</li>
+            <li>when loss of precision is necessary, operations should be done in right order, only the last operation should loose precision, sometimes multiplication by 100 may be needed</li>
+            <li>
+                <ul>exact result of 4.11*0.23/2 is 0.47265, and this will be result such calculations in in Mbn with precision=5, with precision = 2 result should be 0.47</ul>
+                <ul>4.11*0.23/2 = 0.48, because precision is lost in multiplication and division, 411*0.23/200 is right, precision is lost only in division</ul>
+                <ul>0.01/2*100 = 1, because precision is lost in division, 0.01*100/2 is right, no precision is lost</ul>
+            </li>
+        </ul>
+    </li>
 </ul>
 
 <div class="title2" id="exceptions">Exceptions</div>
@@ -1104,6 +1123,7 @@ unset($relFile); ?>
 <div class="title2" id="changelog">Changelog</div>
 
 <ul>
+    <li>03.01.2020 - added factorial to reduce</li>
     <li>13.12.2019 - minor PHP code changes</li>
     <li>11.12.2019 - changed MbnErr.errorValue (string|null) to errorValues (array[php], object[js]) <strong>(1.49)</strong></li>
     <li>20.11.2019 - fixed PHP 5.4 compatibility <strong>(1.48)</strong></li>
