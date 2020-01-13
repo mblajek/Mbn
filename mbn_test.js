@@ -9,7 +9,6 @@ var testMbn = function (displayResp) {
             var req = test[1];
             var exp = test[2];
 
-
             try {
                 evv = String(eval(exp));
             } catch (ex) {
