@@ -91,7 +91,7 @@ if ($vString !== null) {
 <script src="mbn_test.js"></script>
 
 <div id="topBar">
-    <span style="display: table-cell; vertical-align: middle; margin: 2px 6px">
+    <span>
     <a href="#about">about</a> |
     <a href="#downloads">downloads</a> |
     <a href="#reference">reference</a> |
@@ -176,7 +176,7 @@ if ($vString !== null) {
                 <th>return type</th>
             </tr>
             <tr>
-                <th>declare</th>
+                <th>declaration</th>
                 <td>a = b</td>
                 <td>a = new Mbn(b)</td>
                 <td>a = 0;<br>a = b;</td>
@@ -665,16 +665,16 @@ if ($vString !== null) {
                 <li>pow and sqrt should be used with care</li>
                 <li>when loss of precision is necessary, operations should be done in right order, only the last
                     operation should loose precision, sometimes multiplication by 100 may be needed
-                </li>
-                <li>
-                    <ul>exact result of 4.11*0.23/2 is 0.47265, and this will be result such calculations in in Mbn with
-                        precision=5, with precision = 2 result should be 0.47
-                    </ul>
-                    <ul>4.11*0.23/2 = 0.48, because precision is lost in multiplication and division, 411*0.23/200 is
-                        right, precision is lost only in division
-                    </ul>
-                    <ul>0.01/2*100 = 1, because precision is lost in division, 0.01*100/2 is right, no precision is
-                        lost
+                    <ul>
+                        <li>exact result of 4.11*0.23/2 is 0.47265, and this will be result such calculations in in Mbn
+                            with
+                            precision=5, with precision = 2 result should be 0.47, but 4.11*0.23/2 = 0.48, because
+                            precision is lost in multiplication and division, 411*0.23/200 is
+                            right, precision is lost only in division
+                        </li>
+                        <li>0.01/2*100 = 1, because precision is lost in division, 0.01*100/2 is right, no precision is
+                            lost
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -1019,52 +1019,87 @@ if ($vString !== null) {
         <li>07.03.2018 - fixed errors for MbnE=false <strong>(1.36)</strong></li>
     </ul>
 
+    <div class="title2">Other methods</div>
+
+    <div class="title2" id="other_methods_split">Array methods - split - split value into an array</div>
+    <div>Value can be split into array preserving sum of values, result is array of Mbn objects</div>
+    <ul>
+        <li>splitting into given number of parts
+            <ul>
+                <li>
+                    <span class="monoInline">(new Mbn(3)).split()</span> gives array <span class="monoInline">[1.50, 1.50]</span>
+                    <span class="monoInline">(new Mbn(4)).split(3)</span> gives array <span class="monoInline">[1.33, 1.34, 1.33]</span>
+                    (or similar)
+                </li>
+            </ul>
+        </li>
+        <li>splitting into given proportions
+            <ul>
+                <li>
+                    <span class="monoInline">(new Mbn(4.5)).split([1, 2])</span> gives array <span class="monoInline">[1.50, 3.00]</span>
+                </li>
+                <li>
+                    <span class="monoInline">(new Mbn(4.5)).split([-1, -2])</span> gives array <span class="monoInline">[1.50, 3.00]</span>
+                </li>
+                <li>
+                    proportion can have mixed signs, so <span class="monoInline">(new Mbn(4.5)).split([-1, 2])</span>
+                    gives array <span class="monoInline">[-4.50, 9.00]</span><br>
+                    hint: sum of proportions cannot be zero
+                </li>
+                <li>PHP: array of proportions can be associative, so <span class="monoInline">(new Mbn(4.5)).split(['a' => 1, 'b' => 2])</span>
+                    gives array <span class="monoInline">['a' => 1.50, 'b' => 3.00]</span></li>
+            </ul>
+        </li>
+    </ul>
+
+    <div class="title2" id="other_methods_reduce">Array methods - reduce - map or reduce array</div>
+    <div>Array can be mapped or reduced with one of Mbn methods<br>PHP: array can be associative</div>
+    <ul>
+        <li>one-argument functions: abs, inva, invm, ceil, floor, sqrt, round, sgn, intp, fact
+            <ul>
+                <li>result is mapped array, so <span class="monoInline">Mbn.reduce("abs", [1, -2])</span> gives array
+                    <span class="monoInline">[1.00, 2.00]</span></li>
+                <li>PHP: <span class="monoInline">Mbn::reduce("abs", ['a' => 1, 'b' => -2])</span> gives array
+                    <span class="monoInline">['a' => 1.00, 'b' => 2.00]</span></li>
+                <li>"set" may be used as a function, to create array of Mbn objects without any other actions</li>
+            </ul>
+        </li>
+        <li>two-argument functions: add, sub, mul, div, mod, min, max, pow
+            <ul>
+                <li>two-argument function and single value gives mapped array
+                    <ul>
+                        <li><span class="monoInline">Mbn.reduce("pow", [3, 4, 5], 2)</span> gives array <span
+                               class="monoInline">[3^2, 4^2, 5^2]</span> &rarr; <span class="monoInline">[9.00, 16.00, 25.00]</span>
+                        </li>
+                        <li><span class="monoInline">Mbn.reduce("pow", 2, [3, 4, 5])</span> gives array <span
+                               class="monoInline">[2^3, 2^4, 2^5]</span> &rarr; <span class="monoInline">[8.00, 16.00, 32.00]</span>
+                        </li>
+                    </ul>
+                </li>
+                <li>two-argument function and two arrays give mapped array
+                    <ul>
+                        <li><span class="monoInline">Mbn.reduce("mul", [3, 4, 5], [1, 2, 3])</span> gives array <span
+                               class="monoInline">[3*1, 4*2, 5*3]</span> &rarr; <span class="monoInline">[3.00, 8.00, 15.00]</span>
+                            <br>
+                            hint: arrays have to have the same length
+                            PHP: hint: associative arrays have to have identical keys
+                        </li>
+                    </ul>
+                </li>
+                <li>two-argument function and one array reduces array
+                    <ul>
+                        <li><span class="monoInline">Mbn.reduce("mul", [3, 4, 5])</span> gives 3*4*5 = 60.00<br>
+                        <li>asymmetric functions work identical, not really useful: <span class="monoInline">Mbn.reduce("sub", [3, 4, 5])</span>
+                            gives 3-4-5 = -6.00
+                        <li>for empty array returns 0.00</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+
 
     <script>
-        w("Other methods", "title2");
-
-        we(['//set value', 'new Mbn(0.5).set(4);']);
-
-        we(['//standard set, using =, sets reference to existing object', 'var a = new Mbn(2);', 'var b = new Mbn();', 'var c = new Mbn();', 'b = a;', 'c.set(a);', 'a.add(3, true);', 'b + " " + c;']);
-
-        w("Other methods - cmp, eq", "title2");
-
-        we(['//compare with other number, returns number', '//1 if number is greater than other value, 0 if equals, -1 if is lower', 'new Mbn(0.5).cmp(4);']);
-
-        w();
-        we(['//second argumend defines maximum difference still treated as equality', 'new Mbn(1.5).cmp(1.7, 0.2);']);
-
-        w();
-        we(['//check if numbers are equal, also maximum difference can be passed', 'new Mbn(1.9).eq(1.7, 0.2);']);
-
-        w("Other methods - split", "title2");
-
-        we(['//split value to numbers, which sum correctly to it', '//returns array of Mbn objects', '//number of parts (default 2) or array with ratios can be given', 'new Mbn(3).split();']);
-
-        we('new Mbn(3).split().join(" ");');
-
-        we('new Mbn(5).split([1, 1, 2]).join(" ");');
-
-        we('new Mbn(2.02).split([1, 1, 2]).join(" ");');
-
-        w();
-        w(['//in PHP works with assocjative arrays', "(new Mbn(2.02))->split(['a' => 1, 'c' => 1, 'b' => 2])", "//gives array ['a' => 0.51, 'c' => 0.50, 'b' => 1.01]"], 'mono');
-
-        w("Other methods - format", "title2");
-
-        we(["//output can be formatted, with thousands grouping", "Mbn('12345678').format();"], "mono");
-        we(["//input can contain some spaces in integer part", "Mbn('123 45 678.12');"], "mono");
-
-        w("Other methods - reduce", "title2");
-        we(['//reduce array to value or invoke single argument function on each element (typically called map)', '//2-argument functions: add, mul, min, max', 'Mbn.reduce("add", [2.5, 1.5, 3.4, -4.4]);']);
-
-        w();
-        we(['//1-argument functions: set (simply make array of Mbn objects), abs, inva, invm, ceil, floor, sqrt, round, sgn, intp', 'Mbn.reduce("set", [2.5, 1.5, 3.4, -4.4]);']);
-        we(['Mbn.reduce("inva", [2.5, 1.5, 3.4, -4.4]).join(" ");']);
-
-        w();
-        w(["//in PHP works with assocjative arrays", "Mbn::reduce('sqrt', ['a'=>4, 'b'=>9])", "//gives array ['a'=>2.00, 'b'=>3.00]"], "mono");
-
         w("Other methods - calc", "title2");
 
         we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);

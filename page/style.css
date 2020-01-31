@@ -25,7 +25,12 @@ a:hover {
     border-radius: 0;
     background-color: lightgray;
     margin: 0;
-    xcolor: black;
+}
+
+#topBar span {
+    display: table-cell;
+    vertical-align: middle;
+    margin: 2px 6px
 }
 
 #topBar a {
@@ -148,8 +153,12 @@ body.dark .monoInline {
     color: #aaa;
 }
 
+body.dark a {
+    color: #46e
+}
+
 body.dark a:visited {
-    color: #b3b
+    color: #c3c
 }
 
 body.dark #topBar a {

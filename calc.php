@@ -13,7 +13,7 @@ if ($q !== null) {
 ?><!DOCTYPE html>
 <head>
     <title>MbnCalc</title>
-    <link rel="icon" href="icon" type="image/bmp"/>
+    <link rel="icon" href="page/favicon.ico" type="image/bmp"/>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
 </head>
