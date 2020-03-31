@@ -43,6 +43,7 @@ var testMbn = function (displayResp) {
         if (key === "mbn.invalid_argument") {
             return "Niepoprawny argument %a% dla konstruktora %v%".replace("%a%", value.v);
         }
+        return null;
     });
 
     var xmlhttp = new XMLHttpRequest();
@@ -53,11 +54,15 @@ var testMbn = function (displayResp) {
             var testsl = tests.length;
             for (var i = 0; i < testsl; i++) {
                 var test = tests[i];
-                test[2] = test[0].replace(/->|::/g, ".").replace(/^\$/, "var $");
+                test[2] = test[0]
+                   .replace(/->|::/g, ".")
+                   .replace(/^\$/, "var $")
+                   .replace(/\n/g, "\\n\\")
+                   .replace(/\r/g, "\\r\\");
             }
-            var starttimeJS = new Date();
+            var starttimeJS = Date.now();
             var ret = runTestMbn(tests);
-            ret.time = new Date() - starttimeJS;
+            ret.time = Date.now() - starttimeJS;
             ret.MbnV = Mbn.prop().MbnV;
             displayResp(JSON.stringify(ret));
         }

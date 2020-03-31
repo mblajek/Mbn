@@ -70,9 +70,11 @@ if ($vString !== null) {
     }
 }
 ?><!DOCTYPE html>
+<html lang="en">
 <head>
     <title>Mbn Library</title>
     <meta charset="UTF-8">
+    <meta name="description" content="Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.">
     <link rel="icon" href="page/favicon.ico" type="image/png"/>
     <link rel="stylesheet" href="page/style.css"/>
 </head>
@@ -99,7 +101,7 @@ if ($vString !== null) {
     <a href="#object_declarations">object declarations</a> |
     <a href="#exceptions">exceptions</a> |
     <a href="#changelog">changelog</a> |
-    <a href="#dark_mode" id="darkMode">&#x263D;</a>
+    <a href="javascript:void 0;" id="darkMode">&#x263D;</a>
     </span>
 </div>
 <div id="scroller">
@@ -1171,3 +1173,4 @@ if ($vString !== null) {
     </script>
 </div>
 </body>
+</html>

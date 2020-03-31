@@ -51,6 +51,7 @@ MbnErr::translate(function ($key, $value) {
     if ($key === 'mbn.invalid_argument') {
         return str_replace('%a%', $value['v'], 'Niepoprawny argument %a% dla konstruktora %v%');
     }
+    return null;
 });
 
 function testMbn() {
@@ -113,10 +114,17 @@ function testMbn() {
     foreach ($tests as &$test) {
         $tst = $test[0];
         $jsonA = [];
-        while (preg_match('/[^)]({[^}]*})/', $tst, $jsonA) === 1) {
+        $pos = 0;
+        while (preg_match('/[^)]({[^}]*})/', substr($tst, $pos), $jsonA) === 1) {
             $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[1]);
-            $jsonArr = str_replace([' ', "\r", "\n"], '', var_export(json_decode($json, true), true));
-            $tst = str_replace($jsonA[1], $jsonArr, $tst);
+            $jsonDecoded = json_decode($json, true);
+            if ($jsonDecoded === null) {
+                $pos += strlen($jsonA[1]);
+            } else {
+                $jsonArr = str_replace([' ', "\r", "\n"], '', var_export($jsonDecoded, true));
+                $tst = str_replace($jsonA[1], $jsonArr, $tst);
+                $pos += strlen($jsonArr);
+            }
         }
         $expArr = explode('; ', $tst);
         $expArr[count($expArr) - 1] = 'return ' . $expArr[count($expArr) - 1] . ';';
@@ -127,7 +135,11 @@ function testMbn() {
     $starttimePHP = microtime(true);
     $testPHP = runTestMbn($tests);
     $testPHP['time'] = round((microtime(true) - $starttimePHP) * 1000);
-    $testPHP['MbnV'] = Mbn::prop()['MbnV'];
+    $testPHP['MbnV'] = '?';
+    try {
+        $testPHP['MbnV'] = Mbn::prop()['MbnV'];
+    } catch (MbnErr $e) {
+    }
 
     $result = json_encode($testPHP);
     file_put_contents($phpCheckFile, $result);

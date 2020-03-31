@@ -388,7 +388,6 @@
         ["new Mbn('=12/3/2')", "2.00"],
         ["new Mbn('=12/(3/2)')", "8.00"],
         ["new Mbn('=12*3/2')", "18.00"],
-        ["new Mbn('=12*3/2')", "18.00"],
         ["new Mbn('=12/3*2')", "8.00"],
         ["new Mbn('=12/(3*2)')", "2.00"],
         ["new Mbn('=-7(-sqrt(4))')", "14.00"],
@@ -542,6 +541,16 @@
         ["Mbn::check('1 + 2')", ""],
         ["Mbn::check('a + toString + valueOf + hasOwnProperty + b')", "a,toString,valueOf,hasOwnProperty,b"],
         ["new Mbn('a + toString + valueOf + hasOwnProperty + b', {a: 1, toString:2, valueOf: 3, hasOwnProperty: 4, b:5})", "15.00"],
+        ["new Mbn('1  2.3')", "mbn.invalid_format Mbn error*"],
+        ["new Mbn('1 2 .3')", "mbn.invalid_format Mbn error*"],
+        ["Mbn::calc('1 {+ 2 +} 3')", "mbn.calc.unexpected Mbn.calc error*"],
+        ["Mbn::calc('1 {+ 2 }+ 3')", "4.00"],
+        ["Mbn::calc('2 {{ /3 {+ 2} 2* }} * 2 + 3')", "7.00"],
+        ["Mbn::calc('2 + 3 + {{ /3 {+ 2} 2* ')", "mbn.calc.unexpected Mbn.calc error*"],
+        ["Mbn::calc('2 + 3 {{ /3 {+ 2} 2* ')", "5.00"],
+        ["Mbn::calc('2 \n+ 3 {{ /3\n {+ 2} 2* ')", "5.00"],
+        ["Mbn::calc('PI\nE')", "8.54"],
+        ["Mbn::calc('2 \n + 3 \r + 4 \t +5 {{ /3 {+ 2} 2* ')", "14.01"],
         ["0", "0"]
     ]
 }

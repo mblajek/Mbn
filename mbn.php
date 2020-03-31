@@ -63,7 +63,7 @@ class MbnErr extends Exception {
     /**
      * Convert value to readable string
      * @param mixed $val value to stringify
-     * @param bool $implodeArr implode array (first level) or replace contents with ".."
+     * @param bool $implodeArr implode array (first level) or replace contents with '..'
      * @return string
      */
     private static function valToMsgString($val, $implodeArr = true) {
@@ -139,7 +139,7 @@ class MbnErr extends Exception {
 
 class Mbn {
     //version of Mbn library
-    protected static $MbnV = '1.49';
+    protected static $MbnV = '1.50';
     //default precision
     protected static $MbnP = 2;
     //default separator
@@ -300,7 +300,7 @@ class Mbn {
      */
     private function fromString($ns, $v = null) {
         $np = [];
-        preg_match('/^\s*(=)?[\s=]*([+\\-])?\s*((.*\S)?)/', $ns, $np);
+        preg_match('/^\\s*(=)?[\\s=]*([-+])?\\s*((?:[\\s\\S]*\\S)?)/', $ns, $np);
         $n = $np[3];
         if ($np[2] === '-') {
             $this->s = -1;
@@ -317,18 +317,21 @@ class Mbn {
             $al = $ln + 1;
         }
         $l = max($al + static::$MbnP, $nl);
+        $cs = 0;
         for ($i = 0; $i <= $l; $i++) {
             $c = ($i < $nl) ? (ord($n[$i]) - 48) : 0;
             if ($c >= 0 && $c <= 9) {
                 if ($i <= $al + static::$MbnP) {
                     $this->d[] = $c;
                 }
-            } elseif (($i !== $ln || $nl === 1) && ($c !== -16 || ($i + 1) >= $ln)) {
-                if ($v !== false && (is_array($v) || $v === true || static::$MbnE === true || (static::$MbnE !== false && $np[1] === '='))) {
+            } elseif (!(($i === $ln && $nl !== 1) || ($c === -16 && $i > $cs && ($i + 1) < $ln))) {
+                if ($v === true || is_array($v) || ($v !== false && (static::$MbnE === true || (static::$MbnE === null && $np[1] === '=')))) {
                     $this->set(static::mbnCalc($ns, $v));
                     return;
                 }
                 throw new MbnErr('invalid_format', $ns);
+            } else if ($c === -16) {
+                $cs = $i + 1;
             }
         }
         $this->mbnRoundLast();
@@ -1188,9 +1191,10 @@ class Mbn {
        'abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true, 'fact' => true,
        'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp', 'div_100' => 'div_100'];
     protected static $states = [
-       'endBop' => ['bop', 'pc', 'fs'],
-       'uopVal' => ['num', 'name', 'uop', 'po'],
-       'po' => ['po']
+       'endBop' => ['bop', 'pc', 'fs', 'cs'],
+       'uopVal' => ['num', 'name', 'uop', 'po', 'cs'],
+       'po' => ['po', 'cs'],
+       'com' => ['ca', 'ce']
     ];
     protected static $ops = [
        '|' => [1, true, 'max'],
@@ -1215,7 +1219,10 @@ class Mbn {
        'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal'],
        'po' => ['rx' => '/^(\\()\\s*/', 'next' => 'uopVal'],
        'pc' => ['rx' => '/^(\\))\\s*/', 'next' => 'endBop'],
-       'fs' => ['rx' => '/^([%!])\\s*/', 'next' => 'endBop']
+       'fs' => ['rx' => '/^([%!])\\s*/', 'next' => 'endBop'],
+       'cs' => ['rx' => '/^({+)\\s*/', 'next' => 'com'],
+       'ca' => ['rx' => '/^([^}]+)\\s*/', 'next' => 'com'],
+       'ce' => ['rx' => '/^(}+)\\s*/', 'next' => 'com']
     ];
 
     /**
@@ -1270,6 +1277,8 @@ class Mbn {
         $rpns = [];
         $rpno = [];
         $t = null;
+        $commentLevel = 0;
+        $commentState = null;
 
         while ($expr !== '') {
             $mtch = [];
@@ -1278,17 +1287,15 @@ class Mbn {
                     break;
                 }
             }
-            if (empty($mtch)) {
-                if ($state === 'endBop') {
-                    $tok = '*';
-                    $t = 'bop';
-                } else {
-                    throw new MbnErr('calc.unexpected', $expr);
-                }
-            } else {
+            if (!empty($mtch)) {
                 $tok = $mtch[1];
                 $expr = substr($expr, strlen($mtch[0]));
                 $expr = ($expr === false) ? '' : $expr;
+            } elseif ($state === 'endBop' && !preg_match(static::$rxs['num']['rx'], $expr)) {
+                $tok = '*';
+                $t = 'bop';
+            } else {
+                throw new MbnErr('calc.unexpected', $expr);
             }
             switch ($t) {
                 case 'num':
@@ -1342,6 +1349,19 @@ class Mbn {
                         $rpns[] = $rolp[2];
                     }
                     break;
+                case 'cs':
+                    $commentLevel = strlen($tok);
+                    $commentState = $state;
+                    break;
+                case 'ce':
+                    if ($commentLevel === strlen($tok)) {
+                        $state = $commentState;
+                        continue 2;
+                    } else if ($commentLevel < strlen($tok)) {
+                        throw new MbnErr('calc.unexpected', $tok);
+                    }
+                    break;
+                case 'ca':
                 default:
             }
             $state = static::$rxs[$t]['next'];
@@ -1352,7 +1372,7 @@ class Mbn {
             }
             $rpns[] = $rolp[2];
         }
-        if ($state !== 'endBop') {
+        if ($state !== 'endBop' && ($state !== 'com' || $commentState !== 'endBop')) {
             throw new MbnErr('calc.unexpected', 'END');
         }
 
