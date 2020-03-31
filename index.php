@@ -74,7 +74,8 @@ if ($vString !== null) {
 <head>
     <title>Mbn Library</title>
     <meta charset="UTF-8">
-    <meta name="description" content="Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.">
+    <meta name="description"
+          content="Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.">
     <link rel="icon" href="page/favicon.ico" type="image/png"/>
     <link rel="stylesheet" href="page/style.css"/>
 </head>
@@ -964,6 +965,9 @@ if ($vString !== null) {
     </ul>
     <div class="title2" id="changelog">Changelog</div>
     <ul>
+        <li>31.03.2020 - added {comments} to expression parser<strong>(1.49)</strong></li>
+        <li>31.03.2020 - fixed multiline expressions, "2\n+3" is 5, not 2</li>
+        <li>31.03.2020 - invalid grouping like "1 .0" or "1(multiple spaces)0" no longer parsed</li>
         <li>03.01.2020 - added factorial to reduce</li>
         <li>13.12.2019 - minor PHP code changes</li>
         <li>11.12.2019 - changed MbnErr.errorValue (string|null) to errorValues (array[php], object[js])
