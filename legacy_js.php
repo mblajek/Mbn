@@ -71,12 +71,15 @@
         return {status: (ret.length === 0) ? 'OK' : 'ERR', count: tl, errors: ret};
     };
 
-    var testsAll = <?php readfile('mbn_test_set.json'); ?>;
+    /** @type {{both:array, js:array, php:array}} */
+    var testsAll = (<?php readfile('mbn_test_set.json'); ?>);
+    console.log(testsAll);
     var tests = testsAll.both.concat(testsAll.js);
     var testsl = tests.length;
     for (var i = 0; i < testsl; i++) {
         var test = tests[i];
-        test[2] = test[0].replace(/->|::/g, ".").replace(/^\$/, "var $");
+        test[2] = test[0].replace(/->|::/g, ".").replace(/^\$/, "var $")
+           .replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
     }
     var starttimeJS = new Date();
     var ret = runTestMbn(tests);

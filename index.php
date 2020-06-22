@@ -965,7 +965,7 @@ if ($vString !== null) {
     </ul>
     <div class="title2" id="changelog">Changelog</div>
     <ul>
-        <li>31.03.2020 - added {comments} to expression parser<strong>(1.49)</strong></li>
+        <li>31.03.2020 - added {comments} to expression parser <strong>(1.49)</strong></li>
         <li>31.03.2020 - fixed multiline expressions, "2\n+3" is 5, not 2</li>
         <li>31.03.2020 - invalid grouping like "1 .0" or "1(multiple spaces)0" no longer parsed</li>
         <li>03.01.2020 - added factorial to reduce</li>
