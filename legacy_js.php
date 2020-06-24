@@ -73,7 +73,7 @@
 
     /** @type {{both:array, js:array, php:array}} */
     var testsAll = (<?php readfile('mbn_test_set.json'); ?>);
-    console.log(testsAll);
+
     var tests = testsAll.both.concat(testsAll.js);
     var testsl = tests.length;
     for (var i = 0; i < testsl; i++) {
