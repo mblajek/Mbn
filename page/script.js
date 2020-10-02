@@ -88,7 +88,6 @@ window.addEventListener("load", function (ev) {
     }
 
     setTimeout(function () {
-
         var requestTestPhp = new XMLHttpRequest();
         requestTestPhp.onreadystatechange = function () {
             if (requestTestPhp.readyState === 4) {
