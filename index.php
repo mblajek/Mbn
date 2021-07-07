@@ -147,7 +147,7 @@ if ($vString !== null) {
     <pre><span class="lb"></span><strong id="resultPHP">..</strong></pre>
 
     <div class="title2" id="downloads">Downloads</div>
-    <div>Minified JS is created with <a href='http://closure-compiler.appspot.com'>Google Closure api</a></div>
+    <div>Minified JS is created with <a href='https://closure-compiler.appspot.com'>Google Closure api</a></div>
     <div>Minified PHP is created with custom text replacements, intended to be used in online PHP sandboxes like <a
            href="https://3v4l.org/">3v4l.org</a>
     </div>
@@ -965,7 +965,7 @@ if ($vString !== null) {
     </ul>
     <div class="title2" id="changelog">Changelog</div>
     <ul>
-        <li>31.03.2020 - added {comments} to expression parser <strong>(1.49)</strong></li>
+        <li>31.03.2020 - added {comments} to expression parser <strong>(1.50)</strong></li>
         <li>31.03.2020 - fixed multiline expressions, "2\n+3" is 5, not 2</li>
         <li>31.03.2020 - invalid grouping like "1 .0" or "1(multiple spaces)0" no longer parsed</li>
         <li>03.01.2020 - added factorial to reduce</li>
