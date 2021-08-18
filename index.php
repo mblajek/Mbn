@@ -109,27 +109,25 @@ if ($vString !== null) {
     <div class="title1">Mbn (Multi-byte number) Library</div>
     <div>Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.</div>
     <div class="title2" id="about">About</div>
-    <div>Main job of the library is to regain control on numbers.</div>
-    <div>Most of computer maths bases on float/double numbers which are fast and precise, but cause some problems in
+    <div>The main job of the library is to regain control of numbers.</div>
+    <div>Most of computer maths is based on float/double numbers which are fast and precise, but cause some problems in
         fixed-precision (e.g. financial) calculations.
     </div>
-    <div>Also it's easy to get unexpected some NaN and Infinity values. Usually results should be formatted in concrete
-        way,
-        what is more or less available in languages.
+    <div>It's also easy to get unexpected NaN and Infinity values. Results often need to be formatted in a particular
+        way, which might or might not be available across languages.
     </div>
-    <div>In Mbn library:
+    <div>With Mbn library:
         <ul>
-            <li>parsing invalid strings, division by zero and many more problems are thrown as exceptions</li>
-            <li>all calculations have predictable results, 1.4 - 0.4 gives always 1, not 0.9999999999999999</li>
-            <li>almost identical syntax between JS and PHP, all operations supported by a single class</li>
-            <li>fixed precision with any size of fractional part: from zero to thousands and more</li>
-            <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 is parsed as 6, =2PI as
-                6.28, see <a href='calc'>calc example</a></li>
+            <li>parsing invalid strings, division by zero, and many more problems are thrown as exceptions</li>
+            <li>all calculations have predictable results, e.g. 1.4 - 0.4 gives always 1, not 0.9999999999999999</li>
+            <li>syntax is almost identical between JS and PHP, all operations supported by a single class</li>
+            <li>fixed precision with any size of fractional part: from zero to thousands or more</li>
+            <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 gives 6, =2PI gives
+                6.28 (depending on precision), see <a href='calc'>calc example</a></li>
             <li>built in <a href="#other_methods_split">split</a> and <a href="#other_methods_reduce">reduce</a>
-                functions
-                for some useful array operations
+                functions for some useful array operations
             </li>
-            <li>custom formatting: dot/coma separator, grouping thousands, truncating trailing zeros</li>
+            <li>custom formatting: dot/comma separator, thousands separator, truncating trailing zeros</li>
             <li>exception messages can be easily translated</li>
             <li>compatibility: PHP 5.4+, JS ES3+ (IE6+)</li>
         </ul>
@@ -248,7 +246,7 @@ if ($vString !== null) {
             </tr>
             <tr>
                 <th>power</th>
-                <td>Math.pow(a, b)</td>
+                <td>Math.pow(a, b) or a ** b</td>
                 <td>a.pow(b)</td>
                 <td>a = Math.pow(a, b)</td>
                 <td>a.pow(b, true)</td>
@@ -307,7 +305,7 @@ if ($vString !== null) {
                 <th>Mbn</th>
             </tr>
             <tr>
-                <th>additional inverse</th>
+                <th>additive inverse</th>
                 <td>-a</td>
                 <td>a.inva()</td>
                 <td>a = -a</td>
@@ -352,10 +350,9 @@ if ($vString !== null) {
             </tr>
             <tr class="hidden"></tr>
             <tr>
-                <td colspan="6">'b = a' when 'a' is object, only passes reference to existing instance of object<br/>a.add(0)
-                    is easiest way to create new instance the same Mbn class with the same value<br/>Mbn object has
-                    method
-                    'set', so it can be modified to have specified value
+                <td colspan="6">operation 'b = a' when 'a' is an object only passes reference to existing instance
+                    of the object<br/>a.add(0) is the easiest way to create new instance the same Mbn class with
+                    the same value<br/>Mbn object has method 'set', so it can be modified
                 </td>
             </tr>
             <tr>
@@ -426,9 +423,9 @@ if ($vString !== null) {
             </tr>
             <tr class="hidden"></tr>
             <tr>
-                <td colspan="6">Number(a) when 'a' is Mbn may cause errors for Mbn with comma separator, thousand
-                    formatting
-                    etc.<br>when precision is 0, toNumber in PHP returns int
+                <td colspan="6">do not use Number(a) because it is equivalent to Number(a.toString())
+                which might apply rounding or fail, depending on the formatter
+                <br>when precision is 0, toNumber in PHP returns int
                 </td>
             </tr>
             <tr>
@@ -456,9 +453,10 @@ if ($vString !== null) {
             </tr>
             <tr class="hidden"></tr>
             <tr>
-                <td colspan="6">gets string representation with changed Mbn* class params<br>params: boolean - trigger
-                    thousand formatting (grouping), default true<br/>object - Mbn* params, truncation, formatting,
-                    precision, separator; missing - inherit from class
+                <td colspan="6">gets string representation with changed Mbn* class params<br>params: boolean - enable
+                    thousands separator, default true<br>
+                    object - Mbn* params, truncation, formatting,
+                    precision, separator; missing parameters are taken from class
                 </td>
             </tr>
             </tbody>
@@ -466,26 +464,30 @@ if ($vString !== null) {
     </div>
 
     <div class="title2" id="class_declarations">Class declarations</div>
-    <div>Each Mbn class has few parameters defining it's precision, default format and behavior
-        <br/>Library in JS and PHP delivers single class named Mbn with default parameters. This class can be extended.
+    <div>Each Mbn class has parameters defining its precision, default format and behavior
+        <br/>The library provides a single class named Mbn with default parameters (both in JS and PHP).
+        This class can be extended.
         <br/>Available parameters:
     </div>
     <ul>
         <li><strong>MbnP</strong> - precision - number of digits in fractional part, defines how many digits will be
             stored
-            <br>by default also defines string representation, MbnP=0 &rarr; "0", MbnP=2 &rarr; "0.00"
+           
+           by default also defines the string representation: MbnP=0 &rarr; "0", MbnP=2 &rarr; "0.00"
             <ul>
                 <li>Default: 2</li>
+                <li>Note that this affects all the computations, not only the formatting of the result,
+                e.g.: new Mbn("=1/3*3").toString() === "0.99"</li>
             </ul>
         </li>
         <li>
-            <strong>MbnS</strong> - separator - dot or comma, decimal separator in string representation
+            <strong>MbnS</strong> - separator - dot or comma, decimal separator in the string representation
             <ul>
                 <li>Default: . (dot)</li>
             </ul>
         </li>
         <li>
-            <strong>MbnT</strong> - truncation - true or false, truncation of trailing zeros in string representation
+            <strong>MbnT</strong> - truncation - true or false, truncation of trailing zeros in the string representation
             <br>for MbnP=2 and MbnT=true: 1.12 &rarr; "1.12", 1.10 &rarr; "1.1", 1.00 &rarr; "1"
             <ul>
                 <li>Default: false (no truncation)</li>
@@ -493,14 +495,14 @@ if ($vString !== null) {
         </li>
         <li>
             <strong id="class_declarations_mbne">MbnE</strong> - evaluating - true, false or null, triggers usage of
-            expression parser
+            the expression parser
             <ul>
                 <li>true: all expressions are evaluated</li>
-                <li>null: expressions starting with "=", like "=2+3" ale evaluated</li>
-                <li>false: no expressions ale evaluated, "=2+3" causes invalid format exception</li>
+                <li>null: expressions starting with "=", like "=2+3", are evaluated</li>
+                <li>false: no expressions are evaluated, "=2+3" causes invalid format exception</li>
                 <li><span class="monoInline">new Mbn("=2+3", true)</span> is parsed always regardless of MbnE</li>
                 <li><span class="monoInline">new Mbn("=2+3", false)</span> is never parsed regardless of MbnE</li>
-                <li>When object [js] or array [php] is passed as second argument, also expression is parsed:
+                <li>When an object [js] or an array [php] is passed as the second argument, expression is also parsed:
                     <br><span class="monoInline">new Mbn("=2a", {a: 1})</span> [js] / <span class="monoInline">new Mbn('=2a', ['a' => 1])</span>
                     [php]
                 </li>
@@ -511,19 +513,18 @@ if ($vString !== null) {
             </ul>
         </li>
         <li>
-            <strong>MbnF</strong> - formatting - true or false, grouping thousands (with space) in string representation
+            <strong>MbnF</strong> - formatting - true or false, use space as the thousands separator in the string representation
             <br>for MbnP=5 and MbnF=true 12345.12345 &rarr; "12 345.12345"
             <ul>
-                <li>Default: false (no formatting)</li>
+                <li>Default: false (no thousands separator)</li>
             </ul>
         </li>
         <li>
-            <strong>MbnL</strong> - limit - number of digits, that will cause limit_exceeded exception
-            <br>some short expressions like "=9!!" or "=9^9^9" can have really big results and take much time
+            <strong>MbnL</strong> - limit - number of digits that will cause limit_exceeded exception
+            <br>some short expressions like "=9!!" or "=9^9^9" can have really big results and take much time to evaluate
             <br>MbnL can avoid interface freeze or server overload
-            <br>hint: some operations like power, may exceed limit when result shouldn't, because of storing exact
-            result
-            during calculations
+            <br>hint: some operations, like power, may exceed the limit even when the final result doesn't, because of storing exact
+            partial results
             <ul>
                 <li>Default: 1000</li>
             </ul>
@@ -532,12 +533,12 @@ if ($vString !== null) {
 
     <div class="title2" id="class_declarations_js">Class declarations in JS</div>
     <div>Default Mbn class can be extended with <span class="monoInline">Mbn.extend()</span> method
-        <br/>Single precision as number, or object with Mbn* parameters can be passed.
-        <br/>hint: Mbn in JS is not exactly class, it's a class, function and object
-        <br/>Derived classes cannot be extended
+        <br>Single precision as number, or object with Mbn* parameters can be passed.
+        <br>hint: Mbn in JS is not exactly class, it's a class, a function and an object
+        <br>Derived classes cannot be extended further
     </div>
     <script>
-        w(["//default: precision 2, dot separator, ...", "//class already defined in library", "//var Mbn = Mbn.extend();"], "mono");
+        w(["//default: precision 2, dot separator, ...", "//class already defined by the library", "//var Mbn = Mbn.extend();"], "mono");
         we('new Mbn("12.7");');
 
         w();
@@ -561,122 +562,118 @@ if ($vString !== null) {
         we('new Mbn5t("12.7");');
     </script>
     <div class="title2" id="class_declarations_php">Class declarations in PHP</div>
-    <div>Default Mbn class can be extended standard inheritance by overriding protected static fields
-        <br/>Mbn* fields which are not overridden, have default value
-        <br/>Derived classes shouldn't be extended
+    <div>Default Mbn class can be extended with standard inheritance by overriding protected static fields
+        <br>Mbn* fields which are not overridden have default values
+        <br>Derived classes shouldn't be extended further
     </div>
     <pre><span class="lb"></span>class Mbn0 extends Mbn {<!--
---><br/><span class="lb"></span>  protected static $MbnP = 0;<!--
---><br/><span class="lb"></span>}</pre>
+--><br><span class="lb"></span>  protected static $MbnP = 0;<!--
+--><br><span class="lb"></span>}</pre>
     <div></div>
     <pre><span class="lb"></span>class Mbn4c extends Mbn {<!--
---><br/><span class="lb"></span>  protected static $MbnP = 4;<!--
---><br/><span class="lb"></span>  protected static $MbnS = ',';<!--
---><br/><span class="lb"></span>}</pre>
+--><br><span class="lb"></span>  protected static $MbnP = 4;<!--
+--><br><span class="lb"></span>  protected static $MbnS = ',';<!--
+--><br><span class="lb"></span>}</pre>
     <div></div>
     <pre><span class="lb"></span>class Mbn5t extends Mbn {<!--
---><br/><span class="lb"></span>  protected static $MbnP = 5;<!--
---><br/><span class="lb"></span>  protected static $MbnT = true;<!--
---><br/><span class="lb"></span>}</pre>
+--><br><span class="lb"></span>  protected static $MbnP = 5;<!--
+--><br><span class="lb"></span>  protected static $MbnT = true;<!--
+--><br><span class="lb"></span>}</pre>
 
     <div class="title2" id="object_declarations">Object declarations</div>
-    <div>There are several types of values that can be passed as first constructor argument - a value</div>
+    <div>There are several types of values that can be passed as the first constructor argument - the value</div>
     <ul>
         <li>none - <span class="monoInline">new Mbn()</span> &rarr; 0</li>
         <li>boolean - <span class="monoInline">new Mbn(true / false)</span> &rarr; 1 / 0</li>
         <li>string - value from string, examples of valid arguments for default Mbn
             <ul>
-                <li>dot/coma decimal separator: "12.123", "12,123"</li>
+                <li>dot/comma decimal separator: "12.123", "12,123"</li>
                 <li>missing fractional or integer part: ".123" &rarr; "0.12", "12." &rarr; "12.00"</li>
-                <li>number with formatted integer part: "12 345,123" &rarr; "12345.12"</li>
+                <li>number with thousands separator in the integer part: "12 345,123" &rarr; "12345.12"</li>
                 <li>expression, like mentioned in <a href="#class_declarations_mbne">class declarations</a> and <a
                        href="#other_methods_calc">expression parser</a> sections
                 </li>
             </ul>
         </li>
-        <li>object - if can be casted to valid string, it's parsed<br>e.g. instance of another Mbn class</li>
-        <li>Mbn object - if object is instance of the same Mbn class, operation is faster</li>
-        <li>cannot be array - array <span class="monoInline">[1, 2]</span> has valid string representation "1,2", but
+        <li>object - the object is converted to string and parsed<br>e.g. instance of another Mbn class</li>
+        <li>Mbn object - if an instance of the same Mbn class, operation is faster</li>
+        <li>cannot be array - e.g. array <span class="monoInline">[1, 2]</span> has valid string representation "1,2", but
             shouldn't be parsed
         </li>
     </ul>
-    <div>Second argument to constructor may be true / false or object [js] / array [php], what affects expression
+    <div>Second argument to constructor may be true / false or object [js] / array [php], which affects expression
         evaluation
         <br>as mentioned in <a href="#class_declarations_mbne">class declarations</a> and <a
            href="#other_methods_calc">expression parser</a> sections
     </div>
-    <div>In JS Mbn called as a function, also returns new instance of Mbn (<span class="monoInline">Mbn()</span> instead
-        of
-        <span class="monoInline">new Mbn()</span>)
+    <div>In JS Mbn called as a function also returns new instance of Mbn (<span class="monoInline">Mbn()</span> instead
+        of <span class="monoInline">new Mbn()</span>)
     </div>
     <div class="title2">Dealing with Mbn objects</div>
     <ul>
         <li>Mbn objects have "magic" <span class="monoInline">.toString()</span> [js] / <span class="monoInline">->__toString()</span>
             [php] methods
-            <br/><span class="monoInline">(new Mbn(2)) + "x"</span> [js] / <span
+            <br><span class="monoInline">(new Mbn(2)) + "x"</span> [js] / <span
                class="monoInline">(new Mbn(2)) . 'x'</span> [php] gives "2.00x"
         </li>
-        <li>value passed as first argument, to two-argument function is firstly converted to Mbn class of object
+        <li>value passed as the first argument to a two-argument method is first converted to Mbn class of the object
             <ul>
                 <li>two-argument functions: add, sub, mul, div, mod, min, max, pow</li>
                 <li>invalid value passed as this argument causes exception
                     <br><span class="monoInline">(new Mbn(2)).add("x")</span></li>
-                <li>value with bigger precision is firstly truncated to precision
+                <li>value with bigger precision is first truncated to precision
                     <br><span class="monoInline">(new Mbn(2)).add("1.999")</span>
                     &rarr; <span class="monoInline">(new Mbn(2)).add(new Mbn("1.999"))</span> &rarr; "4.00"
                 </li>
             </ul>
         </li>
-        <li>value passed as last a argument, to all standard functions triggers modification of original object (===
+        <li>true passed as the last argument to any of the standard methods triggers modification of the original object (===
             true)
             <ul>
                 <li>standard functions: two-argument functions and round, floor ceil, intp, abs, inva, invm, sqrt, sgn
                 </li>
                 <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1);</span> "a" stays unchanged and "b" is set
-                    to
-                    result
+                    to the result
                 </li>
-                <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1, true);</span> "a" is changed, but "b" gets
-                    simply
-                    reference to "a"
+                <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1, true);</span> "a" is changed, but "b" becomes
+                    simply a reference to "a"
                 </li>
             </ul>
         </li>
-        <li>because results are Mbn objects, it's possible to use method chaining
+        <li>as the results are Mbn objects, it's possible to use method chaining
             <ul>
                 <li>sum of 3 numbers: <span class="monoInline">a = b.add(c).add(d)</span>
-                    <br/>ad 2 numbers to "a": <span class="monoInline">a.add(b, true).add(c, true)</span></li>
-                <li>sum of 2 numbers, but lot less than zero: <span class="monoInline">b = a.add(x).max(0)</span>
-                    <br/>limit "a" to be between two and three: <span
+                    <br>ad 2 numbers to "a": <span class="monoInline">a.add(b, true).add(c, true)</span></li>
+                <li>sum of 2 numbers, but not less than zero: <span class="monoInline">b = a.add(x).max(0)</span>
+                    <br>limit "a" to be between two and three: <span
                        class="monoInline">a.max(2, true).min(3, true)</span>
                 </li>
             </ul>
         </li>
-        <li>loosing / keeping precision
+        <li>losing / keeping precision
             <ul>
-                <li>results of operations are predictable, but in some cases may lead to loose of precision, what is not
-                    implementation problem, result of 0.01*0.01 may be 0.00001, but this number doesn't exist in Mbn
-                    class with 2 digits of fractional part
+                <li>results of operations are predictable, but in some cases may lead to loss of precision, which is not
+                    an implementation problem, e.g. result of 0.01*0.01 may be 0.00001, but this number doesn't exist in
+                    Mbn class with 2 digits of fractional part
                 </li>
-                <li>some Mbn functions never lead to loss of precision: add, sub, mod, min, max, fact, inva</li>
-                <li>for mul (and precision = 2) it depends on number of size of arguments fractional parts, 1.23*5 or
-                    1.2*3.4 never looses precision, 1.23*4.5 always looses
+                <li>some Mbn functions never lead to a loss of precision: add, sub, mod, min, max, fact, inva</li>
+                <li>for mul (and precision = 2) it depends on the size of arguments' fractional parts, 1.23*5 or
+                    1.2*3.4 never loses precision, 1.23*4.5 always does
                 </li>
-                <li>for div (and precision = 2) it depends, e.g. division of integer by 100 or by it's own divisor never
-                    looses precision
+                <li>for div (and precision = 2) it depends, e.g. division of integer by 100 or by one of its divisors never
+                    loses precision
                 </li>
                 <li>pow and sqrt should be used with care</li>
-                <li>when loss of precision is necessary, operations should be done in right order, only the last
-                    operation should loose precision, sometimes multiplication by 100 may be needed
+                <li>when loss of precision is necessary, operations should be done in the right order, only the last
+                    operation should lose precision, sometimes multiplication by 100 may be needed
                     <ul>
-                        <li>exact result of 4.11*0.23/2 is 0.47265, and this will be result such calculations in in Mbn
-                            with
-                            precision=5, with precision = 2 result should be 0.47, but 4.11*0.23/2 = 0.48, because
-                            precision is lost in multiplication and division, 411*0.23/200 is
-                            right, precision is lost only in division
+                        <li>exact result of 4.11*0.23/2 is 0.47265, and this will be the result such calculations in Mbn
+                            with precision=5, while with precision = 2 the result should be 0.47, but 4.11*0.23/2 = 0.48,
+                            because precision is lost in multiplication and division; to fix this: 411*0.23/200 gives the
+                            right result, as precision is lost only in division
                         </li>
-                        <li>0.01/2*100 = 1, because precision is lost in division, 0.01*100/2 is right, no precision is
-                            lost
+                        <li>0.01/2*100 = 1, because precision is lost in division, while 0.01*100/2 is correct,
+                            no precision is lost
                         </li>
                     </ul>
                 </li>
@@ -686,16 +683,16 @@ if ($vString !== null) {
 
     <div class="title2" id="exceptions">Exceptions</div>
     <div>All exceptions are instances of MbnErr class</div>
-    <div>JS: MbnErr has field "message", and method "toString" returns that message <span
+    <div>JS: MbnErr has field "message", and method "toString" returns that message: <span
            class="monoInline">ex.message</span>, <span class="monoInline">String(ex)</span></div>
     <div>PHP: MbnErr extends Exception, message available with <span class="monoInline">$ex->getMessage()</span></div>
-    <div>Moreover MbnErr has fields "errorKey" and "errorValues" which represent concrete situation.</div>
-    <div>Field errorValues contains string representations of values to message or is empty, when there is no value to
+    <div>Moreover MbnErr has fields "errorKey" and "errorValues" which represent the particular erroneous situation.</div>
+    <div>Field errorValues contains string representations of values to the message, or is empty when there is no value to
         pass
     </div>
     <div>Possible values of errorKey:</div>
     <ul>
-        <li><span class="monoInline">mbn.invalid_argument</span> - value passed to Mbn constructor is in wrong type,
+        <li><span class="monoInline">mbn.invalid_argument</span> - value passed to Mbn constructor is of the wrong type,
             e.g.
             function, array, ..
             <ul>
@@ -729,7 +726,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.pow.unsupported_exponent</span> - only integer exponents are supported
             <ul>
-                <li>errorValues.v is given exponent</li>
+                <li>errorValues.v is the given exponent</li>
                 <li><span class="monoInline">a.pow(0.5)</span>, <span class="monoInline">a.pow(1.5)</span>, <span
                        class="monoInline">Mbn.calc("2^.5")</span></li>
             </ul>
@@ -762,7 +759,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.extend.invalid_precision</span> - invalid value for precision (MbnP)
             <ul>
-                <li>errorValues.v is given precision</li>
+                <li>errorValues.v is the given precision</li>
                 <li><span class="monoInline">Mbn.extend(-2)</span>, <span
                        class="monoInline">Mbn.extend({MbnP: 0.5})</span>
                 </li>
@@ -777,7 +774,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.format.invalid_precision</span> - invalid value for precision (MbnP)
             <ul>
-                <li>errorValues.v is given precision</li>
+                <li>errorValues.v is the given precision</li>
                 <li><span class="monoInline">a.format({MbnP: 0.5})</span> [js], <span class="monoInline">$a->format(['MbnP' => 0.5])</span>
                     [php]
                 </li>
@@ -785,7 +782,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.extend.invalid_separator</span> - invalid value for decimal separator (MbnS)
             <ul>
-                <li>errorValues.v is given separator</li>
+                <li>errorValues.v is the given separator</li>
                 <li><span class="monoInline">Mbn.extend({MbnS: 1})</span>, <span
                        class="monoInline">Mbn.extend({MbnS: ':'})</span></li>
                 <li><span
@@ -795,7 +792,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.format.invalid_separator</span> - invalid value for decimal separator (MbnS)
             <ul>
-                <li>errorValues.v is given separator</li>
+                <li>errorValues.v is the given separator</li>
                 <li><span class="monoInline">a.format({MbnS: 1})</span> [js], <span
                        class="monoInline">$a->format(['MbnS' => 1])</span> [php]
                 </li>
@@ -805,7 +802,7 @@ if ($vString !== null) {
             zeros
             (MbnT)
             <ul>
-                <li>errorValues.v is given truncation</li>
+                <li>errorValues.v is the given truncation</li>
                 <li><span class="monoInline">Mbn.extend({MbnT: 1})</span></li>
                 <li><span class="monoInline">class MbnT1 extends Mbn {protected static $MbnT = 1;} MbnT1::prop();</span>
                 </li>
@@ -815,7 +812,7 @@ if ($vString !== null) {
             zeros
             (MbnT)
             <ul>
-                <li>errorValues.v is given truncation</li>
+                <li>errorValues.v is the given truncation</li>
                 <li><span class="monoInline">a.format({MbnT: 1})</span> [js], <span
                        class="monoInline">$a->format(['MbnT' => 1])</span> [php]
                 </li>
@@ -823,7 +820,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.extend.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)
             <ul>
-                <li>errorValues.v is given evaluating trigger</li>
+                <li>errorValues.v is the given evaluating trigger</li>
                 <li><span class="monoInline">Mbn.extend({MbnE: 1})</span></li>
                 <li><span class="monoInline">class MbnE1 extends Mbn {protected static $MbnE = 1;} MbnE1::prop();</span>
                 </li>
@@ -832,7 +829,7 @@ if ($vString !== null) {
         <li><span class="monoInline">mbn.format.invalid_evaluating</span> - invalid value for evaluating trigger (MbnE)
             <ul>
                 <li>hint: MbnE doesn't affect format(), but is validated; this behavior may be changed</li>
-                <li>errorValues.v is given evaluating trigger</li>
+                <li>errorValues.v is the given evaluating trigger</li>
                 <li><span class="monoInline">a.format({MbnE: 1})</span> [js], <span
                        class="monoInline">$a->format(['MbnE' => 1])</span> [php]
                 </li>
@@ -840,7 +837,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.extend.invalid_formatting</span> - invalid value for formatting (MbnF)
             <ul>
-                <li>errorValues.v is given formatting</li>
+                <li>errorValues.v is the given formatting</li>
                 <li><span class="monoInline">Mbn.extend({MbnF: 1})</span></li>
                 <li><span class="monoInline">class MbnF1 extends Mbn {protected static $MbnF = 1;} MbnF1::prop();</span>
                 </li>
@@ -848,7 +845,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.format.invalid_formatting</span> - invalid value for formatting (MbnF)
             <ul>
-                <li>errorValues.v is given formatting</li>
+                <li>errorValues.v is the given formatting</li>
                 <li><span class="monoInline">a.format({MbnF: 1})</span> [js], <span
                        class="monoInline">$a->format(['MbnF' => 1])</span> [php]
                 </li>
@@ -856,7 +853,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.extend.invalid_limit</span> - invalid value digit limit (MbnL)
             <ul>
-                <li>errorValues.v is given limit</li>
+                <li>errorValues.v is the given limit</li>
                 <li><span class="monoInline">Mbn.extend({MbnE: Infinity})</span>, <span class="monoInline">Mbn.extend({MbnE: -1})</span>
                 </li>
                 <li><span
@@ -867,7 +864,7 @@ if ($vString !== null) {
         <li><span class="monoInline">mbn.format.invalid_limit</span> - invalid value digit limit (MbnL)
             <ul>
                 <li>hint: MbnL doesn't affect format(), but is validated; this behavior may be changed</li>
-                <li>errorValues.v is given limit</li>
+                <li>errorValues.v is the given limit</li>
                 <li><span class="monoInline">a.format({MbnL: -1})</span> [js], <span class="monoInline">$a->format(['MbnL' => -1])</span>
                     [php]
                 </li>
@@ -927,7 +924,7 @@ if ($vString !== null) {
         </li>
         <li><span class="monoInline">mbn.reduce.invalid_function</span> - invalid function name passed to "reduce"
             <ul>
-                <li>errorValues.v is given function name</li>
+                <li>errorValues.v is the given function name</li>
                 <li><span class="monoInline">a.reduce("x", [1])</span></li>
             </ul>
         </li>
@@ -1028,7 +1025,7 @@ if ($vString !== null) {
     <div class="title2">Other methods</div>
 
     <div class="title2" id="other_methods_split">Array methods - split - split value into an array</div>
-    <div>Value can be split into array preserving sum of values, result is array of Mbn objects</div>
+    <div>A value can be split into an array of Mbn values that sum up to the original value</div>
     <ul>
         <li>splitting into given number of parts
             <ul>
@@ -1048,7 +1045,7 @@ if ($vString !== null) {
                     <span class="monoInline">(new Mbn(4.5)).split([-1, -2])</span> gives array <span class="monoInline">[1.50, 3.00]</span>
                 </li>
                 <li>
-                    proportion can have mixed signs, so <span class="monoInline">(new Mbn(4.5)).split([-1, 2])</span>
+                    proportions can have mixed signs, so <span class="monoInline">(new Mbn(4.5)).split([-1, 2])</span>
                     gives array <span class="monoInline">[-4.50, 9.00]</span><br>
                     hint: sum of proportions cannot be zero
                 </li>
@@ -1059,11 +1056,12 @@ if ($vString !== null) {
     </ul>
 
     <div class="title2" id="other_methods_reduce">Array methods - reduce - map or reduce array</div>
-    <div>Array can be mapped or reduced with one of Mbn methods<br>PHP: array can be associative</div>
+    <div>Array can be mapped or reduced with one of the Mbn methods<br>PHP: array can be associative</div>
     <ul>
         <li>one-argument functions: abs, inva, invm, ceil, floor, sqrt, round, sgn, intp, fact
             <ul>
-                <li>result is mapped array, so <span class="monoInline">Mbn.reduce("abs", [1, -2])</span> gives array
+                <li>result is mapped array, so <span class="monoInline">Mbn.reduce("abs", [1, -2])</span> is equivalent to
+                    <span class="monoInline">[1, -2].map(v => (new Mbn(v)).abs())</span> and returns
                     <span class="monoInline">[1.00, 2.00]</span></li>
                 <li>PHP: <span class="monoInline">Mbn::reduce("abs", ['a' => 1, 'b' => -2])</span> gives array
                     <span class="monoInline">['a' => 1.00, 'b' => 2.00]</span></li>
@@ -1072,7 +1070,7 @@ if ($vString !== null) {
         </li>
         <li>two-argument functions: add, sub, mul, div, mod, min, max, pow
             <ul>
-                <li>two-argument function and single value gives mapped array
+                <li>two-argument function and a single value gives mapped array
                     <ul>
                         <li><span class="monoInline">Mbn.reduce("pow", [3, 4, 5], 2)</span> gives array <span
                                class="monoInline">[3^2, 4^2, 5^2]</span> &rarr; <span class="monoInline">[9.00, 16.00, 25.00]</span>
@@ -1092,7 +1090,7 @@ if ($vString !== null) {
                         </li>
                     </ul>
                 </li>
-                <li>two-argument function and one array reduces array
+                <li>two-argument function and one array reduces the array
                     <ul>
                         <li><span class="monoInline">Mbn.reduce("mul", [3, 4, 5])</span> gives 3*4*5 = 60.00<br>
                         <li>asymmetric functions work identical, not really useful: <span class="monoInline">Mbn.reduce("sub", [3, 4, 5])</span>
@@ -1111,10 +1109,10 @@ if ($vString !== null) {
         we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);
 
         w();
-        we(['//standard operators work typically, also with power evaluated right-to-left', 'Mbn.calc("3 ^ 3 ^ 3") + " " + Mbn.calc("(3 ^ 3) ^ 3");']);
+        we(['//standard operators work normally, also with power evaluated right-to-left', 'Mbn.calc("3 ^ 3 ^ 3") + " " + Mbn.calc("(3 ^ 3) ^ 3");']);
 
         w();
-        we(['//it is posible, to use percentage values', 'Mbn.calc("200 * 123%");']);
+        we(['//it is posible to use percentage values', 'Mbn.calc("200 * 123%");']);
 
         w();
         we(['//modulo uses # operator', 'Mbn.calc("245 # 100");']);
@@ -1123,7 +1121,7 @@ if ($vString !== null) {
         we(['//min and max use & and | symbols, and therefore work like logical operators or/and on 0/1 values', 'Mbn.calc("(1 | 0) & 0");']);
 
         w();
-        w(['//operator priorities high to low (in partenthesis with the same priority): ^, (*, /, #), (+, -), &amp;, |'], "mono");
+        w(['//operator priorities high to low (in partentheses operators with the same priority): ^, (*, /, #), (+, -), &amp;, |'], "mono");
 
         w();
         we(['//single argument functions abs, ceil, floor, round, sqrt, sgn, int (=intp) are accesible', 'Mbn.calc("((sqrt(5) + 1) / 2)^2");']);
@@ -1133,24 +1131,24 @@ if ($vString !== null) {
         we(['Mbn5t.calc("eps");']);
 
         w();
-        we(["//variables can be passed as second argument", 'Mbn.calc("a / b", {a: 7, b: 3});']);
+        we(["//variables can be passed as the second argument", 'Mbn.calc("a / b", {a: 7, b: 3});']);
         w(["//php", "Mbn::calc('a / b', ['a' => 7, 'b' => 3]);"], "mono");
 
         w();
-        we(["//calc() is called when constructor is called with string begnning with =", 'new Mbn("=x*x", {x: 2});']);
+        we(["//calc() is called when constructor is called with a string begnning with =", 'new Mbn("=x*x", {x: 2});']);
 
         w("Defining constants", "title2");
 
-        we(['//constants can be get by name', 'Mbn.def("PI");']);
+        we(['//constants can be accessed by name', 'Mbn.def("PI");']);
 
         w();
-        we(['//constants can be defined, have to start from letter or _', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
+        we(['//constants can be defined, have to start with letter or _', 'Mbn.def("Q", "2");', 'Mbn.def("Q");']);
 
         w();
-        we(['//accessing to undefined constants and redefinition of defined throws exception', 'Mbn.def("Q", "2");']);
+        we(['//accessing undefined constants and constant redefinition throws exception', 'Mbn.def("Q", "2");']);
 
         w();
-        we(['//constant can be checked if is defined', 'Mbn.def(null, "Q");']);
+        we(['//constant can be checked for existence', 'Mbn.def(null, "Q");']);
 
         w("Other methods - check", "title2");
         we(['//incorrect expressions return false', 'Mbn.check("a * b *");']);
