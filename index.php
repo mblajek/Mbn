@@ -456,7 +456,7 @@ if ($vString !== null) {
                 <td colspan="6">gets string representation with changed Mbn* class params<br>params: boolean - enable
                     thousands separator, default true<br>
                     object - Mbn* params, truncation, formatting,
-                    precision, separator; empty object - inherit from class
+                    precision, separator; missing parameters are taken from class
                 </td>
             </tr>
             </tbody>
