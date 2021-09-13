@@ -119,7 +119,7 @@ if ($vString !== null) {
     <div>With Mbn library:
         <ul>
             <li>parsing invalid strings, division by zero, and many more problems are thrown as exceptions</li>
-            <li>all calculations have predictable results, e.g. 1.4 - 0.4 gives always 1, not 0.9999999999999999</li>
+            <li>all calculations have predictable results, e.g. 1.4-0.4 gives always 1, not 0.9999999999999999</li>
             <li>syntax is almost identical between JS and PHP, all operations supported by a single class</li>
             <li>fixed precision with any size of fractional part: from zero to thousands or more</li>
             <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 gives 6, =2PI gives
@@ -129,7 +129,7 @@ if ($vString !== null) {
             </li>
             <li>custom formatting: dot/comma separator, thousands separator, truncating trailing zeros</li>
             <li>exception messages can be easily translated</li>
-            <li>compatibility: PHP 5.4+, JS ES3+ (IE6+)</li>
+            <li>compatibility: PHP 5.4+ (5.4-8.1 tested), JS ES3+ (IE6+)</li>
         </ul>
     </div>
     <div>Mbn is distributed under the <a href='https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'>MIT License</a>,
