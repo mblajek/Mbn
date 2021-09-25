@@ -20,18 +20,18 @@ if ($q !== null) {
 <html lang="en">
 <head>
     <title>MbnCalc</title>
-    <link rel="icon" href="page/favicon.ico" type="image/bmp"/>
+    <link rel="icon" href="favicon.ico" type="image/png"/>
     <meta charset="UTF-8">
     <meta name="description" content="Mbn Calculator">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
     <meta name="theme-color" content="green">
-    <link rel="stylesheet" href="page/calc_style.css"/>
-    <link rel="manifest" href="page/calc_manifest.json">
+    <link rel="stylesheet" href="calc_style.css"/>
+    <link rel="manifest" href="calc_manifest.json">
 </head>
 <body>
-<script src="lib/mbn.min.js"></script>
+<script src="mbn.min.js"></script>
 <main id="main">
-    <a id="home"></a>
+    <a id="home" href="<?= env::homepage; ?>"><img src="favicom.ico" alt="home"/></a>
     <div id="buttons">
         <button onclick="mbnChange(0, true);" id="mbnST"></button>
         <button onclick="mbnChange(-1);">&lt;</button>
@@ -52,6 +52,6 @@ if ($q !== null) {
         <button id="newCalc">new window</button>
     </div>
 </main>
-<script src="page/calc_script.js"></script>
+<script src="calc_script.js"></script>
 </body>
 </html>
