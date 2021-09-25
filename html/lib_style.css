@@ -1,0 +1,166 @@
+html {
+    height: 100%;
+}
+
+body {
+    font-family: sans-serif;
+    line-height: 1.4em;
+    margin: 0;
+    height: 100%;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#topBar {
+    display: table;
+    width: calc(100% - 12px);
+    padding: 0 6px;
+    height: 50px;
+    border-radius: 0;
+    background-color: lightgray;
+    margin: 0;
+}
+
+#topBar span {
+    display: table-cell;
+    vertical-align: middle;
+    margin: 2px 6px
+}
+
+#topBar a {
+    display: inline-block;
+    color: black;
+}
+
+#scroller {
+    height: calc(100% - 54px);
+    overflow-y: auto;
+    margin: 0;
+}
+
+pre, div {
+    border-radius: 2px;
+    padding: 2px 6px 2px 6px;
+    font-size: 1em;
+    margin: 0;
+}
+
+.title1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.title2 {
+    margin-top: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    border-left: 2px solid gray;
+}
+
+.title3 {
+    font-size: 1.2em;
+}
+
+.monoInline {
+    font-family: "Consolas", monospace;
+    color: dimgray;
+    font-weight: bold;
+    background-color: whitesmoke;
+}
+
+pre, div.mono {
+    font-family: "Consolas", monospace;
+    background-color: lightgray;
+    border: 1px solid gray;
+    white-space: pre-wrap;
+}
+
+span.lb:after {
+    color: gray;
+    content: ">| ";
+}
+
+.mono span.it {
+    font-style: italic;
+    color: gray;
+}
+
+.result {
+    font-family: "Consolas", monospace;
+    border: 1px solid gray;
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 0;
+    border-radius: 2px 0 0 2px;
+}
+
+.label {
+    font-family: "Consolas", monospace;
+    border: 1px solid gray;
+    display: inline-block;
+    margin-left: 0;
+    border-radius: 0 2px 2px 0;
+    border-left: 0;
+}
+
+table {
+    border: 1px solid gray;
+    width: 100%;
+    border-radius: 2px;
+    border-spacing: 0;
+}
+
+table tr:nth-child(odd) {
+    background-color: lightgray;
+}
+
+table td, table th {
+    width: calc(100% / 6);
+    font-family: "Consolas", monospace;
+    padding: 4px;
+    border-left: 1px solid gray;
+}
+
+table th:first-child, table td:first-child {
+    border-left: 0 solid gray;
+}
+
+table tr.hidden {
+    display: none
+}
+
+body.dark {
+    background-color: #000;
+    color: #ccc;
+}
+
+body.dark pre,
+body.dark div.mono,
+body.dark table tr:nth-child(2n+1),
+body.dark #topBar {
+    background-color: #333;
+}
+
+body.dark .monoInline {
+    background-color: #222;
+    color: #aaa;
+}
+
+body.dark a {
+    color: #46e
+}
+
+body.dark a:visited {
+    color: #c3c
+}
+
+body.dark #topBar a {
+    color: #ccc;
+}

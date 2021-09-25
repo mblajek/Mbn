@@ -1,0 +1,70 @@
+body {
+    margin: 2px;
+}
+
+#main {
+    display: block;
+    border: 2px solid green;
+    max-width: 512px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2px;
+}
+
+div.info {
+    margin: 2px;
+}
+
+div#buttons {
+    float: right;
+    border: 1px solid black;
+}
+
+img[alt=home] {
+    float: left;
+    margin: -4px 2px 0 -4px;
+    image-rendering: pixelated;
+}
+
+input, textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 2px;
+    outline: none;
+}
+
+textarea {
+    resize: none;
+    overflow: hidden;
+}
+
+a {
+    color: black;
+}
+
+button, input#mbnP {
+    background-color: lightgray;
+    cursor: pointer;
+    border: none;
+    padding: 1px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+input#mbnP {
+    cursor: default;
+    background-color: white;
+    width: 30px;
+    display: inline-block;
+    text-align: center;
+}
+
+div#time {
+    float: right;
+}
+
+div#additionalOptions{
+    display: none;
+    margin-top: 4px;
+}
