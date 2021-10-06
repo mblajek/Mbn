@@ -20,18 +20,25 @@ class Router {
         $requireFile(!empty($page['path']) ? $page['path'] : $url, $query);
     }
 
-    private static function buildPath($scheme, $host) {
-        return ($scheme ?: $_SERVER['REQUEST_SCHEME']) . "://"
-           . ($host ?: $_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
+    private static function buildPath($protocol, $host) {
+        return "$protocol://" . ($host ?: $_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
     }
 
     public static function run($requireFile) {
+        $protocol = isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] :
+           (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : null);
+
+        if (!$protocol) {
+            header('HTTP/1.1 500 Internal Server Error');
+            echo "No protocol header";
+        }
+
         $redirect = null;
-        if (env::ssl && $_SERVER['REQUEST_SCHEME'] === 'http') {
+        if (env::ssl && $protocol === 'http') {
             $redirect = self::buildPath('https', null);
         }
         if (strpos($_SERVER['HTTP_HOST'], 'www.') === 0) {
-            $redirect = self::buildPath(null, substr($_SERVER['HTTP_HOST'], 4));
+            $redirect = self::buildPath($protocol, substr($_SERVER['HTTP_HOST'], 4));
         }
         if ($redirect) {
             header('Location: ' . $redirect);
