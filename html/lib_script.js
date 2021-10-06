@@ -73,7 +73,9 @@ window.addEventListener("load", function (ev) {
         var resultSpan = document.getElementById("result" + lng);
         try {
             var res = JSON.parse(result);
-            var txt = lng + " v" + res.MbnV + ": " + res.status + " (" + res.count + " tests, " + res.time + " ms)";
+            var c = res.cache ? ", from cache" : "";
+            var txt = lng + " v" + res.MbnV + ": " + res.status
+               + " (" + res.count + " tests, " + res.time + " ms" + c+ ")";
             for (var i = 0; i < res.errors.length; i++) {
                 var error = res.errors[i];
                 txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;

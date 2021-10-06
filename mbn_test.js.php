@@ -44,10 +44,11 @@ MbnErr::translate(function ($key, $value) {
 });
 
 class MbnTest {
+    const CACHE_TIME = 10;
     private static $testsAllJson = null;
     private static $phpTestResult = null;
 
-    public static function getTestsAllJson() {
+    public static function getTestsAllJson() /*:string*/ {
         if (self::$testsAllJson === null) {
             self::$testsAllJson = FileHelper::getFile('mbn_test_set.json');
         }
@@ -87,12 +88,18 @@ class MbnTest {
         return ['status' => (count($ret) === 0) ? 'OK' : 'ERR', 'count' => $i, 'errors' => $ret];
     }
 
-    public static function testMbn() {
+    private static function testMbn() /*:string*/ {
         $phpVersion = phpversion();
-        /*$phpCheckFile = 'release/php_check_' . str_replace('.', '-', $phpVersion) . '.json';
-        if (file_exists($phpCheckFile) && (time() - filemtime($phpCheckFile)) < 100) {
-            return file_get_contents($phpCheckFile);
-        }*/
+        $time = time();
+
+        $phpCheckFile = 'release/php_check_' . str_replace('.', '-', $phpVersion);
+        if (($cachedResult = FileHelper::getFile($phpCheckFile)) !== null) {
+            $cachedResultArr = json_decode($cachedResult, true);
+            if (isset($cachedResultArr['cache']) && $time - $cachedResultArr['cache'] <= self::CACHE_TIME) {
+                $cachedResultArr['cache'] = true;
+                return json_encode($cachedResultArr);
+            }
+        }
 
         $testsAll = json_decode(self::getTestsAllJson());
         $tests = array_merge($testsAll->both, $testsAll->php);
@@ -128,34 +135,40 @@ class MbnTest {
         $testPHP['time'] = round((microtime(true) - $startTimePHP) * 1000);
         $testPHP['env'] = 'PHP_' . $phpVersion;
 
-        //file_put_contents($phpCheckFile, json_encode($testPHP + ['cache' => true]));
-        self::$phpTestResult = json_encode($testPHP + ['cache' => false]);
-
-        return self::$phpTestResult;
+        FileHelper::putFile($phpCheckFile, json_encode($testPHP + ['cache' => $time]));
+        return json_encode($testPHP);
     }
 
-    public static function output($contents, $query) {
-        list ($htmlStart, $htmlEnd) = explode('|', '<html lang="en"><body><pre>|</pre></body></html>');
+    public static function testMbnResult($encode) {
+        if (!self::$phpTestResult) {
+            self::$phpTestResult = self::testMbn();
+        }
+        return $encode ? json_encode(self::$phpTestResult) : self::$phpTestResult;
+    }
+
+    public static function output($contents, $query) /*:string*/{
+        list ($htmlStart, $htmlEnd) = explode('|', '<html lang="en"><body>|</body></html>');
         switch ($query) {
             case 'php':
-                $contents = self::$phpTestResult;
+                $contents = self::testMbnResult(false);
                 break;
             case 'docker':
-                $contents = "$htmlStart" . implode("\n", array_map(function ($v) {
-                       return file_get_contents("http://mbn-php$v/mbn_test?php");
+
+                $contents = "$htmlStart<pre>" . implode('<br>', array_map(function ($v) {
+                       return env::docker ? file_get_contents("http://mbn-php$v/mbn_test?php") : "skipped $v";
                    }, ['5-4', '5-5', '5-6', '7-0', '7-1', '7-2', '7-3', '7-4', '8-0', '8-1']))
-                   . "\n\n" . self::$phpTestResult . "$htmlEnd";
+                   . "<br>---<br>" . self::$phpTestResult . "</pre>$htmlEnd";
                 break;
             case 'js':
                 header('Content-Type: application/javascript');
                 break;
             default:
-                $contents = "$htmlStart<script>$contents</script>$htmlEnd";
+                $contents = "$htmlStart<pre></pre><script>$contents</script>$htmlEnd";
         }
-        echo $contents;
+        return $contents;
     }
 }
-$phpTestResult = json_encode(MbnTest::testMbn());
+
 ob_start();
 ?>
 function displayResult(displayTestStatusOpt) {
@@ -253,10 +266,10 @@ function displayResult(displayTestStatusOpt) {
         displayTestStatus("JS", jsonEncode(ret));
     }
 
-    displayTestStatus("PHP", <?= $phpTestResult;?>);
+    displayTestStatus("PHP", <?=MbnTest::testMbnResult(true);?>);
     setTimeout(testMbn, 100);
 }
 displayResult(((typeof displayTestStatus) !== "undefined") ? displayTestStatus : undefined);
 
 <?php
-MbnTest::output(ob_get_clean(), isset($query) ? $query : null);
+echo MbnTest::output(ob_get_clean(), isset($query) ? $query : null);

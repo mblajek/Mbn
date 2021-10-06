@@ -16,7 +16,7 @@ Available for PHP Composer - https://packagist.org/packages/mblajek/mbn.
         mbn.js - JavaScript version
         mbn.php - PHP version
         mbn.d.ts - TypeScript declaration file
-        download from https://mirkl.es/n/lib#downloads
+        download from https://mbn.li#downloads
 
     Developer tools:
         mbn_test.js - Unit tests for JS version

@@ -69,6 +69,11 @@ class FileHelper {
         return null;
     }
 
+    public static function putFile($file, $contents) /*:?bool*/ {
+        $path = self::getFilePath($file);
+        return (file_put_contents($path, $contents) !== false);
+    }
+
     public static function getCachedHash() /*:?string*/ {
         $vFilePath = self::getReleaseFilePath('v');
         if (file_exists($vFilePath)) {

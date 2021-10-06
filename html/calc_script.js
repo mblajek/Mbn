@@ -126,14 +126,17 @@ window.addEventListener("load", function () {
     };
     mbnChange();
 
-    if ('serviceWorkerX' in navigator) {
+    if ('serviceWorker' in navigator) {
+        var locationReload = function () {
+            setTimeout(location.reload.bind(location), 250);
+        }
         navigator.serviceWorker.register('calc_worker.js', {scope: "/calc"})
            .catch(function (error) {
                console.error('Registration failed: ' + error);
            }).then(function (sw) {
             if (sw.active === null) {
                 out.print("reloading 2/2")
-                location.reload();
+                locationReload();
                 return;
             }
             elements.reloadAll.addEventListener("click", function () {
@@ -142,7 +145,7 @@ window.addEventListener("load", function () {
                     sw.unregister().then(function () {
                         if (event.data.status === "OK") {
                             out.print("reloading 1/2")
-                            location.reload();
+                            locationReload();
                         } else {
                             out.error(event.data.message);
                         }
@@ -153,7 +156,7 @@ window.addEventListener("load", function () {
                 }
             });
         });
-    }else{
+    } else {
         elements.reloadAll.disabled = true;
     }
     document.getElementById("newCalc").addEventListener("click", function () {

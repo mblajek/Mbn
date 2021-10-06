@@ -31,7 +31,7 @@ if ($q !== null) {
 <body>
 <script src="mbn.min.js"></script>
 <main id="main">
-    <a id="home" href="<?= env::homepage; ?>"><img src="favicom.ico" alt="home"/></a>
+    <a id="home" href="<?=env::homepage;?>"><img src="favicom.ico" alt="home"/></a>
     <div id="buttons">
         <button onclick="mbnChange(0, true);" id="mbnST"></button>
         <button onclick="mbnChange(-1);">&lt;</button>
