@@ -31,7 +31,7 @@ class Router {
             $redirect = self::buildPath('https', null);
         }
         if (strpos($_SERVER['HTTP_HOST'], 'www.') === 0) {
-            $redirect = self::buildPath(null, substr($_SERVER['HTTP_HOST'], strlen('www.')));
+            $redirect = self::buildPath(null, substr($_SERVER['HTTP_HOST'], 4));
         }
         if ($redirect) {
             header('Location: ' . $redirect);
@@ -44,6 +44,3 @@ class Router {
         self::runPath($requireFile, $url, $query);
     }
 }
-/*echo '<pre>';
-var_dump(get_defined_vars());
-die;*/
