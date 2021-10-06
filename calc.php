@@ -39,7 +39,7 @@ if ($q !== null) {
         <button onclick="mbnChange(1);">&gt;</button>
         <button id="addOpt">+</button>
     </div>
-    <div class="info"><a href="lib">Mbn</a>.calc / const: PI, E, eps</div>
+    <div class="info"><a href=".">Mbn</a>.calc / const: PI, E, eps</div>
     <div class="info">func: abs, ceil, floor, round, sqrt, sgn, int</div>
     <textarea rows="2" id="inputField"></textarea>
     <div style="display: block">

@@ -30,7 +30,7 @@ class Router {
 
         if (!$protocol) {
             header('HTTP/1.1 500 Internal Server Error');
-            echo "No protocol header";
+            echo 'No protocol header';
         }
 
         $redirect = null;
