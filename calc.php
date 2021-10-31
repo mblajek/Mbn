@@ -1,20 +1,19 @@
 <?php
 set_time_limit(1);
-$q = filter_input(INPUT_GET, 'text');
-$q = ($q === null) ? filter_input(INPUT_POST, 'text') : $q;
-if ($q !== null) {
-    if ($q === 'worker.js') {
-        header('Content-Type: text/javascript');
-        readfile('page/calc_worker.js');
-        die;
-    }
+function php_calc($query) {
     header('Content-Type: text/plain');
+    parse_str($query, $queryArgs);
+    $text = isset($queryArgs['text']) ? $queryArgs['text'] : '';
     require_once 'release/mbn.min.php';
     try {
-        die(Mbn::calc($q));
+        echo Mbn::calc($text);
     } catch (Exception $e) {
-        die($e->getMessage());
+        echo $e->getMessage();
     }
+    die;
+}
+if (!empty($query)) {
+    php_calc($query);
 }
 ?><!DOCTYPE html>
 <html lang="en">
@@ -31,7 +30,7 @@ if ($q !== null) {
 <body>
 <script src="mbn.min.js"></script>
 <main id="main">
-    <a id="home" href="<?=env::homepage;?>"><img src="favicom.ico" alt="home"/></a>
+    <a id="home" href="<?= env::homepage; ?>"><img src="favicom.ico" alt="home"/></a>
     <div id="buttons">
         <button onclick="mbnChange(0, true);" id="mbnST"></button>
         <button onclick="mbnChange(-1);">&lt;</button>

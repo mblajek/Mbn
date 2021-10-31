@@ -54,6 +54,8 @@ window.addEventListener("load", function (ev) {
             var releaseBtn = document.getElementById("releaseBtn");
             releaseBtn.style.visibility = "visible";
             releaseBtn.onclick = function () {
+                releaseBtn.onclick = function () {
+                };
                 releaseBtn.style.color = "gray";
                 var xmlhttp = new XMLHttpRequest();
                 xmlhttp.onreadystatechange = function () {
@@ -62,7 +64,7 @@ window.addEventListener("load", function (ev) {
                         location.reload();
                     }
                 };
-                xmlhttp.open("POST", "mbn_release.php", true);
+                xmlhttp.open("POST", "mbn_release", true);
                 xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                 xmlhttp.send("");
             };
@@ -75,7 +77,7 @@ window.addEventListener("load", function (ev) {
             var res = JSON.parse(result);
             var c = res.cache ? ", from cache" : "";
             var txt = lng + " v" + res.MbnV + ": " + res.status
-               + " (" + res.count + " tests, " + res.time + " ms" + c+ ")";
+               + " (" + res.count + " tests, " + res.time + " ms" + c + ")";
             for (var i = 0; i < res.errors.length; i++) {
                 var error = res.errors[i];
                 txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;

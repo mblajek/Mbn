@@ -5,7 +5,8 @@ class Router {
        'calc' => [],
        '' => ['path' => 'lib'],
        'LICENSE' => ['redirect' => 'https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'],
-       'mbn_test' => ['path' => 'mbn_test.js']
+       'mbn_test' => ['path' => 'mbn_test.js'],
+       'mbn_release' => ['path' => 'mbn_release'],
     ];
 
     private static function runPath($requireFile, $url, $query) /*:void*/ {

@@ -22,7 +22,7 @@ class FileHelper {
     ];
 
     private static function getReleaseFilePath($file) /*:string*/ {
-        return '../release/' . (ctype_upper($file[0]) ? '_' : '') . $file;
+        return '../release/' . ($file && ctype_upper($file[0]) ? '_' : '') . $file;
     }
 
     private static function getFilePath($file) /*:string*/ {
@@ -61,17 +61,27 @@ class FileHelper {
         die;
     }
 
-    public static function getFile($file) /*:?string*/ {
-        $path = self::getFilePath($file);
+    public static function getFile($file, $release = false) /*:?string*/ {
+        $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
         if (file_exists($path)) {
             return file_get_contents($path);
         }
         return null;
     }
 
-    public static function putFile($file, $contents) /*:?bool*/ {
-        $path = self::getFilePath($file);
-        return (file_put_contents($path, $contents) !== false);
+    public static function putFile($file, $contents, $release = false) /*:?bool*/ {
+        $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
+        $addNewline = ($contents && $contents[strlen($contents) - 1] === PHP_EOL) ? '' : PHP_EOL;
+        return (file_put_contents($path, $contents . $addNewline) !== false);
+    }
+
+    public static function clearRelease() {
+        $releaseDirPath = self::getReleaseFilePath('');
+        foreach (scandir($releaseDirPath) as $file) {
+            if ($file && $file[0] !== '.') {
+                unlink($releaseDirPath . $file);
+            }
+        }
     }
 
     public static function getCachedHash() /*:?string*/ {

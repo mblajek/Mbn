@@ -1,7 +1,4 @@
 <?php
-$cachedHash = FileHelper::getCachedHash();
-$currentHash = FileHelper::getCurrentHash();
-$hashChanged = ($cachedHash !== $currentHash);
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +14,7 @@ $hashChanged = ($cachedHash !== $currentHash);
     //avoid any caching
     <?php readfile('../mbn.js') ?>
     var releaseStatus = {
-        hashChanged: <?= json_encode($hashChanged) ?>,
+        hashChanged: <?= json_encode(FileHelper::getCachedHash() !== FileHelper::getCurrentHash()) ?>,
         passedPHP: false,
         passedJS: false
     };
@@ -25,8 +22,6 @@ $hashChanged = ($cachedHash !== $currentHash);
         console.log(result + " [" + lang + "]");
     };
 </script>
-
-<script src="lib_script.js"></script>
 
 <div id="topBar">
     <span>
@@ -74,8 +69,8 @@ $hashChanged = ($cachedHash !== $currentHash);
     </div>
     <div>Available for PHP Composer via <a href='https://packagist.org/packages/mblajek/mbn'>Packagist</a>.</div>
 
-    <div class="title2" id="tests_and_benchmark">Tests and benchmark<span id="releaseBtn"
-                                                                          style="cursor:pointer; visibility:hidden;"> &#8635;</span>
+    <div class="title2" id="tests_and_benchmark">Tests and benchmark<span
+           id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>
     </div>
     <pre><span class="lb"></span><strong id="resultPHP">..</strong></pre>
     <pre><span class="lb"></span><strong id="resultJS">..</strong></pre>
@@ -1052,6 +1047,8 @@ $hashChanged = ($cachedHash !== $currentHash);
             </ul>
         </li>
     </ul>
+
+    <script src="lib_script.js"></script>
 
     <div class="title2" id="other_methods_calc">Other methods - calc</div>
     <script>
