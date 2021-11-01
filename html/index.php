@@ -7,8 +7,7 @@ $requireFile = function ($name, $query = null) {
         require_once $requirePath;
         return true;
     }
-    header('HTTP/1.1 500 Internal Server Error');
-    echo "Class not found: $name";
+    (new SimpleHtml(500))->addErrorDiv("Class not found: $name")->render();
     die;
 };
 

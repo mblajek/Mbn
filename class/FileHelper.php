@@ -55,8 +55,7 @@ class FileHelper {
             header('Content-Disposition: ' . ($show ? 'inline' : 'attachment') . '; filename="' . $url . '"');
             readfile($foundFilePath);
         } else {
-            header('HTTP/1.1 404 Not Found');
-            echo "File not found: $url";
+            (new SimpleHtml(404))->addErrorDiv("File not found: $url")->render();
         }
         die;
     }
@@ -65,6 +64,17 @@ class FileHelper {
         $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
         if (file_exists($path)) {
             return file_get_contents($path);
+        }
+        return null;
+    }
+
+    public static function getZipFile($file, $release = false) /*:?ZipArchive*/ {
+        $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
+        if (file_exists($path)) {
+            $zip = new ZipArchive();
+            if ($zip->open($path)) {
+                return $zip;
+            }
         }
         return null;
     }

@@ -7,6 +7,7 @@ class Router {
        'LICENSE' => ['redirect' => 'https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'],
        'mbn_test' => ['path' => 'mbn_test.js'],
        'mbn_release' => ['path' => 'mbn_release'],
+       'mbn_update' => ['path' => 'mbn_update'],
     ];
 
     private static function runPath($requireFile, $url, $query) /*:void*/ {
@@ -21,25 +22,29 @@ class Router {
         $requireFile(!empty($page['path']) ? $page['path'] : $url, $query);
     }
 
-    private static function buildPath($protocol, $host) {
+    private static function getProtocol() /*:string*/ {
+        $protocol = isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] :
+           (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : null);
+        if (!$protocol) {
+            (new SimpleHtml(500))->addErrorDiv('No protocol header')->render();
+            die;
+        }
+        return $protocol;
+    }
+
+    private static function buildPath($protocol, $host) /*:void*/ {
         return "$protocol://" . ($host ?: $_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
     }
 
-    public static function run($requireFile) {
-        $protocol = isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] :
-           (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) ? $_SERVER['HTTP_X_FORWARDED_PROTO'] : null);
-
-        if (!$protocol) {
-            header('HTTP/1.1 500 Internal Server Error');
-            echo 'No protocol header';
-        }
-
+    public static function run($requireFile) /*:void*/ {
+        $protocol = self::getProtocol();
         $redirect = null;
-        if (env::ssl && $protocol === 'http') {
-            $redirect = self::buildPath('https', null);
-        }
         if (strpos($_SERVER['HTTP_HOST'], 'www.') === 0) {
             $redirect = self::buildPath($protocol, substr($_SERVER['HTTP_HOST'], 4));
+        }
+        if (env::ssl && $protocol === 'http') {
+            // www. - access without https
+            $redirect = $redirect ? null : self::buildPath('https', null);
         }
         if ($redirect) {
             header('Location: ' . $redirect);

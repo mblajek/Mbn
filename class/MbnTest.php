@@ -92,8 +92,8 @@ class MbnTest {
         $phpVersion = phpversion();
         $time = time();
 
-        $phpCheckFile = 'release/php_check_' . str_replace('.', '-', $phpVersion);
-        if (($cachedResult = FileHelper::getFile($phpCheckFile)) !== null) {
+        $phpCheckFile = 'php_check_' . str_replace('.', '-', $phpVersion);
+        if (($cachedResult = FileHelper::getFile($phpCheckFile, true)) !== null) {
             $cachedResultArr = json_decode($cachedResult, true);
             if (isset($cachedResultArr['cache']) && $time - $cachedResultArr['cache'] <= self::CACHE_TIME) {
                 $cachedResultArr['cache'] = true;
@@ -135,7 +135,7 @@ class MbnTest {
         $testPHP['time'] = round((microtime(true) - $startTimePHP) * 1000);
         $testPHP['env'] = 'PHP_' . $phpVersion;
 
-        FileHelper::putFile($phpCheckFile, json_encode($testPHP + ['cache' => $time]));
+        FileHelper::putFile($phpCheckFile, json_encode($testPHP + ['cache' => $time]), true);
         return json_encode($testPHP);
     }
 
@@ -146,26 +146,27 @@ class MbnTest {
         return $encode ? json_encode(self::$phpTestResult) : self::$phpTestResult;
     }
 
-    public static function output($contents, $query) /*:string*/ {
-        list ($htmlStart, $htmlEnd) = explode('|', '<html lang="en"><body>|</body></html>');
+    public static function output($contents, $query) /*:void*/ {
         switch ($query) {
             case 'php':
-                $contents = self::testMbnResult(false);
+                echo self::testMbnResult(false);
                 break;
             case 'js':
                 header('Content-Type: application/javascript');
+                echo $contents;
                 break;
             case 'docker':
                 if (env::docker) {
-                    $contents = "$htmlStart<pre>" . implode('<br>', array_map(function ($v) {
-                           return file_get_contents("http://mbn-php$v/mbn_test?php");
-                       }, ['5-4', '5-5', '5-6', '7-0', '7-1', '7-2', '7-3', '7-4', '8-0', '8-1']))
-                       . "<br>---<br>" . self::$phpTestResult . "</pre>$htmlEnd";
-                    break;
+                    (new SimpleHtml())->addPre(array_merge(array_map(function ($v) {
+                        return file_get_contents("http://mbn-php$v/mbn_test?php");
+                    }, ['5-4', '5-5', '5-6', '7-0', '7-1', '7-2', '7-3', '7-4', '8-0', '8-1']),
+                       ["---", self::$phpTestResult]))->render();
+                } else{
+                    (new SimpleHtml())->addErrorDiv('docker disabled')->render();
                 }
+                break;
             default:
-                $contents = "$htmlStart<pre></pre><script>$contents</script>$htmlEnd";
+                (new SimpleHtml())->addPre()->addScript($contents)->render();
         }
-        return $contents;
     }
 }

@@ -1,8 +1,4 @@
-<?php
-ob_start();
-
-
-?>
+<?php ob_start(); ?>
 function displayResult(displayTestStatusOpt) {
     var displayTestStatus = displayTestStatusOpt || (function (lang, result) {
         document.getElementsByTagName('pre')[0].innerHTML += ((result + " [" + lang + "]<br>"))
@@ -104,4 +100,4 @@ function displayResult(displayTestStatusOpt) {
 displayResult(((typeof displayTestStatus) !== "undefined") ? displayTestStatus : undefined);
 
 <?php
-echo MbnTest::output(ob_get_clean(), isset($query) ? $query : null);
+MbnTest::output(ob_get_clean(), isset($query) ? $query : null);
