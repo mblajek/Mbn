@@ -68,6 +68,11 @@ class FileHelper {
         return null;
     }
 
+    public static function deleteFile($file, $release = false) /*:?bool*/ {
+        $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
+        return (unlink($path) !== false);
+    }
+
     public static function putFile($file, $contents, $release = false, $binary = false) /*:?bool*/ {
         $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
         $addNewline = ($binary || ($contents && $contents[strlen($contents) - 1] === PHP_EOL)) ? '' : PHP_EOL;

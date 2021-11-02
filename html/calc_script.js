@@ -130,7 +130,7 @@ window.addEventListener("load", function () {
         var locationReload = function () {
             setTimeout(location.reload.bind(location), 250);
         }
-        navigator.serviceWorker.register('calc_worker.js', {scope: "/calc"})
+        navigator.serviceWorker.register('calc_worker.js', {scope: "calc"})
            .catch(function (error) {
                console.error('Registration failed: ' + error);
            }).then(function (sw) {

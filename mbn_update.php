@@ -1,7 +1,7 @@
 <?php
 $githubZip = 'github.zip';
 
-function updateMbn($githubZip) {
+function updateMbn($githubZip, $query) {
     function getAllFilesZip($githubZip) {
         $zip = FileHelper::getZipFile($githubZip, true);
         if (!$zip) {
@@ -24,19 +24,21 @@ function updateMbn($githubZip) {
     }
 
     $githubZipContents = file_get_contents(env::githubZip);
-    /*$localZipContents = FileHelper::getFile($githubZip, true);
+    $localZipContents = FileHelper::getFile($githubZip, true);
     if ($githubZipContents === $localZipContents) {
         return 'already up-to-date';
-    }*/
-    FileHelper::putFile($githubZip, $githubZipContents, true, true);
+    }
 
+    FileHelper::putFile($githubZip, $githubZipContents, true, true);
     $allFilesAndContentsZip = getAllFilesZip($githubZip);
     if (is_string($allFilesAndContentsZip)) {
         return $allFilesAndContentsZip;
     }
+    FileHelper::deleteFile($githubZip, true);
 
     $allFiles = FileHelper::getAllFiles();
     $allFilesZip = $allFilesAndContentsZip['files'];
+    $allContentsZip = $allFilesAndContentsZip['contents'];
 
     $commonFiles = [];
     $changedFiles = [];
@@ -50,7 +52,22 @@ function updateMbn($githubZip) {
             $changedFiles[$file] = ['dir' => $dirFile, 'zip' => $zipFile];
         }
     }
-    return print_r($commonFiles, true) . PHP_EOL . print_r($changedFiles, true);
+    $updateInfo = implode(', ', $commonFiles) . PHP_EOL . print_r($changedFiles, true);
+    $updateHash = hash('sha256', $updateInfo);
+
+    if ($query !== $updateHash) {
+        return $updateInfo . $updateHash;
+    }
+    foreach ($changedFiles as $fileName => $changedFile) {
+        if ($changedFile['zip'] !== null) {
+            FileHelper::putFile($fileName, $allContentsZip[$fileName]);
+        } else {
+            FileHelper::deleteFile($fileName);
+        }
+    }
+
+    FileHelper::putFile($githubZip, $githubZipContents, true, true);
+    return $updateInfo . 'updated';
 }
 
-echo updateMbn($githubZip);
+echo updateMbn($githubZip, isset($query) ? $query : '');

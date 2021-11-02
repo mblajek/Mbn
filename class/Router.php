@@ -19,7 +19,7 @@ class Router {
         if (!empty($page['getFile'])) {
             FileHelper::downloadFileAndDie($url, $query === 'show');
         }
-        if(!empty($page['type'])){
+        if (!empty($page['type'])) {
             header('Content-Type: ' . $page['type']);
         }
         $requireFile(!empty($page['path']) ? $page['path'] : $url, $query);
@@ -54,7 +54,8 @@ class Router {
             die;
         }
 
-        $url = isset($_SERVER['REDIRECT_URL']) ? ltrim($_SERVER['REDIRECT_URL'], '/') : '';
+        $baseLen = isset($_SERVER['REDIRECT_BASE']) ? strlen($_SERVER['REDIRECT_BASE']) : 0;
+        $url = substr(isset($_SERVER['REDIRECT_URL']) ? ltrim($_SERVER['REDIRECT_URL'], '/') : '', $baseLen);
         $query = isset($_SERVER['REDIRECT_QUERY_STRING']) ? trim($_SERVER['REDIRECT_QUERY_STRING'], '/') : '';
 
         self::runPath($requireFile, $url, $query);

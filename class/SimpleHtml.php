@@ -36,6 +36,7 @@ class SimpleHtml {
                 header('HTTP/1.1 500 Internal Server Error');
                 break;
         }
+        header('Content-Type: text/html');
         echo '<html lang="en"><head><title>Mbn Library</title></head><body>' . $this->contents . '</body></html>';
     }
 }
