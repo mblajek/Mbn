@@ -54,8 +54,8 @@ class Router {
             die;
         }
 
-        $baseLen = isset($_SERVER['REDIRECT_BASE']) ? strlen($_SERVER['REDIRECT_BASE']) : 0;
-        $url = substr(isset($_SERVER['REDIRECT_URL']) ? ltrim($_SERVER['REDIRECT_URL'], '/') : '', $baseLen);
+        $contextLen = isset($_SERVER['CONTEXT_PREFIX']) ? strlen($_SERVER['CONTEXT_PREFIX']) : 0;
+        $url = substr(isset($_SERVER['REDIRECT_URL']) ? ltrim($_SERVER['REDIRECT_URL'], '/') : '', $contextLen);
         $query = isset($_SERVER['REDIRECT_QUERY_STRING']) ? trim($_SERVER['REDIRECT_QUERY_STRING'], '/') : '';
 
         self::runPath($requireFile, $url, $query);
