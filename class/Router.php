@@ -6,8 +6,8 @@ class Router {
        '' => ['path' => 'lib'],
        'LICENSE' => ['redirect' => 'https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'],
        'mbn_test' => ['path' => 'mbn_test.js'],
-       'mbn_release' => ['path' => 'mbn_release'],
-       'mbn_update' => ['path' => 'mbn_update'],
+       'mbn_release' => ['path' => 'mbn_release', 'type' => 'text/plain'],
+       'mbn_update' => ['path' => 'mbn_update', 'type' => 'text/plain'],
     ];
 
     private static function runPath($requireFile, $url, $query) /*:void*/ {
@@ -18,6 +18,9 @@ class Router {
         }
         if (!empty($page['getFile'])) {
             FileHelper::downloadFileAndDie($url, $query === 'show');
+        }
+        if(!empty($page['type'])){
+            header('Content-Type: ' . $page['type']);
         }
         $requireFile(!empty($page['path']) ? $page['path'] : $url, $query);
     }

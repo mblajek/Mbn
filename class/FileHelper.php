@@ -68,20 +68,9 @@ class FileHelper {
         return null;
     }
 
-    public static function getZipFile($file, $release = false) /*:?ZipArchive*/ {
+    public static function putFile($file, $contents, $release = false, $binary = false) /*:?bool*/ {
         $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
-        if (file_exists($path)) {
-            $zip = new ZipArchive();
-            if ($zip->open($path)) {
-                return $zip;
-            }
-        }
-        return null;
-    }
-
-    public static function putFile($file, $contents, $release = false) /*:?bool*/ {
-        $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
-        $addNewline = ($contents && $contents[strlen($contents) - 1] === PHP_EOL) ? '' : PHP_EOL;
+        $addNewline = ($binary || ($contents && $contents[strlen($contents) - 1] === PHP_EOL)) ? '' : PHP_EOL;
         return (file_put_contents($path, $contents . $addNewline) !== false);
     }
 
@@ -108,5 +97,36 @@ class FileHelper {
             return hash('sha256', implode('', array_map('file_get_contents', $files)));
         }
         return null;
+    }
+
+    public static function getZipFile($file, $release = false) /*:?ZipArchive*/ {
+        $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
+        if (file_exists($path)) {
+            $zip = new ZipArchive();
+            if ($zip->open($path)) {
+                return $zip;
+            }
+        }
+        return null;
+    }
+
+    public static function getAllFiles($dirPath = '', $depth = 2) {
+        $ret = [];
+        $dirFullPath = self::getFilePath($dirPath);
+        foreach (scandir($dirFullPath) as $file) {
+            $filePath = $dirPath ? "$dirPath/$file" : $file;
+            if ($file === '.' || $file === '..' || $filePath === 'release' || $filePath === 'env.php'
+               || $filePath === '.git' || $filePath === '.idea') {
+                continue;
+            }
+            $fileFullPath = self::getFilePath($filePath);
+            if (!is_dir($fileFullPath)) {
+                $fileContents = self::getFile($filePath);
+                $ret[$filePath] = strlen($fileContents) . '-' . hash('sha256', $fileContents);
+            } elseif ($depth) {
+                $ret += self::getAllFiles($filePath, $depth - 1);
+            }
+        }
+        return $ret;
     }
 }

@@ -27,7 +27,7 @@ class SimpleHtml {
         return $this;
     }
 
-    public function render($die = false) {
+    public function render() {
         switch ($this->code) {
             case 404:
                 header('HTTP/1.1 404 Not Found');
@@ -37,8 +37,5 @@ class SimpleHtml {
                 break;
         }
         echo '<html lang="en"><head><title>Mbn Library</title></head><body>' . $this->contents . '</body></html>';
-        if ($die) {
-            die();
-        }
     }
 }
