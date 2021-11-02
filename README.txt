@@ -1,28 +1,29 @@
 Mbn (Multi-byte number) Library
-Library for PHP and JS to do calculations with any precision and correct (half-up) approximations
 
-Author: Mikołaj Błajek
-mblajek_mbn(at)mailplus.pl
-https://github.com/mblajek/Mbn/blob/master/LICENSE.txt
+Library for PHP and JS to do calculations with any precision and correct (half-up) rounding
 
-project page: https://mbn.li - library files available there
-Available for PHP Composer - https://packagist.org/packages/mblajek/mbn.
+Project page: https://mbn.li
 
-    Pages:
-        index.php - Main page - description of library with examples, also runs unit tests
-        calc.php - Calculator based on library ( https://mbn.li/calc )
+Available for PHP Composer: https://packagist.org/packages/mblajek/mbn
 
-    Library:
-        mbn.js - JavaScript version
-        mbn.php - PHP version
-        mbn.d.ts - TypeScript declaration file
-        download from https://mbn.li#downloads
+Repository contains
+    library files
+    home page
+    simple PWA calculator
+    dockerfiles with supported environments
+    and some tools for:
+        updating page from GitHub
+        testing php and js versions
+        preparing library files to download
 
-    Developer tools:
-        mbn_test.js - Unit tests for JS version
-        mbn_test.php - Unit tests for PHP version
-        mbn_test_set.json - Common set of tests
-        mbn_release.php - Generate minified versions to /release/ folder
-        legacy_js.php - runs JS tests in ES3 environment
+Page needs env interface in env.php file:
 
-Code is optimized for speed and size; not for readability.
+interface env {
+    const ssl = false; // redirect to ssl
+    const docker = true; // docker environment for testing all versions from docker-compose
+    // url to GitHub repository zip download
+    const githubZip = 'https://github.com/mblajek/Mbn/archive/refs/heads/master.zip';
+}
+
+Code is optimized for speed and size; not for readability
+Library is PHP 5.4 compatible, so whole repository is limited to PHP 5.4
