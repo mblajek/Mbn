@@ -47,6 +47,10 @@ function updateMbn($githubZip, $query) {
             $changedFiles[$file] = ['dir' => $dirFile, 'zip' => $zipFile];
         }
     }
+    if (count($changedFiles) === 0) {
+        return 'already up-to-date';
+    }
+
     $updateInfo = implode(', ', $commonFiles) . PHP_EOL . print_r($changedFiles, true);
     $updateHash = hash('sha256', $updateInfo);
 
