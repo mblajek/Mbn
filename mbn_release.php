@@ -1,22 +1,24 @@
 <?php
 
 function releaseMbn() {
-    if (!is_dir('release') && !mkdir('release') && !is_dir('release')) {
-        return 'cannot create release folder';
-    }
-    $oldHash = null;
-    if (file_exists('release/v')) {
-        $oldHash = json_decode(file_get_contents('release/v'))->hash;
-    }
+    $newHash = FileHelper::getCurrentHash();
 
-    $mbn_js = file_get_contents('mbn.js');
-    $mbn_php = file_get_contents('mbn.php');
-    $mbn_d_ts = file_get_contents('mbn.d.ts');
+    $mbn_js = FileHelper::getFile('mbn.js');
+    $mbn_php = FileHelper::getFile('mbn.php');
+    $mbn_d_ts = FileHelper::getFile('mbn.d.ts');
+    $filesToSave = [];
 
-    $newHash = hash('sha256', $mbn_js . $mbn_php . $mbn_d_ts);
-
-    if ($oldHash === $newHash) {
+    if (FileHelper::getCachedHash() === $newHash) {
         return 'already up-to-date';
+    }
+
+    function getVersion($code) {
+        preg_match('/MbnV = [\'"]([\d.]+)[\'"];/', $code, $varr);
+        return 'v' . (isset($varr[1]) ? $varr[1] : '');
+    }
+
+    function removePhpTag($code, $replace = '') {
+        return trim(preg_replace('/^<\?php\s*/i', $replace, $code));
     }
 
     function checkMinifyJS(&$errors, $code) {
@@ -114,15 +116,8 @@ function releaseMbn() {
             $c0 = $c;
             $stSpace = false;
         }
-        $tempFile = 'release/mbn.min.php.temp';
-        file_put_contents($tempFile, $mbn_min_php_out);
-        //test mbn.min.php
-        /** @noinspection PhpIncludeInspection */
-        require_once $tempFile;
-        unlink($tempFile);
-        ob_start();
-        require_once 'mbn_test.php';
-        $minPhpObj = json_decode(ob_get_clean());
+        eval(removePhpTag($mbn_min_php_out));
+        $minPhpObj = json_decode(MbnTest::testMbnResult(false));
         if ($minPhpObj->status !== 'OK') {
             $errors[] = ['PHP' => 'Status !== OK'];
             foreach ($minPhpObj->errors as $error) {
@@ -154,13 +149,9 @@ function releaseMbn() {
         return $errStr;
     }
 
-    function getVersion($code) {
-        preg_match('/MbnV = [\'"]([\d.]+)[\'"];/', $code, $varr);
-        return 'v' . (isset($varr[1]) ? $varr[1] : '');
-    }
 
-    $license = '/* Mbn {V} / ' . date('d.m.Y') . ' | https://mirkl.es/n/lib | Copyright (c) 2016-' . date('Y')
-       . ' Mikołaj Błajek | https://mirkl.es/n/LICENSE */' . PHP_EOL;
+    $license = '/* Mbn {V} / ' . date('d.m.Y') . ' | https://mbn.li | Copyright (c) 2016-' . date('Y')
+       . ' Mikołaj Błajek | https://mbn.li/LICENSE */' . PHP_EOL;
 
     $versionJs = getVersion($mbn_js);
     $versionPhp = getVersion($mbn_php);
@@ -168,47 +159,38 @@ function releaseMbn() {
     $licenseJs = str_replace('{V}', $versionJs, $license);
     $licensePhp = '<?php ' . str_replace('{V}', $versionPhp, $license);
 
-    $phpOpenTagRx = '/^<\?php\s*/i';
+    $filesToSave['mbn.php'] = removePhpTag($mbn_php, $licensePhp);
+    $filesToSave['mbn.min.php'] = removePhpTag($mbn_min_php, $licensePhp);
+    $filesToSave['mbn.js'] = preg_replace('/^\s*/', $licenseJs, $mbn_js);
+    $filesToSave['mbn.min.js'] = preg_replace('/^\s*/', $licenseJs, $mbn_min_js);
+    $filesToSave['mbn.d.ts'] = preg_replace('/^\s*/', $licenseJs, $mbn_d_ts);
 
-    file_put_contents('release/mbn.php', preg_replace($phpOpenTagRx, $licensePhp, $mbn_php));
-    file_put_contents('release/mbn.min.php', preg_replace($phpOpenTagRx, $licensePhp, $mbn_min_php));
-
-    file_put_contents('release/mbn.js', preg_replace('/^\s*/', $licenseJs, $mbn_js));
-    file_put_contents('release/mbn.min.js', preg_replace('/^\s*/', $licenseJs, $mbn_min_js));
-
-    file_put_contents('release/mbn.d.ts', preg_replace('/^\s*/', $licenseJs, $mbn_d_ts));
-
-    //split into files
-    $namespace = 'namespace Mbn;' . PHP_EOL;
+    //split into class files
     $mbnClasses = [];
     $mbnClassName = null;
-
-    foreach (explode(PHP_EOL, trim(preg_replace($phpOpenTagRx, '', $mbn_php))) as $line) {
-        $match = [];
-        if (preg_match('/^(?:final\\s+)?class\\s+(\\w+)(?:\\s+extends\\s+(\\w+))?/', trim($line), $match)) {
+    foreach (explode(PHP_EOL, removePhpTag($mbn_php)) as $line) {
+        $line = trim($line, "\n\r");
+        if (preg_match('/^class\\s+(\\w+)(?:\\s+extends\\s+(\\w+))?/', trim($line), $match)) {
             $mbnClassName = $match[1];
-            if (!empty($match[1])) {
+            $mbnClasses[$mbnClassName] = 'namespace Mbn;' . PHP_EOL;
+            if (!empty($match[2])) {
                 $line = preg_replace('/(class\\s+\\w+\\s+extends\\s+)(\\w+)/', '$1\\\\$2', $line, 1);
             }
         }
         if ($mbnClassName !== null) {
-            $mbnClasses[$mbnClassName][] = $line;
+            $mbnClasses[$mbnClassName] .= $line . PHP_EOL;
         }
     }
-
-    foreach ($mbnClasses as $mbnClassName => &$mbnClassLines) {
-        if ($mbnClassLines[count($mbnClassLines) - 1] !== '') {
-            $mbnClassLines[] = '';
-        }
-        file_put_contents('release/_' . $mbnClassName . '.php', $licensePhp . $namespace . implode(PHP_EOL, $mbnClassLines));
+    foreach ($mbnClasses as $mbnClassName => $mbnClassLines) {
+        $filesToSave[$mbnClassName . '.php'] = $licensePhp . $mbnClassLines;
     }
-    unset($mbnClassLines);
 
-    file_put_contents('release/v', json_encode([
-       'mbn_js' => $versionJs,
-       'mbn_php' => $versionPhp,
-       'hash' => $newHash
-    ]));
+    $filesToSave['v'] = json_encode(['mbn_js' => $versionJs, 'mbn_php' => $versionPhp, 'hash' => $newHash]);
+
+    FileHelper::clearRelease();
+    foreach ($filesToSave as $fileName => $fileContents) {
+        FileHelper::putFile($fileName, $fileContents, true);
+    }
 
     return 'update finished: JS ' . $versionJs . ', PHP ' . $versionPhp;
 }

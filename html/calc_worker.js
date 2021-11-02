@@ -1,4 +1,4 @@
-var cacheName = "v1.01";
+var cacheName = "v1.02";
 /** @var {Cache} */
 var cache = null;
 
@@ -10,16 +10,8 @@ function initCache(event) {
 }
 
 function installFunction() {
-    return cache.addAll([
-        'page/global_favicon.ico',
-        'lib/mbn.min.js',
-        'calc',
-        'page/favicon.ico',
-        'page/calc_style.css',
-        'page/calc_manifest.json',
-        'page/calc_script.js',
-        'page/calc_icon_1024.png'
-    ]);
+    return cache.addAll(['calc', 'mbn.min.js', 'favicon.ico', 'favicom.ico',
+        'calc_style.css', 'calc_script.js', 'calc_manifest.json', 'calc_icon_1024.png']);
 }
 
 function fetchFunction(event) {

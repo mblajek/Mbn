@@ -54,6 +54,8 @@ window.addEventListener("load", function (ev) {
             var releaseBtn = document.getElementById("releaseBtn");
             releaseBtn.style.visibility = "visible";
             releaseBtn.onclick = function () {
+                releaseBtn.onclick = function () {
+                };
                 releaseBtn.style.color = "gray";
                 var xmlhttp = new XMLHttpRequest();
                 xmlhttp.onreadystatechange = function () {
@@ -62,18 +64,20 @@ window.addEventListener("load", function (ev) {
                         location.reload();
                     }
                 };
-                xmlhttp.open("POST", "mbn_release.php", true);
+                xmlhttp.open("POST", "mbn_release", true);
                 xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                 xmlhttp.send("");
             };
         }
     }
 
-    function displayTestStatus(lng, result) {
+    displayTestStatus = function (lng, result) {
         var resultSpan = document.getElementById("result" + lng);
         try {
             var res = JSON.parse(result);
-            var txt = lng + " v" + res.MbnV + ": " + res.status + " (" + res.count + " tests, " + res.time + " ms)";
+            var c = res.cache ? ", from cache" : "";
+            var txt = lng + " v" + res.MbnV + ": " + res.status
+               + " (" + res.count + " tests, " + res.time + " ms" + c + ")";
             for (var i = 0; i < res.errors.length; i++) {
                 var error = res.errors[i];
                 txt += "\n\n" + error.id + ") " + error.code + "\n!) " + error.correct + "\n=) " + error.incorrect;
@@ -88,17 +92,10 @@ window.addEventListener("load", function (ev) {
     }
 
     setTimeout(function () {
-        var requestTestPhp = new XMLHttpRequest();
-        requestTestPhp.onreadystatechange = function () {
-            if (requestTestPhp.readyState === 4) {
-                displayTestStatus("PHP", requestTestPhp.responseText);
-            }
-        };
-        requestTestPhp.open("POST", "mbn_test.php", true);
-        requestTestPhp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        testMbn(function (responseText) {
-            displayTestStatus("JS", responseText);
-            requestTestPhp.send("");
-        });
-    }, 250);
+        var js = document.createElement("script");
+        js.src = "mbn_test?js";
+        document.body.appendChild(js);
+    }, 100);
 });
+
+

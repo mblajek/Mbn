@@ -1,74 +1,4 @@
 <?php
-$relFiles = [
-   'mbn.js' => ['desc' => 'Library in JS'],
-   'mbn.php' => ['desc' => 'Library in PHP'],
-   'mbn.min.js' => ['desc' => 'Minified library in JS'],
-   'mbn.min.php' => ['desc' => 'Minified library in PHP'],
-   'mbn.d.ts' => ['desc' => 'TypeScript declaration file'],
-   'Mbn.php' => ['desc' => 'Mbn class in PHP (with namespace, without MbnErr class)'],
-   'MbnErr.php' => ['desc' => 'MbnErr class in PHP (with namespace)'],
-];
-foreach ($relFiles as $n => &$relFile) {
-    if ($n === ucfirst($n)) {
-        $n = '_' . $n;
-    }
-    $relFile['path'] = 'release/' . $n;
-}
-unset($relFile);
-
-$vString = null;
-if (file_exists('release/v')) {
-    $vString = file_get_contents('release/v');
-}
-$getFile = filter_input(INPUT_GET, 'gf');
-if (!empty($getFile)) {
-    if ($getFile === 'v') {
-        header('Content-Type: text/json');
-        echo $vString;
-    } else {
-        $getFileLower = strtolower($getFile);
-        $isUcFirstOrLower = ($getFile === $getFileLower) || ($getFile === ucfirst($getFile));
-        if ($isUcFirstOrLower && (isset($relFiles[$getFile]) || isset($relFiles[$getFileLower]))) {
-            $relFile = isset($relFiles[$getFile]) ? $relFiles[$getFile] : $relFiles[$getFileLower];
-            $relFilePath = $relFile['path'];
-            $disposition = null;
-            $extension = pathinfo($relFilePath, PATHINFO_EXTENSION);
-            if (filter_input(INPUT_GET, 'show') === null) {
-                switch ($extension) {
-                    case 'js':
-                    case 'ts':
-                        header('Content-Type: text/javascript');
-                        break;
-                    case 'php':
-                        header('Content-Type: application/php');
-                        break;
-                    default:
-                        header('Content-Type: text/plain');
-                }
-                $disposition = 'attachment';
-            } else {
-                header('Content-Type: text/plain');
-                $disposition = 'inline';
-            }
-            header('Content-Disposition: ' . $disposition . '; filename="' . $getFile . '"');
-            readfile($relFilePath);
-        } else {
-            header('HTTP/1.0 404 Not Found');
-        }
-    }
-    die;
-}
-require 'mbn.php';
-$hashChanged = true;
-if ($vString !== null) {
-    $oldHash = json_decode($vString)->hash;
-    $newHash = hash('sha256', file_get_contents('mbn.js') . file_get_contents('mbn.php') . file_get_contents('mbn.d.ts'));
-    if ($oldHash === $newHash) {
-        $hashChanged = false;
-    } elseif (file_exists('release/php_check')) {
-        unlink('release/php_check');
-    }
-}
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,22 +6,22 @@ if ($vString !== null) {
     <meta charset="UTF-8">
     <meta name="description"
           content="Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.">
-    <link rel="icon" href="page/favicon.ico" type="image/png"/>
-    <link rel="stylesheet" href="page/style.css"/>
+    <link rel="icon" href="favicon.ico" type="image/png"/>
+    <link rel="stylesheet" href="lib_style.css"/>
 </head>
 <body>
 <script>
     //avoid any caching
-    <?php readfile('mbn.js') ?>
+    <?php readfile('../mbn.js') ?>
     var releaseStatus = {
-        hashChanged: <?= json_encode($hashChanged) ?>,
+        hashChanged: <?= json_encode(FileHelper::getCachedHash() !== FileHelper::getCurrentHash()) ?>,
         passedPHP: false,
         passedJS: false
     };
+    var displayTestStatus = function (lang, result) {
+        console.log(result + " [" + lang + "]");
+    };
 </script>
-
-<script src="page/script.js"></script>
-<script src="mbn_test.js"></script>
 
 <div id="topBar">
     <span>
@@ -123,7 +53,8 @@ if ($vString !== null) {
             <li>syntax is almost identical between JS and PHP, all operations supported by a single class</li>
             <li>fixed precision with any size of fractional part: from zero to thousands or more</li>
             <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 gives 6, =2PI gives
-                6.28 (depending on precision), see <a href='calc'>calc example</a></li>
+                6.28 (depending on precision), see <!--suppress HtmlUnknownTarget --><a href='calc'>calc example</a>
+            </li>
             <li>built in <a href="#other_methods_split">split</a> and <a href="#other_methods_reduce">reduce</a>
                 functions for some useful array operations
             </li>
@@ -138,11 +69,11 @@ if ($vString !== null) {
     </div>
     <div>Available for PHP Composer via <a href='https://packagist.org/packages/mblajek/mbn'>Packagist</a>.</div>
 
-    <div class="title2" id="tests_and_benchmark">Tests and benchmark<span id="releaseBtn"
-                                                                          style="cursor:pointer; visibility:hidden;"> &#8635;</span>
+    <div class="title2" id="tests_and_benchmark">Tests and benchmark<span
+           id="releaseBtn" style="cursor:pointer; visibility:hidden;"> &#8635;</span>
     </div>
-    <pre><span class="lb"></span><strong id="resultJS">..</strong></pre>
     <pre><span class="lb"></span><strong id="resultPHP">..</strong></pre>
+    <pre><span class="lb"></span><strong id="resultJS">..</strong></pre>
 
     <div class="title2" id="downloads">Downloads</div>
     <div>Minified JS is created with <a href='https://closure-compiler.appspot.com'>Google Closure api</a></div>
@@ -151,9 +82,10 @@ if ($vString !== null) {
     </div>
     <div>Generally code is optimized for speed and size; not for readability</div>
     <?php try {
-        foreach ($relFiles as $n => &$relFile) { ?>
-            <pre><span class="lb"></span><strong><?= $n ?></strong> [ <a href="lib/<?= $n ?>&amp;show">show</a> | <a
-                   href="lib/<?= $n ?>">download</a> ] (<?= (new Mbn(filesize($relFile['path'])))->div(1024) ?> kB)<!--
+        foreach (FileHelper::getFileList() as $n => &$relFile) {
+            if (!isset($relFile['desc'])) continue; ?>
+            <pre><span class="lb"></span><strong><?= $n ?></strong> [ <a href="<?= $n ?>?show">show</a> | <a
+                   href="<?= $n ?>">download</a> ] (<?= (new Mbn($relFile['size']))->div(1024) ?> kB)<!--
 --><br/><span class="lb"></span><?= $relFile['desc'] ?></pre>
         <?php }
     } catch (MbnErr $e) {
@@ -424,8 +356,8 @@ if ($vString !== null) {
             <tr class="hidden"></tr>
             <tr>
                 <td colspan="6">do not use Number(a) because it is equivalent to Number(a.toString())
-                which might apply rounding or fail, depending on the formatter
-                <br>when precision is 0, toNumber in PHP returns int
+                    which might apply rounding or fail, depending on the formatter
+                    <br>when precision is 0, toNumber in PHP returns int
                 </td>
             </tr>
             <tr>
@@ -472,12 +404,13 @@ if ($vString !== null) {
     <ul>
         <li><strong>MbnP</strong> - precision - number of digits in fractional part, defines how many digits will be
             stored
-           
-           by default also defines the string representation: MbnP=0 &rarr; "0", MbnP=2 &rarr; "0.00"
+
+            by default also defines the string representation: MbnP=0 &rarr; "0", MbnP=2 &rarr; "0.00"
             <ul>
                 <li>Default: 2</li>
                 <li>Note that this affects all the computations, not only the formatting of the result,
-                e.g.: new Mbn("=1/3*3").toString() === "0.99"</li>
+                    e.g.: new Mbn("=1/3*3").toString() === "0.99"
+                </li>
             </ul>
         </li>
         <li>
@@ -487,7 +420,8 @@ if ($vString !== null) {
             </ul>
         </li>
         <li>
-            <strong>MbnT</strong> - truncation - true or false, truncation of trailing zeros in the string representation
+            <strong>MbnT</strong> - truncation - true or false, truncation of trailing zeros in the string
+            representation
             <br>for MbnP=2 and MbnT=true: 1.12 &rarr; "1.12", 1.10 &rarr; "1.1", 1.00 &rarr; "1"
             <ul>
                 <li>Default: false (no truncation)</li>
@@ -513,7 +447,8 @@ if ($vString !== null) {
             </ul>
         </li>
         <li>
-            <strong>MbnF</strong> - formatting - true or false, use space as the thousands separator in the string representation
+            <strong>MbnF</strong> - formatting - true or false, use space as the thousands separator in the string
+            representation
             <br>for MbnP=5 and MbnF=true 12345.12345 &rarr; "12 345.12345"
             <ul>
                 <li>Default: false (no thousands separator)</li>
@@ -521,9 +456,11 @@ if ($vString !== null) {
         </li>
         <li>
             <strong>MbnL</strong> - limit - number of digits that will cause limit_exceeded exception
-            <br>some short expressions like "=9!!" or "=9^9^9" can have really big results and take much time to evaluate
+            <br>some short expressions like "=9!!" or "=9^9^9" can have really big results and take much time to
+            evaluate
             <br>MbnL can avoid interface freeze or server overload
-            <br>hint: some operations, like power, may exceed the limit even when the final result doesn't, because of storing exact
+            <br>hint: some operations, like power, may exceed the limit even when the final result doesn't, because of
+            storing exact
             partial results
             <ul>
                 <li>Default: 1000</li>
@@ -597,7 +534,8 @@ if ($vString !== null) {
         </li>
         <li>object - the object is converted to string and parsed<br>e.g. instance of another Mbn class</li>
         <li>Mbn object - if an instance of the same Mbn class, operation is faster</li>
-        <li>cannot be array - e.g. array <span class="monoInline">[1, 2]</span> has valid string representation "1,2", but
+        <li>cannot be array - e.g. array <span class="monoInline">[1, 2]</span> has valid string representation "1,2",
+            but
             shouldn't be parsed
         </li>
     </ul>
@@ -627,7 +565,8 @@ if ($vString !== null) {
                 </li>
             </ul>
         </li>
-        <li>true passed as the last argument to any of the standard methods triggers modification of the original object (===
+        <li>true passed as the last argument to any of the standard methods triggers modification of the original object
+            (===
             true)
             <ul>
                 <li>standard functions: two-argument functions and round, floor ceil, intp, abs, inva, invm, sqrt, sgn
@@ -635,7 +574,8 @@ if ($vString !== null) {
                 <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1);</span> "a" stays unchanged and "b" is set
                     to the result
                 </li>
-                <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1, true);</span> "a" is changed, but "b" becomes
+                <li>for <span class="monoInline">a = new Mbn(2); b = a.add(1, true);</span> "a" is changed, but "b"
+                    becomes
                     simply a reference to "a"
                 </li>
             </ul>
@@ -660,7 +600,8 @@ if ($vString !== null) {
                 <li>for mul (and precision = 2) it depends on the size of arguments' fractional parts, 1.23*5 or
                     1.2*3.4 never loses precision, 1.23*4.5 always does
                 </li>
-                <li>for div (and precision = 2) it depends, e.g. division of integer by 100 or by one of its divisors never
+                <li>for div (and precision = 2) it depends, e.g. division of integer by 100 or by one of its divisors
+                    never
                     loses precision
                 </li>
                 <li>pow and sqrt should be used with care</li>
@@ -668,8 +609,10 @@ if ($vString !== null) {
                     operation should lose precision, sometimes multiplication by 100 may be needed
                     <ul>
                         <li>exact result of 4.11*0.23/2 is 0.47265, and this will be the result such calculations in Mbn
-                            with precision=5, while with precision = 2 the result should be 0.47, but 4.11*0.23/2 = 0.48,
-                            because precision is lost in multiplication and division; to fix this: 411*0.23/200 gives the
+                            with precision=5, while with precision = 2 the result should be 0.47, but 4.11*0.23/2 =
+                            0.48,
+                            because precision is lost in multiplication and division; to fix this: 411*0.23/200 gives
+                            the
                             right result, as precision is lost only in division
                         </li>
                         <li>0.01/2*100 = 1, because precision is lost in division, while 0.01*100/2 is correct,
@@ -686,8 +629,10 @@ if ($vString !== null) {
     <div>JS: MbnErr has field "message", and method "toString" returns that message: <span
            class="monoInline">ex.message</span>, <span class="monoInline">String(ex)</span></div>
     <div>PHP: MbnErr extends Exception, message available with <span class="monoInline">$ex->getMessage()</span></div>
-    <div>Moreover MbnErr has fields "errorKey" and "errorValues" which represent the particular erroneous situation.</div>
-    <div>Field errorValues contains string representations of values to the message, or is empty when there is no value to
+    <div>Moreover MbnErr has fields "errorKey" and "errorValues" which represent the particular erroneous situation.
+    </div>
+    <div>Field errorValues contains string representations of values to the message, or is empty when there is no value
+        to
         pass
     </div>
     <div>Possible values of errorKey:</div>
@@ -1060,7 +1005,8 @@ if ($vString !== null) {
     <ul>
         <li>one-argument functions: abs, inva, invm, ceil, floor, sqrt, round, sgn, intp, fact
             <ul>
-                <li>result is mapped array, so <span class="monoInline">Mbn.reduce("abs", [1, -2])</span> is equivalent to
+                <li>result is mapped array, so <span class="monoInline">Mbn.reduce("abs", [1, -2])</span> is equivalent
+                    to
                     <span class="monoInline">[1, -2].map(v => (new Mbn(v)).abs())</span> and returns
                     <span class="monoInline">[1.00, 2.00]</span></li>
                 <li>PHP: <span class="monoInline">Mbn::reduce("abs", ['a' => 1, 'b' => -2])</span> gives array
@@ -1102,10 +1048,10 @@ if ($vString !== null) {
         </li>
     </ul>
 
+    <script src="lib_script.js"></script>
 
+    <div class="title2" id="other_methods_calc">Other methods - calc</div>
     <script>
-        w("Other methods - calc", "title2");
-
         we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);
 
         w();
