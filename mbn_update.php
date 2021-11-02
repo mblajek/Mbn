@@ -24,17 +24,12 @@ function updateMbn($githubZip, $query) {
     }
 
     $githubZipContents = file_get_contents(env::githubZip);
-    $localZipContents = FileHelper::getFile($githubZip, true);
-    if ($githubZipContents === $localZipContents) {
-        return 'already up-to-date';
-    }
 
     FileHelper::putFile($githubZip, $githubZipContents, true, true);
     $allFilesAndContentsZip = getAllFilesZip($githubZip);
     if (is_string($allFilesAndContentsZip)) {
         return $allFilesAndContentsZip;
     }
-    FileHelper::deleteFile($githubZip, true);
 
     $allFiles = FileHelper::getAllFiles();
     $allFilesZip = $allFilesAndContentsZip['files'];
@@ -66,7 +61,6 @@ function updateMbn($githubZip, $query) {
         }
     }
 
-    FileHelper::putFile($githubZip, $githubZipContents, true, true);
     return $updateInfo . 'updated';
 }
 
