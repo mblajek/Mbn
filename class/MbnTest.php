@@ -89,16 +89,17 @@ class MbnTest {
     }
 
     private static function testMbn() /*:string*/ {
-        $phpVersion = phpversion();
         $time = time();
 
-        $phpCheckFile = 'php_check_' . str_replace('.', '-', $phpVersion);
-        if (($cachedResult = FileHelper::getFile($phpCheckFile, true)) !== null) {
+        $phpCheckFile = 'php_check_' . str_replace('.', '-', PHP_VERSION);
+        $cachedResult = FileHelper::getFile($phpCheckFile, true);
+        if ($cachedResult !== null) {
             $cachedResultArr = json_decode($cachedResult, true);
             if (isset($cachedResultArr['cache']) && $time - $cachedResultArr['cache'] <= self::CACHE_TIME) {
                 $cachedResultArr['cache'] = true;
                 return json_encode($cachedResultArr);
             }
+            FileHelper::deleteFile($phpCheckFile, true);
         }
 
         $testsAll = json_decode(self::getTestsAllJson());
@@ -133,9 +134,11 @@ class MbnTest {
         } catch (MbnErr $e) {
         }
         $testPHP['time'] = round((microtime(true) - $startTimePHP) * 1000);
-        $testPHP['env'] = 'PHP_' . $phpVersion;
+        $testPHP['env'] = 'PHP_' . PHP_VERSION;
 
-        FileHelper::putFile($phpCheckFile, json_encode($testPHP + ['cache' => $time]), true);
+        if ($testPHP['status'] === 'OK') {
+            FileHelper::putFile($phpCheckFile, json_encode($testPHP + ['cache' => $time]), true);
+        }
         return json_encode($testPHP);
     }
 
@@ -161,7 +164,7 @@ class MbnTest {
                         return file_get_contents("http://mbn-php$v/mbn_test?php");
                     }, ['5-4', '5-5', '5-6', '7-0', '7-1', '7-2', '7-3', '7-4', '8-0', '8-1']),
                        ["---", self::$phpTestResult]))->render();
-                } else{
+                } else {
                     (new SimpleHtml())->addErrorDiv('docker disabled')->render();
                 }
                 break;

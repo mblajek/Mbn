@@ -1,5 +1,4 @@
-<?php
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Mbn Library</title>
@@ -10,9 +9,10 @@
     <link rel="stylesheet" href="lib_style.css"/>
 </head>
 <body>
+<script src="lib_script.js"></script>
 <script>
     //avoid any caching
-    <?php readfile('../mbn.js') ?>
+    <?php readfile('../mbn.js'); ?>
     var releaseStatus = {
         hashChanged: <?= json_encode(FileHelper::getCachedHash() !== FileHelper::getCurrentHash()) ?>,
         passedPHP: false,
@@ -1047,8 +1047,6 @@
             </ul>
         </li>
     </ul>
-
-    <script src="lib_script.js"></script>
 
     <div class="title2" id="other_methods_calc">Other methods - calc</div>
     <script>
