@@ -1,6 +1,6 @@
 <?php
 
-class MbnErr extends Exception {
+class MbnErr extends \Exception {
     /* Common error message object */
     private static $messages = [
        'invalid_argument' => 'invalid argument: %v%',
@@ -111,7 +111,7 @@ class MbnErr extends Exception {
         if (is_callable($translation)) {
             try {
                 $msg = $translation($this->errorKey, $valArr);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
             }
         }
         if (!is_string($msg)) {

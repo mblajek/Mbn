@@ -116,6 +116,7 @@ function releaseMbn() {
             $c0 = $c;
             $stSpace = false;
         }
+        $mbn_min_php_out = str_replace('extends\\Exception', 'extends \\Exception', $mbn_min_php_out);
         eval(removePhpTag($mbn_min_php_out));
         $minPhpObj = json_decode(MbnTest::testMbnResult(false));
         if ($minPhpObj->status !== 'OK') {
@@ -170,12 +171,9 @@ function releaseMbn() {
     $mbnClassName = null;
     foreach (explode(PHP_EOL, removePhpTag($mbn_php)) as $line) {
         $line = trim($line, "\n\r");
-        if (preg_match('/^class\\s+(\\w+)(?:\\s+extends\\s+(\\w+))?/', trim($line), $match)) {
+        if (preg_match('/^class\\s+(\\w+)(?:\\s+extends\\s+\\w+)?/', trim($line), $match)) {
             $mbnClassName = $match[1];
             $mbnClasses[$mbnClassName] = 'namespace Mbn;' . PHP_EOL;
-            if (!empty($match[2])) {
-                $line = preg_replace('/(class\\s+\\w+\\s+extends\\s+)(\\w+)/', '$1\\\\$2', $line, 1);
-            }
         }
         if ($mbnClassName !== null) {
             $mbnClasses[$mbnClassName] .= $line . PHP_EOL;
