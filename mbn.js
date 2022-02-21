@@ -71,7 +71,7 @@ var Mbn = (function () {
             }
             return "[" + valArr.join(",") + "]";
         }
-        return String(val);
+        return (typeof val === "string") ? ("\"" + val + "\"") : String(val);
     };
     /**
      * Common error message object
@@ -138,7 +138,7 @@ var Mbn = (function () {
     };
 
     //version of Mbn library
-    var MbnV = "1.50";
+    var MbnV = "1.51";
     //default precision
     var MbnDP = 2;
     //default separator
@@ -369,9 +369,8 @@ var Mbn = (function () {
             var nf = nn - ni;
             var nfi, c, i;
             do {
-                c = ni % 10;
-                ni -= c;
-                ni /= 10;
+                c = Math.round(ni % 10);
+                ni = Math.round((ni - c) / 10);
                 a._d.unshift(c);
             } while (ni > 0);
             for (i = 0; i <= MbnP; i++) {
@@ -796,7 +795,7 @@ var Mbn = (function () {
                 }
                 n = asum.toNumber();
                 for (i = 0; i < n; i++) {
-                    arr.push(mbn1);
+                    arr.push([i, mbn1]);
                 }
             } else {
                 var mulp = (new Mbn(10)).pow(MbnP);
@@ -805,14 +804,13 @@ var Mbn = (function () {
                 var sgns = [false, false, false];
                 for (i = 0; i < n; i++) {
                     var ai = (new Mbn(ar[i])).mul(mulp);
-                    ai._i = i;
                     sgns[ai._s + 1] = true;
-                    arr.push(ai);
                     asum.add(ai, true);
+                    arr.push([i, ai]);
                 }
                 if (sgns[0] && sgns[2]) {
                     arr.sort(function (a, b) {
-                        return asum._s * a.cmp(b);
+                        return asum._s * a[1].cmp(b[1]);
                     });
                 }
             }
@@ -825,14 +823,15 @@ var Mbn = (function () {
             var a = new Mbn(this);
             var brr = [];
             brr.length = n;
-            var idx;
+            var v, idx;
             for (i = 0; i < n; i++) {
-                idx = arr[i].hasOwnProperty("_i") ? arr[i]._i : i;
-                if (arr[i]._s === 0) {
-                    brr[idx] = arr[i];
+                idx = arr[i][0];
+                v = arr[i][1];
+                if (v._s === 0) {
+                    brr[idx] = v;
                 } else {
-                    var b = a.mul(arr[i]).div(asum);
-                    asum.sub(arr[i], true);
+                    var b = a.mul(v).div(asum);
+                    asum.sub(v, true);
                     a.sub(b, true);
                     brr[idx] = b;
                 }
@@ -986,19 +985,19 @@ var Mbn = (function () {
          */
         Mbn.prototype.sqrt = function (m) {
             var t = this.mul(100);
-            var rb = new Mbn(t);
-            var r = new Mbn(t);
-            var mbn2 = new Mbn(2);
+            var r = t.add(0);
             if (r._s === -1) {
                 throw new MbnErr("sqrt.negative_value", this);
             }
             if (r._s === 1) {
+                var mbn2 = new Mbn(2), diff = null, lastDiff, cnt = 0;
                 do {
-                    rb.set(r);
-                    r.add(t.div(r), true).div(mbn2, true);
-                } while (!rb.eq(r));
+                    lastDiff = diff;
+                    diff = r.add(0).sub(r.add(t.div(r), true).div(mbn2, true), true);
+                    cnt += (lastDiff && diff._s * lastDiff._s === -1) ? 1 : 0;
+                } while (diff._s !== 0 && cnt < 4);
+                mbnRoundLast(r);
             }
-            mbnRoundLast(r);
             return mbnSetReturn(this, r, m);
         };
 
@@ -1188,10 +1187,9 @@ var Mbn = (function () {
             sqrt: true, round: true, sgn: true, int: "intp", div_100: "div_100"
         };
         var states = {
-            endBop: ["bop", "pc", "fs", "cs"],
-            uopVal: ["num", "name", "uop", "po", "cs"],
-            po: ["po", "cs"],
-            com: ["ca", "ce"]
+            endBop: ["bop", "pc", "fs"],
+            uopVal: ["num", "name", "uop", "po"],
+            fn: ["po"]
         };
         var ops = {
             "|": [1, true, "max"],
@@ -1210,16 +1208,13 @@ var Mbn = (function () {
         var rxs = {
             num: {rx: /^([0-9., ]+)\s*/, next: states.endBop},
             name: {rx: /^([A-Za-z_]\w*)\s*/},
-            fn: {next: states.po},
+            fn: {next: states.fn},
             vr: {next: states.endBop},
             bop: {rx: /^([-+*\/#^&|])\s*/, next: states.uopVal},
             uop: {rx: /^([-+])\s*/, next: states.uopVal},
             po: {rx: /^(\()\s*/, next: states.uopVal},
             pc: {rx: /^(\))\s*/, next: states.endBop},
-            fs: {rx: /^([%!])\s*/, next: states.endBop},
-            cs: {rx: /^({+)\s*/, next: states.com},
-            ca: {rx: /^([^}]+)\s*/, next: states.com},
-            ce: {rx: /^(}+)\s*/, next: states.com}
+            fs: {rx: /^([%!])\s*/, next: states.endBop}
         };
 
         var wsRx3 = /^[\s=]+/;
@@ -1243,7 +1238,6 @@ var Mbn = (function () {
         Mbn.check = function (exp, omitConsts) {
             try {
                 var varName, vars = mbnCalc(exp, false), varNames = [];
-                var hasOwnProperty = varNames.hasOwnProperty;
                 for (varName in vars) {
                     if (hasOwnProperty.call(vars, varName)) {
                         varNames[vars[varName]] = varName;
@@ -1275,16 +1269,22 @@ var Mbn = (function () {
             if (!(vars instanceof Object)) {
                 vars = {};
             }
-            var expr = String(exp).replace(wsRx3, "");
+
             var varsUsed = {};
             var varsUsedSize = 0;
             var state = states.uopVal;
-            var rpns = [];
-            var rpno = [];
-            var stateLength, t, tok, mtch, i, rolp;
-            var commentLevel = 0;
-            var commentState = null;
+            var rpns = [], rpno = [];
+            var stateLength, t, tok, mtch, i, rolp, comStart, comEnd;
 
+            var expr = String(exp);
+            while (mtch = expr.match(/{+/)) {
+                mtch = mtch[0];
+                comStart = expr.indexOf(mtch);
+                comEnd = expr.indexOf(mtch.replace(/{/g, "}"), comStart);
+                expr = expr.slice(0, comStart) + ((comEnd === -1)
+                    ? "" : ("\t" + expr.slice(comEnd + mtch.length)))
+            }
+            expr = expr.replace(wsRx3, "");
             while (expr !== "") {
                 mtch = null;
                 stateLength = state.length;
@@ -1353,19 +1353,6 @@ var Mbn = (function () {
                             rpns.push(rolp[2]);
                         }
                         break;
-                    case "cs":
-                        commentLevel = tok.length;
-                        commentState = state;
-                        break;
-                    case "ce":
-                        if (commentLevel === tok.length) {
-                            state = commentState;
-                            continue;
-                        } else if (commentLevel < tok.length) {
-                            throw new MbnErr("calc.unexpected", tok);
-                        }
-                        break;
-                    case "ca":
                     default:
                 }
 
@@ -1377,7 +1364,7 @@ var Mbn = (function () {
                 }
                 rpns.push(rolp[2]);
             }
-            if (state !== states.endBop && (state !== states.com || commentState !== states.endBop)) {
+            if (state !== states.endBop) {
                 throw new MbnErr("calc.unexpected", "END");
             }
 
@@ -1416,3 +1403,6 @@ var Mbn = (function () {
     Mbn.MbnErr = MbnErr;
     return Mbn;
 })();
+if (typeof module === "object") {
+    module.exports.default = module.exports = Mbn;
+}

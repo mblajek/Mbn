@@ -19,6 +19,8 @@
         ["gettype((new Mbn(1))->toNumber())", "double"],
         ["gettype((new Mbn0(1.2))->toNumber())", "integer"],
         ["MbnColon::prop()", "mbn.extend.invalid_separator Mbn.extend error*"],
+        ["new Mbn(9223372036854775807*-1-1)", "-9223372036854775808.00"],
+        ["new Mbn(9223372036854775807)", "9223372036854775807.00"],
         ["0", "0"]
     ],
     "js": [
@@ -353,7 +355,7 @@
         ["Mbn0::def('PI')", "3"],
         ["Mbn3c::def('PI')", "3,142"],
         ["Mbn20u::def('PI')", "3,14159265358979323846"],
-        ["Mbn3c::def('PI', 2)", "mbn.def.already_set Mbn.def error: constant already set: PI = 3,142"],
+        ["Mbn3c::def('PI', 2)", "mbn.def.already_set Mbn.def error: constant already set: \"PI\" = 3,142"],
         ["Mbn::def('MbnP')", "mbn.def.undefined Mbn.def error*"],
         ["Mbn::def('MbnP', 4.2)", "4.20"],
         ["Mbn3c::def('MbnP')", "mbn.def.undefined Mbn.def error*"],
@@ -392,6 +394,8 @@
         ["new Mbn('=12/(3*2)')", "2.00"],
         ["new Mbn('=-7(-sqrt(4))')", "14.00"],
         ["new Mbn('=sqrt(2)')", "1.41"],
+        ["new Mbn20u('=sqrt(0.00000002)')", "0,00014142135623730951"],
+        ["new Mbn20u('=sqrt(0)')", "0"],
         ["new Mbn('=abs(-2-3)')", "5.00"],
         ["new Mbn('=-abs(-2-3)')", "-5.00"],
         ["new Mbn('=floor(3/2)')", "1.00"],
@@ -551,6 +555,10 @@
         ["Mbn::calc('2 \n+ 3 {{ /3\n {+ 2} 2* ')", "5.00"],
         ["Mbn::calc('PI\nE')", "8.54"],
         ["Mbn::calc('2 \n + 3 \r + 4 \t +5 {{ /3 {+ 2} 2* ')", "14.00"],
+        ["new Mbn('={abc}5')", "5.00"],
+        ["new Mbn('={{abc}}6+{def}5')", "11.00"],
+        ["new Mbn(18292252932637972)", "18292252932637972.00"],
+        ["new Mbn(182922529326379721234)", "182922529326379722806.00"],
         ["0", "0"]
     ]
 }

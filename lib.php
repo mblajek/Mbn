@@ -907,6 +907,10 @@
     </ul>
     <div class="title2" id="changelog">Changelog</div>
     <ul>
+        <li>21.02.2022 - fixed problem with mbn from big floats, some implementation changes, npm ready
+            <strong>(1.51)</strong></li>
+        <li>21.02.2022 - string values in error message and errorValues in quotes</li>
+        <li>21.02.2022 - separated parsing integer in PHP, uniformed float parsing with JS</li>
         <li>31.03.2020 - added {comments} to expression parser <strong>(1.50)</strong></li>
         <li>31.03.2020 - fixed multiline expressions, "2\n+3" is 5, not 2</li>
         <li>31.03.2020 - invalid grouping like "1 .0" or "1(multiple spaces)0" no longer parsed</li>

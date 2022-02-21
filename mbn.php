@@ -70,6 +70,9 @@ class MbnErr extends Exception {
         if ($val === null) {
             return 'null';
         }
+        if (is_string($val)) {
+            return '"' . $val . '"';
+        }
         if (is_scalar($val)) {
             return is_bool($val) ? ($val ? 'true' : 'false') : (string)$val;
         }
@@ -139,7 +142,7 @@ class MbnErr extends Exception {
 
 class Mbn {
     //version of Mbn library
-    protected static $MbnV = '1.50';
+    protected static $MbnV = '1.51';
     //default precision
     protected static $MbnP = 2;
     //default separator
@@ -339,7 +342,27 @@ class Mbn {
 
     /**
      * Private function, sets value from number
-     * @param int|float|double $nn
+     * @param int $ni
+     */
+    private function mbnFromInt($ni) {
+        if ($ni > 0) {
+            $ni = -$ni;
+        } else {
+            $this->s = ($ni < 0) ? -1 : 0;
+        }
+        do {
+            $c = -($ni % 10);
+            $ni = ($ni + $c) / 10;
+            array_unshift($this->d, $c);
+        } while ($ni !== 0);
+        for ($n = 0; $n < static::$MbnP; $n++) {
+            $this->d[] = 0;
+        }
+    }
+
+    /**
+     * Private function, sets value from number
+     * @param float $nn
      * @throws MbnErr infinite value
      */
     private function mbnFromNumber($nn) {
@@ -353,18 +376,16 @@ class Mbn {
             $nn = -$nn;
             $this->s = -1;
         }
-        $ni = (int)$nn;
+        $ni = floor($nn);
         $nf = $nn - $ni;
         do {
-            $c = $ni % 10;
-            $ni -= $c;
-            $ni /= 10;
-            array_unshift($this->d, $c);
+            $c = round(fmod($ni, 10));
+            $ni = round(($ni - $c) / 10);
+            array_unshift($this->d, (int)$c);
         } while ($ni > 0);
         for ($n = 0; $n <= static::$MbnP; $n++) {
             $nf *= 10;
-            $nfi = (int)$nf;
-            $c = ($nfi === 10) ? 9 : $nfi;
+            $c = min((int)$nf, 9);
             $this->d[] = $c;
             $nf -= $c;
         }
@@ -432,7 +453,9 @@ class Mbn {
      * @throws MbnErr invalid argument, invalid format, calc error
      */
     public function __construct($n = 0, $v = null) {
-        if (is_float($n) || is_int($n)) {
+        if (is_int($n)) {
+            $this->mbnFromInt($n);
+        } elseif (is_float($n)) {
             $this->mbnFromNumber($n);
         } elseif (is_string($n) || (is_object($n) && method_exists($n, '__toString'))) {
             if ($n instanceof static && $n::$MbnP === static::$MbnP) {
@@ -504,8 +527,8 @@ class Mbn {
     }
 
     /**
-     * Returns int value for MbnP = 0, otherwise float (double) value
-     * @return int|float|double
+     * Returns int value for MbnP = 0, otherwise float value
+     * @return int|float
      */
     public function toNumber() {
         $v = $this->mbnToString(static::$MbnP, '.');
@@ -781,7 +804,7 @@ class Mbn {
             }
             $n = (int)$asum->toNumber();
             for ($i = 0; $i < $n; $i++) {
-                $arr[] = $mbn1;
+                $arr[] = [$i, $mbn1];
             }
             $brr = $arr;
         } else {
@@ -791,16 +814,15 @@ class Mbn {
             $sgns = [false, false, false];
             foreach ($ar as $k => &$v) {
                 $ai = (new static($v))->mul($mulp);
-                $ai->k = $k;
                 $sgns[$ai->s + 1] = true;
                 $asum->add($ai, true);
-                $arr[$k] = $ai;
+                $arr[$k] = [$k, $ai];
             }
             unset($v);
             $brr = $arr;
             if ($sgns[0] && $sgns[2]) {
                 usort($arr, static function ($a, $b) use ($asum) {
-                    return $asum->s * $a->cmp($b);
+                    return $asum->s * $a[1]->cmp($b[1]);
                 });
             }
         }
@@ -811,8 +833,8 @@ class Mbn {
             throw new MbnErr('split.zero_part_sum');
         }
         $a = new static($this);
-        foreach ($arr as $k => &$v) {
-            $idx = isset($v->k) ? $v->k : $k;
+        foreach ($arr as $va) {
+            list($idx, $v) = $va;
             if ($v->s === 0) {
                 $brr[$idx] = $v;
             } else {
@@ -822,7 +844,6 @@ class Mbn {
                 $brr[$idx] = $b;
             }
         }
-        unset($v);
         return $brr;
     }
 
@@ -976,19 +997,22 @@ class Mbn {
      */
     public function sqrt($m = false) {
         $t = $this->mul(100);
-        $rb = new static($t);
         $r = new static($t);
-        $mbn2 = new static(2);
+
         if ($r->s === -1) {
             throw new MbnErr('sqrt.negative_value', $this);
         }
         if ($r->s === 1) {
+            $mbn2 = new static(2);
+            $diff = null;
+            $cnt = 0;
             do {
-                $rb->set($r);
-                $r->add($t->div($r), true)->div($mbn2, true);
-            } while (!$rb->eq($r));
+                $lastDiff = $diff;
+                $diff = $r->add(0)->sub($r->add($t->div($r), true)->div($mbn2, true), true);
+                $cnt += ($lastDiff && $diff->s * $lastDiff->s === -1) ? 1 : 0;
+            } while ($diff->s !== 0 && $cnt < 4);
+            $r->mbnRoundLast();
         }
-        $r->mbnRoundLast();
         return $this->mbnSetReturn($r, $m);
     }
 
@@ -1191,10 +1215,9 @@ class Mbn {
        'abs' => true, 'inva' => false, 'ceil' => true, 'floor' => true, 'fact' => true,
        'sqrt' => true, 'round' => true, 'sgn' => true, 'int' => 'intp', 'div_100' => 'div_100'];
     protected static $states = [
-       'endBop' => ['bop', 'pc', 'fs', 'cs'],
-       'uopVal' => ['num', 'name', 'uop', 'po', 'cs'],
-       'po' => ['po', 'cs'],
-       'com' => ['ca', 'ce']
+       'endBop' => ['bop', 'pc', 'fs'],
+       'uopVal' => ['num', 'name', 'uop', 'po'],
+       'fn' => ['po']
     ];
     protected static $ops = [
        '|' => [1, true, 'max'],
@@ -1213,16 +1236,13 @@ class Mbn {
     protected static $rxs = [
        'num' => ['rx' => '/^([0-9\., ]+)\\s*/', 'next' => 'endBop'],
        'name' => ['rx' => '/^([A-Za-z_]\\w*)\\s*/'],
-       'fn' => ['next' => 'po'],
+       'fn' => ['next' => 'fn'],
        'vr' => ['next' => 'endBop'],
        'bop' => ['rx' => '/^([-+\\*\\/#^&|])\\s*/', 'next' => 'uopVal'],
        'uop' => ['rx' => '/^([-+])\s*/', 'next' => 'uopVal'],
        'po' => ['rx' => '/^(\\()\\s*/', 'next' => 'uopVal'],
        'pc' => ['rx' => '/^(\\))\\s*/', 'next' => 'endBop'],
-       'fs' => ['rx' => '/^([%!])\\s*/', 'next' => 'endBop'],
-       'cs' => ['rx' => '/^({+)\\s*/', 'next' => 'com'],
-       'ca' => ['rx' => '/^([^}]+)\\s*/', 'next' => 'com'],
-       'ce' => ['rx' => '/^(}+)\\s*/', 'next' => 'com']
+       'fs' => ['rx' => '/^([%!])\\s*/', 'next' => 'endBop']
     ];
 
     /**
@@ -1233,8 +1253,8 @@ class Mbn {
      * @throws MbnErr syntax error, operation error
      * @throws MbnErr invalid argument format
      */
-    public static function calc($exp, $vars = null) {
-        return new static($exp, is_array($vars) ? $vars : true);
+    public static function calc($expr, $vars = null) {
+        return new static($expr, is_array($vars) ? $vars : true);
     }
 
     /**
@@ -1268,7 +1288,7 @@ class Mbn {
      */
     private static function mbnCalc($exp, $vars) {
         $onlyCheck = $vars === false;
-        $expr = preg_replace('/^[\\s=]+/', '', $exp);
+
         if (!is_array($vars)) {
             $vars = [];
         }
@@ -1277,17 +1297,24 @@ class Mbn {
         $rpns = [];
         $rpno = [];
         $t = null;
-        $commentLevel = 0;
-        $commentState = null;
 
+        $expr = (string)$exp;
+        while (preg_match('/{+/', $expr, $mtch) === 1) {
+            $mtch = $mtch[0];
+            $comStart = strpos($expr, $mtch);
+            $comEnd = strpos($expr, str_replace('{', '}', $mtch), $comStart);
+            $expr = substr($expr, 0, $comStart) . (($comEnd === false)
+                  ? '' : ("\t" . substr($expr, $comEnd + strlen($mtch))));
+        }
+        $expr = preg_replace('/^[\\s=]+/', '', $expr);
         while ($expr !== '') {
             $mtch = [];
             foreach (static::$states[$state] as $t) {
-                if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch) === 1) {
+                if (preg_match(static::$rxs[$t]['rx'], $expr, $mtch)) {
                     break;
                 }
             }
-            if (!empty($mtch)) {
+            if (count($mtch)) {
                 $tok = $mtch[1];
                 $expr = substr($expr, strlen($mtch[0]));
                 $expr = ($expr === false) ? '' : $expr;
@@ -1349,19 +1376,6 @@ class Mbn {
                         $rpns[] = $rolp[2];
                     }
                     break;
-                case 'cs':
-                    $commentLevel = strlen($tok);
-                    $commentState = $state;
-                    break;
-                case 'ce':
-                    if ($commentLevel === strlen($tok)) {
-                        $state = $commentState;
-                        continue 2;
-                    } else if ($commentLevel < strlen($tok)) {
-                        throw new MbnErr('calc.unexpected', $tok);
-                    }
-                    break;
-                case 'ca':
                 default:
             }
             $state = static::$rxs[$t]['next'];
@@ -1372,7 +1386,7 @@ class Mbn {
             }
             $rpns[] = $rolp[2];
         }
-        if ($state !== 'endBop' && ($state !== 'com' || $commentState !== 'endBop')) {
+        if ($state !== 'endBop') {
             throw new MbnErr('calc.unexpected', 'END');
         }
 
