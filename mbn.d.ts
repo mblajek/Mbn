@@ -1,3 +1,4 @@
+/* Mbn v1.50 / 31.03.2020 | https://mirkl.es/n/lib | Copyright (c) 2016-2020 Mikołaj Błajek | https://mirkl.es/n/LICENSE */
 // TypeScript type definitions for Mbn
 
 type MbnArg = number | boolean | null | undefined | string | Mbn;
@@ -6,25 +7,15 @@ type MbnOneArgFn = "set" | "abs" | "inva" | "invm" | "ceil" | "floor" | "sqrt" |
 
 type MbnTwoArgFn = "min" | "max" | "add" | "sub" | "mul" | "div" | "mod" | "pow";
 
-type MbnPT = number;
-
-type MbnST = "." | ",";
-
-type MbnTT = boolean;
-
-type MbnET = boolean | null;
-
-type MbnFT = boolean;
-
 interface MbnDispOpt {
-    MbnP?: MbnPT,
-    MbnS?: MbnST,
-    MbnT?: MbnTT,
-    MbnF?: MbnFT
+    MbnP?: number,
+    MbnS?: "." | ",",
+    MbnT?: boolean,
+    MbnF?: boolean,
 }
 
 interface MbnOpt extends MbnDispOpt {
-    MbnE?: MbnET
+    MbnE?: boolean | null
 }
 
 interface Mbn {
@@ -93,7 +84,9 @@ interface MbnConstructor {
 
     reduce(fn: MbnTwoArgFn, arr: MbnArg, b: MbnArg[]): Mbn[];
 
-    def(n: string | null, v?: string): Mbn;
+    def(n: string, v?: MbnArg): Mbn;
+
+    def(n: null, v?: string): boolean;
 
     calc(exp: string, vars?: Record<string, MbnArg>): Mbn;
 
@@ -106,4 +99,5 @@ interface MbnConstructorParent extends MbnConstructor {
     extend(opt?: number | MbnOpt): MbnConstructor;
 }
 
-export var Mbn: MbnConstructorParent;
+declare const Mbn: MbnConstructorParent;
+export = Mbn;
