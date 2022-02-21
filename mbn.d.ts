@@ -1,6 +1,3 @@
-/* Mbn v1.50 / 31.03.2020 | https://mirkl.es/n/lib | Copyright (c) 2016-2020 Mikołaj Błajek | https://mirkl.es/n/LICENSE */
-// TypeScript type definitions for Mbn
-
 type MbnArg = number | boolean | null | undefined | string | Mbn;
 
 type MbnOneArgFn = "set" | "abs" | "inva" | "invm" | "ceil" | "floor" | "sqrt" | "round" | "sgn" | "intp";
