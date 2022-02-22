@@ -5,6 +5,7 @@ Library for PHP and JS to do calculations with any precision and correct (half-u
 Project page: https://mbn.li
 
 Available for PHP Composer: https://packagist.org/packages/mblajek/mbn
+Available for JS npm: https://www.npmjs.com/package/mblajek-mbn
 
 Repository contains
     library files
@@ -26,4 +27,4 @@ interface env {
 }
 
 Code is optimized for speed and size; not for readability
-Library is PHP 5.4 compatible, so whole repository is limited to PHP 5.4
+Library is PHP 5.4 compatible, so entire repository is limited to PHP 5.4
