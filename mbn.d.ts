@@ -71,7 +71,9 @@ interface Mbn {
 
 
 interface MbnConstructor {
-    new(n?: MbnArg, v?: boolean | Record<string, MbnArg>): Mbn;
+    (n?: MbnArg, v?: boolean | Partial<Record<string, MbnArg>>): Mbn;
+
+    new(n?: MbnArg, v?: boolean | Partial<Record<string, MbnArg>>): Mbn;
 
     reduce(fn: MbnOneArgFn, arr: MbnArg[]): Mbn[];
 
@@ -85,7 +87,7 @@ interface MbnConstructor {
 
     def(n: null, v?: string): boolean;
 
-    calc(exp: string, vars?: Record<string, MbnArg>): Mbn;
+    calc(exp: string, vars?: Partial<Record<string, MbnArg>>): Mbn;
 
     check(exp: string): string[] | false;
 

@@ -53,7 +53,7 @@
             <li>syntax is almost identical between JS and PHP, all operations supported by a single class</li>
             <li>fixed precision with any size of fractional part: from zero to thousands or more</li>
             <li>built in <a href="#other_methods_calc">expression parser</a>, by default =2+2*2 gives 6, =2PI gives
-                6.28 (depending on precision), see <!--suppress HtmlUnknownTarget --><a href='calc'>calc example</a>
+                6.28 (depending on precision), see <!--suppress HtmlUnknownTarget --><a href="calc">calc example</a>
             </li>
             <li>built in <a href="#other_methods_split">split</a> and <a href="#other_methods_reduce">reduce</a>
                 functions for some useful array operations
@@ -63,13 +63,16 @@
             <li>compatibility: PHP 5.4+ (5.4-8.1 tested), JS ES3+ (IE6+)</li>
         </ul>
     </div>
-    <div>Mbn is distributed under the <a href='https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'>MIT License</a>,
-        see <a href='https://github.com/mblajek/Mbn'>Github page</a>, get with
+    <div>Mbn is distributed under the <a href="https://github.com/mblajek/Mbn/blob/master/LICENSE.txt">MIT License</a>,
+        see <a href="https://github.com/mblajek/Mbn">Github page</a>, get with
         <div class="mono" style="display: inline-block">composer require <a
                     href="https://packagist.org/packages/mblajek/mbn">mblajek/mbn</a></div>
         or
         <div class="mono" style="display: inline-block">npm install <a
                     href="https://www.npmjs.com/package/mblajek-mbn">mblajek-mbn</a></div>
+        or
+        <div class="mono" style="display: inline-block">import Mbn from "<a
+                    href="https://esm.sh/mblajek-mbn">https://esm.sh/mblajek-mbn</a>"</div>
     </div>
 
     <div class="title2" id="tests_and_benchmark">Tests and benchmark<span
@@ -79,7 +82,7 @@
     <pre><span class="lb"></span><strong id="resultJS">..</strong></pre>
 
     <div class="title2" id="downloads">Downloads</div>
-    <div>Minified JS is created with <a href='https://closure-compiler.appspot.com'>Google Closure api</a></div>
+    <div>Minified JS is created with <a href="https://closure-compiler.appspot.com">Google Closure api</a></div>
     <div>Minified PHP is created with custom text replacements, intended to be used in online PHP sandboxes like <a
                 href="https://3v4l.org/">3v4l.org</a>
     </div>
@@ -910,6 +913,7 @@
     </ul>
     <div class="title2" id="changelog">Changelog</div>
     <ul>
+        <li>22.02.2022 - fixed .d.ts and npm types link <strong>(1.51.1)</strong></li>
         <li>21.02.2022 - fixed problem with mbn from big floats, some implementation changes, npm ready
             <strong>(1.51)</strong></li>
         <li>21.02.2022 - string values in error message and errorValues in quotes</li>

@@ -142,7 +142,7 @@ class MbnErr extends \Exception {
 
 class Mbn {
     //version of Mbn library
-    protected static $MbnV = '1.51';
+    protected static $MbnV = '1.51.1';
     //default precision
     protected static $MbnP = 2;
     //default separator
