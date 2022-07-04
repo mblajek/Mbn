@@ -1090,7 +1090,7 @@ class Mbn {
             throw new MbnErr('fact.invalid_value', $this);
         }
         $n = $this->sub(1);
-        $r = new static($this);
+        $r = $this->max(1);
         while ($n->s === 1) {
             $r->mul($n, true);
             $n->sub(1, true);

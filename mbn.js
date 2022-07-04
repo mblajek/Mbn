@@ -1080,7 +1080,7 @@ var Mbn = (function () {
             if (!this.isInt() || this._s === -1) {
                 throw new MbnErr("fact.invalid_value", this);
             }
-            var n = this.sub(1), r = new Mbn(this);
+            var n = this.sub(1), r = this.max(1);
             while (n._s === 1) {
                 r.mul(n, true);
                 n.sub(1, true);
