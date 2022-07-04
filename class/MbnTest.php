@@ -109,7 +109,7 @@ class MbnTest {
             $jsonA = [];
             $pos = 0;
             while (preg_match('/[^)]({[^}]*})/', substr($tst, $pos), $jsonA) === 1) {
-                $json = preg_replace('/([a-z]+):/i', '"$1":', $jsonA[1]);
+                $json = preg_replace('/(\\w+):/', '"$1":', $jsonA[1]);
                 $jsonDecoded = json_decode($json, true);
                 if ($jsonDecoded === null) {
                     $pos += strlen($jsonA[1]);

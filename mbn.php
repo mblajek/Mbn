@@ -54,10 +54,10 @@ class MbnErr extends \Exception {
 
     public $errorKey;
     public $errorValues;
-    private static $translation = null;
+    private static $errTranslation = null;
 
     public static function translate($translation) {
-        static::$translation = $translation;
+        static::$errTranslation = $translation;
     }
 
     /**
@@ -107,7 +107,7 @@ class MbnErr extends \Exception {
         $this->errorValues = $valArr;
 
         $msg = null;
-        $translation = static::$translation;
+        $translation = static::$errTranslation;
         if (is_callable($translation)) {
             try {
                 $msg = $translation($this->errorKey, $valArr);
@@ -142,7 +142,7 @@ class MbnErr extends \Exception {
 
 class Mbn {
     //version of Mbn library
-    protected static $MbnV = '1.51.1';
+    protected static $MbnV = '1.52.0';
     //default precision
     protected static $MbnP = 2;
     //default separator
@@ -298,7 +298,7 @@ class Mbn {
     /**
      * Private function, sets value from string
      * @param string $ns String or formula
-     * @param array|boolean $v Variables, default null
+     * @param array|boolean|null $v Variables, default null
      * @throws MbnErr invalid format, calc error
      */
     private function fromString($ns, $v = null) {
@@ -329,7 +329,7 @@ class Mbn {
                 }
             } elseif (!(($i === $ln && $nl !== 1) || ($c === -16 && $i > $cs && ($i + 1) < $ln))) {
                 if ($v === true || is_array($v) || ($v !== false && (static::$MbnE === true || (static::$MbnE === null && $np[1] === '=')))) {
-                    $this->set(static::mbnCalc($ns, $v));
+                    $this->set(static::mbnCalc($ns, $v, null));
                     return;
                 }
                 throw new MbnErr('invalid_format', $ns);
@@ -1253,26 +1253,19 @@ class Mbn {
      * @throws MbnErr syntax error, operation error
      * @throws MbnErr invalid argument format
      */
-    public static function calc($expr, $vars = null) {
-        return new static($expr, is_array($vars) ? $vars : true);
+    public static function calc($exp, $vars = null) {
+        return new static($exp, is_array($vars) ? $vars : true);
     }
 
     /**
      * Check expression, get names of used vars
      * @param string $exp Expression
-     * @param bool $omitConsts don't list already defined constants
+     * @param bool $omitOptional Omit vars available as constans or results
      * @return array|boolean
      */
-    public static function check($exp, $omitConsts = false) {
+    public static function check($exp, $omitOptional = false) {
         try {
-            $varNames = [];
-            $calcVars = static::mbnCalc($exp, false);
-            foreach ($calcVars as $varName => $_) {
-                if ($omitConsts !== true || !static::def(null, $varName)) {
-                    $varNames[] = $varName;
-                }
-            }
-            return $varNames;
+            return array_keys(static::mbnCalc($exp, false, $omitOptional === true));
         } catch (MbnErr $e) {
             return false;
         }
@@ -1281,24 +1274,19 @@ class Mbn {
     /**
      * Evaluate expression
      * @param string $exp Expression
-     * @param array|boolean $vars Array with vars for evaluation
+     * @param array|boolean|null $vars Array with vars for evaluation
+     * @param bool|null $checkOmitOptional Omit vars available as constans or results
      * @return Mbn|string[]
      * @throws MbnErr syntax error, operation error
      * @throws MbnErr invalid argument format
      */
-    private static function mbnCalc($exp, $vars) {
-        $onlyCheck = $vars === false;
-
+    private static function mbnCalc($exp, $vars, $checkOmitOptional) {
+        $expr = (string)$exp;
+        $varsUsed = [];
         if (!is_array($vars)) {
             $vars = [];
         }
-        $varsUsed = [];
-        $state = 'uopVal';
-        $rpns = [];
-        $rpno = [];
-        $t = null;
-
-        $expr = (string)$exp;
+        $results = ['r0' => new static()];
         while (preg_match('/{+/', $expr, $mtch) === 1) {
             $mtch = $mtch[0];
             $comStart = strpos($expr, $mtch);
@@ -1306,7 +1294,30 @@ class Mbn {
             $expr = substr($expr, 0, $comStart) . (($comEnd === false)
                   ? '' : ("\t" . substr($expr, $comEnd + strlen($mtch))));
         }
-        $expr = preg_replace('/^[\\s=]+/', '', $expr);
+        foreach (explode(';', $expr) as $i => $expr) {
+            $expr = preg_replace('/^[\\s=]+/', '', $expr);
+            $results['r' . ($i + 1)] = $results['r0'] = (($expr === "") ? $results['r0']
+               : self::mbnCalcSingle($expr, $vars, $results, $varsUsed, $checkOmitOptional));
+        }
+        return ($checkOmitOptional === null) ? $results['r0'] : $varsUsed;
+    }
+
+    /**
+     * Evaluate expression
+     * @param string $expr Expression
+     * @param array $vars Array with vars for evaluation
+     * @param array $results Array with vars for evaluation
+     * @param bool|null $checkOmitOptional Omit vars available as constans or results
+     * @return Mbn|string[]
+     * @throws MbnErr syntax error, operation error
+     * @throws MbnErr invalid argument format
+     */
+    private static function mbnCalcSingle($expr, $vars, $results, &$varsUsed, $checkOmitOptional) {
+        $state = 'uopVal';
+        $rpns = [];
+        $rpno = [];
+        $t = null;
+
         while ($expr !== '') {
             $mtch = [];
             foreach (static::$states[$state] as $t) {
@@ -1333,8 +1344,8 @@ class Mbn {
                     if (isset(static::$fnEval[$tok]) && static::$fnEval[$tok] !== false) {
                         $t = 'fn';
                         $rpno [] = array_merge(static::$ops['fn'], [$tok]);
-                    } elseif ($onlyCheck) {
-                        if (empty($varsUsed[$tok])) {
+                    } elseif ($checkOmitOptional !== null) {
+                        if (empty($varsUsed[$tok]) && (!$checkOmitOptional || (!array_key_exists($tok, $results) && !Mbn::def(null, $tok)))) {
                             $varsUsed[$tok] = true;
                         }
                     } elseif (array_key_exists($tok, $vars)) {
@@ -1342,6 +1353,8 @@ class Mbn {
                             $varsUsed[$tok] = new static($vars[$tok]);
                         }
                         $rpns [] = new static($varsUsed[$tok]);
+                    } elseif (array_key_exists($tok, $results)) {
+                        $rpns [] = new static($results[$tok]);
                     } elseif (static::def(null, $tok)) {
                         $rpns [] = static::def($tok);
                     } else {
@@ -1390,12 +1403,11 @@ class Mbn {
             throw new MbnErr('calc.unexpected', 'END');
         }
 
-        if ($onlyCheck) {
+        if ($checkOmitOptional !== null) {
             return $varsUsed;
         }
 
         $rpn = [];
-
         foreach ($rpns as &$tn) {
             if ($tn instanceof static && $tn::$MbnP === static::$MbnP) {
                 $rpn[] = &$tn;
@@ -1415,5 +1427,4 @@ class Mbn {
         }
         return $rpn[0];
     }
-
 }
