@@ -40,3 +40,7 @@ services:
     container_name: mbn-php8-1
     build: { context: .,  dockerfile: php8-1.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
+  php8-2:
+    container_name: mbn-php8-2
+    build: { context: .,  dockerfile: php8-2.dockerfile }
+    volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
