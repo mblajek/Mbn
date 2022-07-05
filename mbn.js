@@ -1190,7 +1190,7 @@ var Mbn = (function () {
 
         var fnEval = {
             abs: true, inva: false, ceil: true, floor: true, fact: true,
-            sqrt: true, round: true, sgn: true, int: "intp", div_100: "div_100"
+            sqrt: true, round: true, sgn: true, "int": "intp", div_100: "div_100"
         };
         var states = {
             endBop: ["bop", "pc", "fs"],
@@ -1414,5 +1414,5 @@ var Mbn = (function () {
     return Mbn;
 })();
 if (typeof module === "object") {
-    module.exports.default = module.exports = Mbn;
+    module.exports["default"] = module.exports = Mbn;
 }

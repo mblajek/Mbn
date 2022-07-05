@@ -914,6 +914,7 @@
     <div class="title2" id="changelog">Changelog</div>
     <ul>
         <li>05.07.2022 - added multipart expressions <strong>(1.52.0)</strong></li>
+        <li>05.07.2022 - JS: fixed ES3 compatibility, quoted access to properties with reserved names </li>
         <li>05.07.2022 - fixed factorial, 0! was 0 (since 08.01.2019)</li>
         <li>22.02.2022 - fixed .d.ts and npm types link <strong>(1.51.1)</strong></li>
         <li>21.02.2022 - fixed problem with mbn from big floats, some implementation changes, npm ready
