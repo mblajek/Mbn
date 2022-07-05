@@ -1,46 +1,57 @@
 services:
   php5-4:
     container_name: mbn-php5-4
-    build: { context: .,  dockerfile: php5-4.dockerfile }
+    deploy: { resources: { limits: { memory: "64M" } } }
+    build: { context: ., dockerfile: php5-4.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php5-5:
     container_name: mbn-php5-5
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php5-5.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php5-6:
     container_name: mbn-php5-6
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php5-6.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php7-0:
     container_name: mbn-php7-0
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php7-0.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php7-1:
     container_name: mbn-php7-1
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php7-1.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php7-2:
     container_name: mbn-php7-2
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php7-2.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php7-3:
     container_name: mbn-php7-3
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php7-3.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php7-4:
     container_name: mbn-php7-4
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php7-4.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php8-0:
     container_name: mbn-php8-0
-    build: { context: .,  dockerfile: php8-0.dockerfile }
+    deploy: { resources: { limits: { memory: "64M" } } }
+    build: { context: ., dockerfile: php8-0.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
     ports: [ "4281:80" ]
   php8-1:
     container_name: mbn-php8-1
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: .,  dockerfile: php8-1.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
   php8-2:
     container_name: mbn-php8-2
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: .,  dockerfile: php8-2.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
