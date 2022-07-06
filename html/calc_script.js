@@ -13,6 +13,15 @@ window.addEventListener("load", function () {
     elements.inputStyle = window.getComputedStyle(elements.inputField, null);
     elements.inputHeightOffset = parseFloat(elements.inputStyle.borderTopWidth) + parseFloat(elements.inputStyle.borderBottomWidth);
 
+    var delay = ("requestAnimationFrame" in window) ?
+        (function (callback) {
+            requestAnimationFrame(function () {
+                requestAnimationFrame(callback)
+            })
+        }) : (function (callback) {
+            setTimeout(callback, 60)
+        });
+
     /* start, dots, print, error */
     var out = (function () {
         var timestamp = new (Mbn.extend({MbnP: 1, MbnT: true}))();
@@ -44,6 +53,7 @@ window.addEventListener("load", function () {
             elements.outputField.value = String(text);
         };
         ret.dots = function () {
+            elements.outputField.style.color = "gray";
             elements.timeOutput.textContent = '...';
         };
         ret.start = function () {
@@ -81,18 +91,16 @@ window.addEventListener("load", function () {
         var currentFullInput = inputValue + "|" + MbnP + "|" + MbnST;
         if (MbnX !== null && lastFullInput !== currentFullInput) {
             out.dots();
-            requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                    out.start();
-                    var result;
-                    try {
-                        result = MbnX.calc(inputValue, vars);
-                        out.print(result);
-                    } catch (e) {
-                        out.error(e);
-                    }
-                });
-            });
+            delay(function () {
+                out.start();
+                var result;
+                try {
+                    result = MbnX.calc(inputValue, vars);
+                    out.print(result);
+                } catch (e) {
+                    out.error(e);
+                }
+            })
             lastFullInput = currentFullInput;
         }
     });
@@ -131,9 +139,9 @@ window.addEventListener("load", function () {
             setTimeout(location.reload.bind(location), 250);
         }
         navigator.serviceWorker.register('calc_worker.js', {scope: "calc"})
-           .catch(function (error) {
-               console.error('Registration failed: ' + error);
-           }).then(function (sw) {
+            .catch(function (error) {
+                console.error('Registration failed: ' + error);
+            }).then(function (sw) {
             if (sw.active === null) {
                 out.print("reloading 2/2")
                 locationReload();

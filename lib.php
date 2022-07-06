@@ -38,7 +38,9 @@
 <div id="scroller">
     <div class="title1">Mbn (Multi-byte number) Library</div>
     <div>Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.</div>
-    <div class="title2" id="about">About</div>
+
+    <div class="anchor" id="about"></div>
+    <div class="title2">About</div>
     <div>The main job of the library is to regain control of numbers.</div>
     <div>Most of computer maths is based on float/double numbers which are fast and precise, but cause some problems in
         fixed-precision (e.g. financial) calculations.
@@ -81,7 +83,8 @@
     <pre><span class="lb"></span><strong id="resultPHP">..</strong></pre>
     <pre><span class="lb"></span><strong id="resultJS">..</strong></pre>
 
-    <div class="title2" id="downloads">Downloads</div>
+    <div class="anchor" id="downloads"></div>
+    <div class="title2">Downloads</div>
     <div>Minified JS is created with <a href="https://closure-compiler.appspot.com">Google Closure api</a></div>
     <div>Minified PHP is created with custom text replacements, intended to be used in online PHP sandboxes like <a
                 href="https://3v4l.org/">3v4l.org</a>
@@ -98,7 +101,8 @@
     }
     unset($relFile); ?>
 
-    <div class="title2" id="reference">Reference</div>
+    <div class="anchor" id="reference"></div>
+    <div class="title2">Reference</div>
     <div>JS and Mbn code equivalents.</div>
     <div>In most cases Mbn code in PHP and JS is identical - <span class="monoInline">a.f()</span> in JS is <span
                 class="monoInline">$a-&gt;f()</span> in PHP
@@ -401,7 +405,8 @@
         </table>
     </div>
 
-    <div class="title2" id="class_declarations">Class declarations</div>
+    <div class="anchor" id="class_declarations"></div>
+    <div class="title2">Class declarations</div>
     <div>Each Mbn class has parameters defining its precision, default format and behavior
         <br/>The library provides a single class named Mbn with default parameters (both in JS and PHP).
         This class can be extended.
@@ -434,7 +439,8 @@
             </ul>
         </li>
         <li>
-            <strong id="class_declarations_mbne">MbnE</strong> - evaluating - true, false or null, triggers usage of
+            <div class="anchor" id="class_declarations_mbne"></div>
+            <strong>MbnE</strong> - evaluating - true, false or null, triggers usage of
             the expression parser
             <ul>
                 <li>true: all expressions are evaluated</li>
@@ -474,7 +480,8 @@
         </li>
     </ul>
 
-    <div class="title2" id="class_declarations_js">Class declarations in JS</div>
+    <div class="anchor" id="class_declarations_js"></div>
+    <div class="title2">Class declarations in JS</div>
     <div>Default Mbn class can be extended with <span class="monoInline">Mbn.extend()</span> method
         <br>Single precision as number, or object with Mbn* parameters can be passed.
         <br>hint: Mbn in JS is not exactly class, it's a class, a function and an object
@@ -504,7 +511,8 @@
         w(['//precision 5, truncate zeros', 'var Mbn5t = Mbn.extend({MbnP: 5, MbnT: true});'], "mono");
         we('new Mbn5t("12.7");');
     </script>
-    <div class="title2" id="class_declarations_php">Class declarations in PHP</div>
+    <div class="anchor" id="class_declarations_php"></div>
+    <div class="title2">Class declarations in PHP</div>
     <div>Default Mbn class can be extended with standard inheritance by overriding protected static fields
         <br>Mbn* fields which are not overridden have default values
         <br>Derived classes shouldn't be extended further
@@ -523,7 +531,8 @@
 --><br><span class="lb"></span>  protected static $MbnT = true;<!--
 --><br><span class="lb"></span>}</pre>
 
-    <div class="title2" id="object_declarations">Object declarations</div>
+    <div class="anchor" id="object_declarations"></div>
+    <div class="title2">Object declarations</div>
     <div>There are several types of values that can be passed as the first constructor argument - the value</div>
     <ul>
         <li>none - <span class="monoInline">new Mbn()</span> &rarr; 0</li>
@@ -630,7 +639,8 @@
         </li>
     </ul>
 
-    <div class="title2" id="exceptions">Exceptions</div>
+    <div class="anchor" id="exceptions"></div>
+    <div class="title2">Exceptions</div>
     <div>All exceptions are instances of MbnErr class</div>
     <div>JS: MbnErr has field "message", and method "toString" returns that message: <span
                 class="monoInline">ex.message</span>, <span class="monoInline">String(ex)</span></div>
@@ -911,7 +921,9 @@
             </ul>
         </li>
     </ul>
-    <div class="title2" id="changelog">Changelog</div>
+
+    <div class="anchor" id="changelog"></div>
+    <div class="title2">Changelog</div>
     <ul>
         <li>05.07.2022 - added multipart expressions <strong>(1.52.0)</strong></li>
         <li>05.07.2022 - JS: fixed ES3 compatibility, quoted access to properties with reserved names </li>
@@ -983,7 +995,8 @@
 
     <div class="title2">Other methods</div>
 
-    <div class="title2" id="other_methods_split">Array methods - split - split value into an array</div>
+    <div class="anchor" id="other_methods_split"></div>
+    <div class="title2">Array methods - split - split value into an array</div>
     <div>A value can be split into an array of Mbn values that sum up to the original value</div>
     <ul>
         <li>splitting into given number of parts
@@ -1014,7 +1027,8 @@
         </li>
     </ul>
 
-    <div class="title2" id="other_methods_reduce">Array methods - reduce - map or reduce array</div>
+    <div class="anchor" id="other_methods_reduce"></div>
+    <div class="title2">Array methods - reduce - map or reduce array</div>
     <div>Array can be mapped or reduced with one of the Mbn methods<br>PHP: array can be associative</div>
     <ul>
         <li>one-argument functions: abs, inva, invm, ceil, floor, sqrt, round, sgn, intp, fact
@@ -1062,7 +1076,8 @@
         </li>
     </ul>
 
-    <div class="title2" id="other_methods_calc">Other methods - calc</div>
+    <div class="anchor" id="other_methods_calc"></div>
+    <div class="title2">Other methods - calc</div>
     <script>
         we(['//string value can be evaluated with library', 'Mbn.calc("2 + 2 * 2");']);
 

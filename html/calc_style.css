@@ -32,6 +32,7 @@ input, textarea {
     box-sizing: border-box;
     padding: 2px;
     outline: none;
+    border: 1px solid gray;
 }
 
 textarea {
