@@ -674,8 +674,7 @@
         <li><span class="monoInline">mbn.limit_exceeded</span> - value reaches limit of digits from MbnL
             <ul>
                 <li>errorValues.v is MbnL, exact value which caused exception is unknown</li>
-                <li><span class="monoInline">new Mbn("x")</span>, <span class="monoInline">new Mbn("1..2")</span></li>
-                <li><span class="monoInline">Mbn({toString:function(){return "x"}})</span></li>
+                <li><span class="monoInline">new Mbn("=9^9^9")</span>, <span class="monoInline">(new Mbn(1000)).fact()</span></li>
             </ul>
         </li>
         <li><span class="monoInline">mbn.div.zero_divisor</span> - division by zero

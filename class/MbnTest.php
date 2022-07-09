@@ -91,8 +91,8 @@ class MbnTest {
     private static function testMbn() /*:string*/ {
         $time = time();
 
-        $phpCheckFile = 'php_check_' . str_replace('.', '-', PHP_VERSION);
-        $cachedResult = FileHelper::getFile($phpCheckFile, true);
+        $phpCheckFile = 'var/php_check_' . str_replace('.', '-', PHP_VERSION);
+        $cachedResult = FileHelper::getFile($phpCheckFile);
         if ($cachedResult !== null) {
             $cachedResultArr = json_decode($cachedResult, true);
             if (isset($cachedResultArr['cache']) && $time - $cachedResultArr['cache'] <= self::CACHE_TIME) {
@@ -137,7 +137,7 @@ class MbnTest {
         $testPHP['env'] = 'PHP_' . PHP_VERSION;
 
         if ($testPHP['status'] === 'OK') {
-            FileHelper::putFile($phpCheckFile, json_encode($testPHP + ['cache' => $time]), true);
+            FileHelper::putFile($phpCheckFile, json_encode($testPHP + ['cache' => $time]));
         }
         return json_encode($testPHP);
     }
