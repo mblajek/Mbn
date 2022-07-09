@@ -14,7 +14,7 @@ function releaseMbn() {
 
     function getVersion($code) {
         preg_match('/MbnV = [\'"]([\d.]+)[\'"];/', $code, $varr);
-        return 'v' . (isset($varr[1]) ? $varr[1] : '');
+        return 'v' . (isset($varr[1]) ? $varr[1] : '?');
     }
 
     function removePhpTag($code, $replace = '') {
