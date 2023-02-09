@@ -29,6 +29,9 @@ function releaseMbn() {
     }
 
     function checkMinifyJS(&$errors) {
+        if (!env::docker) {
+            throw new Exception('Release possible only in docker environment');
+        }
         if (!FileHelper::fileExists('var/cc.jar')) {
             FileHelper::putFile('var/cc.jar', file_get_contents(env::githubCcJar), false, true);
         }
