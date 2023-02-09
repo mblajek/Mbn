@@ -68,6 +68,11 @@ class FileHelper {
         return null;
     }
 
+    public static function fileExists($file, $release = false) /*:?string*/ {
+        $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
+        return file_exists($path);
+    }
+
     public static function deleteFile($file, $release = false) /*:?bool*/ {
         $path = $release ? self::getReleaseFilePath($file) : self::getFilePath($file);
         return (unlink($path) !== false);

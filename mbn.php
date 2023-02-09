@@ -142,7 +142,7 @@ class MbnErr extends \Exception {
 
 class Mbn {
     //version of Mbn library
-    protected static $MbnV = '1.52.0';
+    protected static $MbnV = '1.52.1';
     //default precision
     protected static $MbnP = 2;
     //default separator
@@ -1298,6 +1298,9 @@ class Mbn {
             $expr = preg_replace('/^[\\s=]+/', '', $expr);
             $results['r' . ($i + 1)] = $results['r0'] = (($expr === "") ? $results['r0']
                : self::mbnCalcSingle($expr, $vars, $results, $varsUsed, $checkOmitOptional));
+            for ($j = 0; $j <= $i; $j++) {
+                $results['r0' . ($j + 1)] = $results['r' . ($i - $j + 1)];
+            }
         }
         return ($checkOmitOptional === null) ? $results['r0'] : $varsUsed;
     }

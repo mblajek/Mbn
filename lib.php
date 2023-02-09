@@ -924,6 +924,7 @@
     <div class="anchor" id="changelog"></div>
     <div class="title2">Changelog</div>
     <ul>
+        <li>09.02.2023 - added r0X references, JS: allow creating from bigint <strong>(1.52.1)</strong></li>
         <li>05.07.2022 - added multipart expressions <strong>(1.52.0)</strong></li>
         <li>05.07.2022 - JS: fixed ES3 compatibility, quoted access to properties with reserved names </li>
         <li>05.07.2022 - fixed factorial, 0! was 0 (since 08.01.2019)</li>

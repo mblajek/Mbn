@@ -21,53 +21,53 @@ function releaseMbn() {
         return trim(preg_replace('/^<\?php\s*/i', $replace, $code));
     }
 
-    function checkMinifyJS(&$errors, $code) {
-        $postfields = [
-           'js_code' => $code,
-           'compilation_level' => 'SIMPLE_OPTIMIZATIONS',
-           'output_format' => 'json',
-           'output_info[1]' => 'compiled_code',
-           'output_info[2]' => 'warnings',
-           'output_info[3]' => 'errors',
-           'warning_level' => 'verbose',
-        ];
+    function arrayGetStr($array, $key) {
+        if (array_key_exists($key, $array)) {
+            return $array[$key] ?: '';
+        }
+        return '';
+    }
 
-        foreach ($postfields as $field => &$postfield) {
-            $postfield = preg_replace('/\\[\d+]$/', '', $field) . '=' . rawurlencode($postfield);
+    function checkMinifyJS(&$errors) {
+        if (!FileHelper::fileExists('var/cc.jar')) {
+            FileHelper::putFile('var/cc.jar', file_get_contents(env::githubCcJar), false, true);
         }
-        unset($postfield);
-        $postfieldsStr = implode('&', $postfields);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://closure-compiler.appspot.com/compile');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postfieldsStr);
-        /** @noinspection CurlSslServerSpoofingInspection */
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        $resp = json_decode(curl_exec($ch));
-        $curlErr = curl_error($ch);
-        curl_close($ch);
-        if (empty($resp)) {
-            throw new Exception('empty closure-compiler response ' . $curlErr);
+        //system('java -jar ../var/cc.jar --help 2>&1');\
+        system(implode(' ', ['java -jar ../var/cc.jar',
+            '--js ../mbn.js',
+            '--language_in ECMASCRIPT3',
+            '--language_out ECMASCRIPT3',
+            '--warning_level VERBOSE',
+            '--error_format JSON',
+            '1>../var/cc_std',
+            '2>../var/cc_err']));
+        $ccStd = trim(FileHelper::getFile('var/cc_std')) ?: null;
+        $ccErr = trim(FileHelper::getFile('var/cc_err')) ?: null;
+        FileHelper::deleteFile('var/cc_std');
+        FileHelper::deleteFile('var/cc_err');
+        if (!$ccStd) {
+            if (!$ccErr) {
+                throw new Exception('Empty closure-compiler response');
+            }
+            $ccErrors = json_decode($ccErr, true);
+            if (!$ccErrors) {
+                throw new Exception('JSON: ' . json_last_error_msg());
+            }
+            foreach ($ccErrors as $err) {
+                $line = arrayGetStr($err, 'line');
+                $column = arrayGetStr($err, 'column');
+                $context = arrayGetStr($err, 'context');
+                $error = ['type' => $err['level'], 'message' => $err['description']];
+                if ($context !== '') {
+                    $error['line'] = trim(current(explode(PHP_EOL, $context)));
+                }
+                if ($line !== '' && $column !== '') {
+                    $error['place'] = 'mbn.js:' . $line . ':' . $column;
+                }
+                $errors[] = $error;
+            }
         }
-        $jsErrors = [];
-        if (!empty($resp->errors)) {
-            $jsErrors = array_merge($jsErrors, $resp->errors);
-        }
-        if (!empty($resp->warnings)) {
-            $jsErrors = array_merge($jsErrors, $resp->warnings);
-        }
-        foreach ($jsErrors as $err) {
-            $errors [] = [
-               'place' => 'mbn.js:' . $err->lineno . ':' . $err->charno,
-               'line' => $err->line,
-               'type' => $err->type,
-               'message' => isset($err->error) ? $err->error : $err->warning
-            ];
-        }
-
-        return empty($resp->compiledCode) ? '' : $resp->compiledCode;
+        return $ccStd ?: '';
     }
 
     function minifyCheckPHP(&$errors) {

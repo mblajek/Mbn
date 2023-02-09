@@ -11,6 +11,9 @@ function displayResult(displayTestStatusOpt) {
     var Mbn20u = Mbn.extend({MbnP: 20, MbnS: ',', MbnT: true});
     var Mbn2nef = Mbn.extend({MbnE: false, MbnF: true});
     var Mbn4yec = Mbn.extend({MbnP: 4, MbnE: true, MbnS: ",", MbnL: 20});
+    var wrapBigInt = function (x) {
+        return ((typeof BigInt) === "undefined") ? BigInt(x) : String(x);
+    }
 
     Mbn.MbnErr.translate(function (key, value) {
         if (key === "mbn.invalid_argument") {
@@ -83,7 +86,7 @@ function displayResult(displayTestStatusOpt) {
         for (var i = 0; i < tests.length; i++) {
             var test = tests[i];
             test[2] = test[0].replace(/->|::/g, ".").replace(/^\$/, "var $")
-               .replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
+                .replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
         }
         var startTimeJS = new Date();
         var ret = runTestMbn(tests);

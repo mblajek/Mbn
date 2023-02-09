@@ -30,6 +30,8 @@
         ["typeof ((new Mbn(1))->toNumber())", "number"],
         ["typeof ((new Mbn0(1.2))->toNumber())", "number"],
         ["Mbn::reduce('pow', [2, 3], undefined)", "1.00,1.00"],
+        ["new Mbn(wrapBigInt(4))", "4.00"],
+        ["new Mbn(wrapBigInt(-4))", "-4.00"],
         ["0", "0"]
     ],
     "both": [
@@ -566,6 +568,8 @@
         ["Mbn::check('r0 E;r1;r3 r2')", "r0,E,r1,r3,r2"],
         ["Mbn::check('r0 E;r1;r3 r2', true)", "r3"],
         ["new Mbn('=0!')", "1.00"],
+        ["Mbn::calc('2;4;6;8;1000r1+100r2+10r3+r4')", "2468.00"],
+        ["Mbn::calc('2;4;6;8;1000r01+100r02+10r03+r04')", "8642.00"],
         ["0", "0"]
     ]
 }

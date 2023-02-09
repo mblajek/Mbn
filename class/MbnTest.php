@@ -99,7 +99,7 @@ class MbnTest {
                 $cachedResultArr['cache'] = true;
                 return json_encode($cachedResultArr);
             }
-            FileHelper::deleteFile($phpCheckFile, true);
+            FileHelper::deleteFile($phpCheckFile);
         }
 
         $testsAll = json_decode(self::getTestsAllJson());
