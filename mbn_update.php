@@ -1,9 +1,9 @@
 <?php
-$githubZip = 'github.zip';
+$githubZip = 'var/github.zip';
 
 function updateMbn($githubZip, $query) {
     function getAllFilesZip($githubZip) {
-        $zip = FileHelper::getZipFile($githubZip, true);
+        $zip = FileHelper::getZipFile($githubZip);
         if (!$zip) {
             return 'Failed to open zip';
         }
@@ -25,7 +25,7 @@ function updateMbn($githubZip, $query) {
 
     $githubZipContents = file_get_contents(env::githubZip);
 
-    FileHelper::putFile($githubZip, $githubZipContents, true, true);
+    FileHelper::putFile($githubZip, $githubZipContents, false, true);
     $allFilesAndContentsZip = getAllFilesZip($githubZip);
     if (is_string($allFilesAndContentsZip)) {
         return $allFilesAndContentsZip;
