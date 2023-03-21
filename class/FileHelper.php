@@ -9,6 +9,7 @@ class FileHelper {
        'mbn.d.ts' => ['desc' => 'TypeScript declaration file'],
        'Mbn.php' => ['desc' => 'Mbn class in PHP (with namespace, without MbnErr class)'],
        'MbnErr.php' => ['desc' => 'MbnErr class in PHP (with namespace)'],
+       '../mbn.js' => [],
        'v' => [],
     ];
 
@@ -52,7 +53,9 @@ class FileHelper {
         }
         if ($foundFile && file_exists($foundFilePath = self::getReleaseFilePath($foundFile))) {
             header('Content-Type: ' . static::$contentTypes[$show ? 'txt' : pathinfo($url, PATHINFO_EXTENSION)]);
-            header('Content-Disposition: ' . ($show ? 'inline' : 'attachment') . '; filename="' . $url . '"');
+            if (isset(self::$relFiles[$url]['desc'])) {
+                header('Content-Disposition: ' . ($show ? 'inline' : 'attachment') . '; filename="' . $url . '"');
+            }
             readfile($foundFilePath);
         } else {
             (new SimpleHtml(404))->addErrorDiv("File not found: $url")->render();

@@ -13,7 +13,7 @@ class SimpleHtml {
     }
 
     public function addErrorDiv($text = '') /*:self*/ {
-        $this->contents .= '<div style="color:red">' . htmlspecialchars($text) . '</div>';
+        $this->contents .= '<div style="color:red">' . self::hscArray($text) . '</div>';
         return $this;
     }
 
@@ -23,7 +23,7 @@ class SimpleHtml {
     }
 
     public function addScript($text = '') /*:self*/ {
-        $this->contents .= "<script>$text</script>";
+        $this->contents .= '<script>' . self::hscArray($text) . '</script>';
         return $this;
     }
 

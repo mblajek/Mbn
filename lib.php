@@ -1,3 +1,7 @@
+<?php
+$hashCurrent = FileHelper::getCurrentHash();
+$hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,14 +11,14 @@
           content="Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.">
     <link rel="icon" href="favicon.ico" type="image/png"/>
     <link rel="stylesheet" href="lib_style.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
 </head>
 <body>
 <script src="lib_script.js"></script>
+<script src="mbn_current?<?= $hashCurrent ?>"></script>
 <script>
-    //avoid any caching
-    <?php readfile('../mbn.js'); ?>
     var releaseStatus = {
-        hashChanged: <?= json_encode(FileHelper::getCachedHash() !== FileHelper::getCurrentHash()) ?>,
+        hashChanged: <?= json_encode($hashChanged) ?>,
         passedPHP: false,
         passedJS: false
     };
@@ -107,7 +111,7 @@
     <div>In most cases Mbn code in PHP and JS is identical - <span class="monoInline">a.f()</span> in JS is <span
                 class="monoInline">$a-&gt;f()</span> in PHP
     </div>
-    <div>
+    <div class="scroll-x">
         <table>
             <tbody>
             <tr>

@@ -5,19 +5,20 @@ class Router {
        'calc' => [],
        '' => ['path' => 'lib'],
        'LICENSE' => ['redirect' => 'https://github.com/mblajek/Mbn/blob/master/LICENSE.txt'],
+       'mbn_current' => ['getFile' => '../mbn.js'],
        'mbn_test' => ['path' => 'mbn_test.js'],
        'mbn_release' => ['path' => 'mbn_release', 'type' => 'text/plain'],
        'mbn_update' => ['path' => 'mbn_update', 'type' => 'text/plain'],
     ];
 
     private static function runPath($requireFile, $url, $query) /*:void*/ {
-        $page = isset(self::$pages[$url]) ? self::$pages[$url] : ['getFile' => true];
+        $page = isset(self::$pages[$url]) ? self::$pages[$url] : ['getFile' => $url];
         if (!empty($page['redirect'])) {
             header('Location: ' . $page['redirect']);
             die;
         }
         if (!empty($page['getFile'])) {
-            FileHelper::downloadFileAndDie($url, $query === 'show');
+            FileHelper::downloadFileAndDie($page['getFile'], $query === 'show');
         }
         if (!empty($page['type'])) {
             header('Content-Type: ' . $page['type']);

@@ -116,9 +116,15 @@ span.lb:after {
     border-left: 0;
 }
 
+.scroll-x {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
 table {
     border: 1px solid gray;
     width: 100%;
+    min-width: 750px;
     border-radius: 2px;
     border-spacing: 0;
 }

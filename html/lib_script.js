@@ -95,7 +95,7 @@ window.addEventListener("load", function (ev) {
         var js = document.createElement("script");
         js.src = "mbn_test?js";
         document.body.appendChild(js);
-    }, 100);
+    }, 250);
 });
 
 
