@@ -128,7 +128,7 @@ class FileHelper {
         $dirFullPath = self::getFilePath($dirPath);
         foreach (scandir($dirFullPath) as $file) {
             $filePath = $dirPath ? "$dirPath/$file" : $file;
-            if ($file === '.' || $file === '..' || $filePath === 'release' || $filePath === 'env.php'
+            if ($file === '.' || $file === '..' || $filePath === 'env.php'
                || $filePath === '.git' || $filePath === '.idea') {
                 continue;
             }
