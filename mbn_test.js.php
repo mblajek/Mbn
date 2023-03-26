@@ -52,13 +52,14 @@ function displayResult(displayTestStatusOpt) {
             var req = test[1];
             var exp = test[2];
 
-            var evv;
+            var evv = "";
             try {
                 evv = String(eval(exp));
             } catch (ex) {
                 if (ex instanceof Mbn.MbnErr) {
                     evv = String(ex.errorKey) + " " + String(ex);
                 } else {
+                    console.error(ex);
                     evv += String(ex);
                 }
             }

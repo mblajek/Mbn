@@ -139,7 +139,7 @@ window.addEventListener("load", function () {
             setTimeout(location.reload.bind(location), 250);
         }
         navigator.serviceWorker.register('calc_worker.js', {scope: "calc"})
-            .catch(function (error) {
+            ["catch"](function (error) {
                 console.error('Registration failed: ' + error);
             }).then(function (sw) {
             if (sw.active === null) {

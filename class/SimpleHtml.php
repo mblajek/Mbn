@@ -23,7 +23,7 @@ class SimpleHtml {
     }
 
     public function addScript($text = '') /*:self*/ {
-        $this->contents .= '<script>' . self::hscArray($text) . '</script>';
+        $this->contents .= '<script>' . $text . '</script>';
         return $this;
     }
 
