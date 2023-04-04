@@ -359,6 +359,7 @@
         ["Mbn20u::def('PI')", "3,14159265358979323846"],
         ["Mbn3c::def('PI', 2)", "mbn.def.already_set Mbn.def error: constant already set: \"PI\" = 3,142"],
         ["Mbn::def('MbnP')", "mbn.def.undefined Mbn.def error*"],
+        ["Mbn4yec::def('eps', 5)", "mbn.def.already_set Mbn.def error: constant already set: \"eps\" = 0,0001"],
         ["Mbn::def('MbnP', 4.2)", "4.20"],
         ["Mbn3c::def('MbnP')", "mbn.def.undefined Mbn.def error*"],
         ["Mbn::def('X')", "mbn.def.undefined Mbn.def error*"],

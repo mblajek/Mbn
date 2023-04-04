@@ -142,7 +142,7 @@ class MbnErr extends \Exception {
 
 class Mbn {
     //version of Mbn library
-    protected static $MbnV = '1.52.1';
+    protected static $MbnV = '1.52.2';
     //default precision
     protected static $MbnP = 2;
     //default separator
@@ -1205,7 +1205,7 @@ class Mbn {
             return $res->set($mc[$mx][$n]);
         }
         if (isset($mc[$mx][$n]) || isset($mc[''][$n])) {
-            throw new MbnErr('def.already_set', ['v' => $n, 'w' => new static(isset($mc[$mx][$n]) ? $mc[$mx][$n] : $mc[''][$n])], true);
+            throw new MbnErr('def.already_set', ['v' => $n, 'w' => static::def($n)], true);
         }
         $mc[$mx][$n] = $res->set($v)->add(0);
         return $res;
@@ -1297,7 +1297,7 @@ class Mbn {
         foreach (explode(';', $expr) as $i => $expr) {
             $expr = preg_replace('/^[\\s=]+/', '', $expr);
             $results['r' . ($i + 1)] = $results['r0'] = (($expr === "") ? $results['r0']
-               : self::mbnCalcSingle($expr, $vars, $results, $varsUsed, $checkOmitOptional));
+               : static::mbnCalcSingle($expr, $vars, $results, $varsUsed, $checkOmitOptional));
             for ($j = 0; $j <= $i; $j++) {
                 $results['r0' . ($j + 1)] = $results['r' . ($i - $j + 1)];
             }

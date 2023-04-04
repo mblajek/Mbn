@@ -1,4 +1,4 @@
-/* Mbn v1.53.0 / 26.03.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+/* Mbn v1.53.0 / 04.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
 "use strict";
 
 var Mbn = (function () {
@@ -395,7 +395,7 @@ var Mbn = (function () {
         var mbnToString = function (a, p, s, t, f) {
             var v = a, li = a._d.length - MbnP, i;
             if (p < MbnP) {
-                var b = new Mbn(a);
+                var b = ppNewMbn(a);
                 var bl = b._d.length;
                 if (p < MbnP - 1) {
                     b._d = b._d.slice(0, bl - MbnP + p + 1);
@@ -464,13 +464,12 @@ var Mbn = (function () {
             if (!(this instanceof Mbn)) {
                 return new Mbn(n, v);
             }
-            this._d = [0];
             ppNewAny(n, this, v);
         };
         var mbn0 = Mbn(0);
         /**@param {Mbn=} a
          * @return {Mbn}*/
-        var pfNew0 = own(Object, "setPrototypeOf") ? (function (a) {
+        var ppNew0 = own(Object, "setPrototypeOf") ? (function (a) {
             return a ? ppNewReset(0, a) : Object.setPrototypeOf({_s: 0, _d: mbn0d.slice()}, mbn0);
         }) : function (a) {
             return a ? ppNewReset(0, a) : {__proto__: mbn0, _s: 0, _d: mbn0._d.slice()};
@@ -479,9 +478,16 @@ var Mbn = (function () {
          * @param {Mbn=} a
          * @return {Mbn}*/
         var ppNewInt = function (n, a) {
-            var na = Math.abs(n), mbn = pfNew0(a);
-            mbn._s = (n && n / na);
-            mbn._d[0] = na;
+            var mbn = ppNew0(a);
+            if (n !== 0) {
+                var na = Math.abs(n)
+                mbn._s = n / na;
+                mbn._d[0] = na % 10;
+                while (na >= 10) {
+                    na = (na - mbn._d[0]) / 10;
+                    mbn._d.unshift(na % 10)
+                }
+            }
             return mbn;
         };
         var mbn1 = ppNewInt(1);
@@ -489,8 +495,8 @@ var Mbn = (function () {
          * @param {Mbn=} a
          * @return {Mbn}*/
         var ppNewNumber = function (n, a) {
-            var mbn = pfNew0(a);
-            if (n >= -9 && n <= 9 && n === Math.round(n)) {
+            var mbn = ppNew0(a);
+            if (Math.abs(n) < 1e9 && n === Math.round(n)) {
                 return ppNewInt(n, mbn);
             }
             mbn._d = [];
@@ -502,7 +508,7 @@ var Mbn = (function () {
          * @param {Mbn=} a
          * @return {Mbn}*/
         var ppNewMbn = function (n, a) {
-            var mbn = pfNew0(a);
+            var mbn = ppNew0(a);
             mbn._s = n._s;
             mbn._d = n._d.slice();
             return mbn;
@@ -512,7 +518,7 @@ var Mbn = (function () {
          * @param {Object|boolean=} v
          * @return {Mbn}*/
         var ppNewString = function (n, a, v) {
-            var mbn = pfNew0(a);
+            var mbn = ppNew0(a);
             if (n.length < -15) {
                 var nr = n.replace(",", ".");
                 var nn = Number(nr);
@@ -530,7 +536,7 @@ var Mbn = (function () {
          * @param {Object|boolean=} v
          * @return {Mbn}*/
         var ppNewObject = function (n, a, v) {
-            var mbn = a || pfNew0();
+            var mbn = a || ppNew0();
             if (n instanceof Mbn) {
                 return ppNewMbn(n, mbn)
             } else if (n && n.toString === Array.prototype.toString) {
@@ -539,7 +545,7 @@ var Mbn = (function () {
             return ppNewString((n !== null) ? String(n) : "0", mbn, v);
         };
         ppNewAny = function (n, a, v) {
-            var mbn = pfNew0(a);
+            var mbn = ppNew0(a);
             switch (typeof n) {
                 case "undefined":
                 case "boolean":
@@ -593,75 +599,32 @@ var Mbn = (function () {
             return Number(mbnToString(this, MbnP, "."));
         };
 
-        /**
-         * Compare value with b, a.cmp(b)<=0 means a<=b
-         * @param {*=} b
-         * @param {*=} d Maximum difference treated as equality, default 0
-         * @return {number} 1 if value > b, -1 if value < b, otherwise 0
-         * @throws {MbnErr} negative maximal difference
-         * @throws {MbnErr} invalid argument format
-         */
-        Mbn.prototype.cmp = function (b, d) {
-            var dm;
-            if (!(b instanceof Mbn)) {
-                b = new Mbn(b);
-            }
-            if (d === undefined || (dm = new Mbn(d))._s === 0) {
-                if (this._s !== b._s) {
-                    return (this._s > b._s) ? 1 : -1;
-                }
-                if (this._s === 0) {
-                    return 0;
-                }
-                var bl = b._d.length;
-                var ld = this._d.length - bl;
-                if (ld !== 0) {
-                    return (ld > 0) ? this._s : -this._s;
-                }
-                for (var i = 0; i < bl; i++) {
-                    if (this._d[i] !== b._d[i]) {
-                        return (this._d[i] > b._d[i]) ? this._s : -this._s;
-                    }
-                }
-                return 0;
-            }
-            if (dm._s === -1) {
-                throw new MbnErr("cmp.negative_diff", dm);
-            }
-            if (this.sub(b).abs().cmp(dm) <= 0) {
-                return 0;
-            }
-            return this.cmp(b);
-        };
 
 
 
-        /**
-         * Returns if value equals b
-         * @param {*} b
-         * @param {boolean=} d Maximum difference treated as equality, default 0
-         * @return {boolean}
-         * @throws {MbnErr} negative maximal difference
-         * @throws {MbnErr} invalid argument format
-         */
-        Mbn.prototype.eq = function (b, d) {
-            return this.cmp(b, d) === 0;
-        };
+
+
         /**@param {function} fun
-         * @param {Mbn} a
-         * @param {*=} b
-         * @return {*} l*/
-        var pfFun = function (fun, a, b) {
-            return (fun.length === 1) ? fun(a) : fun(a, (b instanceof Mbn) ? b : ppNewAny(b));
+         * @param {Array} argv
+         * @return {*}*/
+        var pfFun = function (fun, argv) {
+            var argvMbn = [argv[0]];
+            for (var i = 1; i < argv.length; i++) {
+                var arg = argv[i];
+                argvMbn.push((arg instanceof Mbn) ? arg : ppNewAny(arg))
+            }
+            return fun.apply(null, argvMbn);
         }
         /**@param {function} fun
          * @param {boolean=} m
-         * @param {Mbn} a
-         * @param {*=} b
-         * @return {*} l*/
-        var ppFun = function (fun, m, a, b) {
-            return ppNewMbn(pfFun(fun,a, b), (m===true) ? a : undefined);
+         * @param {Array} argv
+         * @return {Mbn}*/
+        var ppFun = function (fun, m, argv) {
+            return ppNewMbn(pfFun(fun, argv), (m === true) ? argv[0] : null);
         }
+        /**@param {Mbn} a
+         * @param {Mbn} b
+         * @return {Mbn}*/
         var ppSet = function (a, b) {
             a._d = b._d.slice();
             a._s = b._s;
@@ -669,8 +632,47 @@ var Mbn = (function () {
         var pfToString;
         var pfFormat;
         var pfToNumber;
-        var pfCmp;
-        var pfEq;
+
+        /**@param {Mbn} a
+         * @param {Mbn} b
+         * @param {Mbn} d
+         * @return {number}*/
+        var pfCmp =  function (a, b, d) {
+            if (d._s === 0) {
+                if (a._s !== b._s) {
+                    return (a._s > b._s) ? 1 : -1;
+                }
+                if (a._s === 0) {
+                    return 0;
+                }
+                var bl = b._d.length;
+                var ld = a._d.length - bl;
+                if (ld !== 0) {
+                    return (ld > 0) ? a._s : -a._s;
+                }
+                for (var i = 0; i < bl; i++) {
+                    if (a._d[i] !== b._d[i]) {
+                        return (a._d[i] > b._d[i]) ? a._s : -a._s;
+                    }
+                }
+                return 0;
+            }
+            if (d._s === -1) {
+                throw new MbnErr("cmp.negative_diff", d);
+            }
+            if (pfCmp(pfAbs(pfSub(a, b)), d, mbn0) !== 1) {
+                return 0;
+            }
+            return pfCmp(a, b, mbn0);
+        };
+        /**@param {Mbn} a
+         * @param {Mbn} b
+         * @param {Mbn} d
+         * @return {boolean}*/
+        var pfEq = function (a, b, d) {
+            return pfCmp(a, b, d) === 0;
+        };
+
 
         /**@param {Mbn} a
          * @param {Mbn} b
@@ -690,6 +692,12 @@ var Mbn = (function () {
                 }
             }
             return true;
+        }
+        /**@param {Mbn} a
+         * @param {Mbn} b
+         * @return {Mbn}*/
+        var pfSet = function (a, b) {
+            return b
         }
         /**@param {Mbn} a
          * @param {Mbn} b
@@ -732,7 +740,7 @@ var Mbn = (function () {
                 ppSet(r, a);
             } else if (b._s === a._s) {
                 var ld = a._d.length - b._d.length;
-                var cmp = a.cmp(b) * a._s;
+                var cmp = pfCmp(a, b, mbn0) * a._s;
                 if (cmp === 0) {
                     r = ppNewInt(0);
                 } else {
@@ -785,7 +793,7 @@ var Mbn = (function () {
                 throw new MbnErr("div.zero_divisor");
             }
             if (a._s === 0) {
-                return new ppNewMbn(a);
+                return ppNewMbn(a);
             }
             var x = a._d.slice();
             var y = b._d.slice();
@@ -852,9 +860,9 @@ var Mbn = (function () {
          * @return {Mbn}*/
         var pfMod = function (a, b) {
             var ba = pfAbs(b);
-            var r = a.sub(a.div(ba).intp().mul(ba));
+            var r = pfSub(a, pfMul(pfIntp(pfDiv(a, ba)), ba));
             if ((r._s * a._s) === -1) {
-                r = ba.sub(r.abs());
+                r = pfSub(ba, pfAbs(r));
                 r._s = a._s;
             }
             return r;
@@ -907,46 +915,46 @@ var Mbn = (function () {
         /**@param {Mbn} a
          * @return {Mbn}*/
         var pfInvm = function (a){
-            return ppNewInt(1).div(a);
+            return pfDiv(mbn1, a);
         };
         /**@param {Mbn} a
          * @return {Mbn}*/
         var pfCeil = function (a) {
-            return a.inva().floor().inva();
+            return pfInva(pfFloor(pfInva(a)));
         };
         /**@param {Mbn} a
          * @return {Mbn}*/
         var pfIntp = function (a) {
-            return (a._s === 1) ? a.floor() : a.inva().floor().inva();
+            return (a._s === 1) ? pfFloor(a) : pfCeil(a);
         };
         /**@param {Mbn} a
          * @param {Mbn} b
          * @return {Mbn}*/
         var pfMin =function (a, b) {
-            return ppNewMbn(a.cmp(b) ===-1 ? a : b);
+            return ppNewMbn(pfCmp(a, b, mbn0) === -1 ? a : b);
         };
         /**@param {Mbn} a
          * @param {Mbn} b
          * @return {Mbn}*/
-
         var pfMax = function (a, b) {
-            return ppNewMbn(a.cmp(b) ===1 ? a : b);
+            return ppNewMbn(pfCmp(a, b, mbn0) === 1 ? a : b);
         };
-
         /**@param {Mbn} a
          * @return {Mbn}*/
         var pfSqrt = function (a) {
-            var t = a.mul(100);
-            var r = t.add(0);
+            var t = pfMul(a, ppNewNumber(100));
+            var r = ppNewMbn(t);
             if (r._s === -1) {
                 throw new MbnErr("sqrt.negative_value", a);
             }
             if (r._s === 1) {
-                var mbn2 = ppNewInt(2), diff = null, lastDiff, cnt = 0;
+                var mbn2 = ppNewInt(2), diff = mbn0, lastDiff, cnt = 0;
                 do {
+                    cnt+=.01;
                     lastDiff = diff;
-                    diff = r.add(mbn0).sub(r.add(t.div(r), true).div(mbn2, true), true);
-                    cnt += (lastDiff && diff._s * lastDiff._s === -1) ? 1 : 0;
+                    diff = pfSub(r, pfDiv(pfAdd(r, pfDiv(t, r)), mbn2));
+                    r=pfSub(r, diff)
+                    cnt += (diff._s * lastDiff._s === -1) ? 1 : 0;
                 } while (diff._s !== 0 && cnt < 4);
                 mbnRoundLast(r);
             }
@@ -962,35 +970,35 @@ var Mbn = (function () {
          * @return {Mbn}*/
         var pfPow = function (a, b) {
             var n = ppNewMbn(b);
-            if (!n.isInt()) {
+            if (!pfIsInt(n)) {
                 throw new MbnErr("pow.unsupported_exponent", n);
             }
             var ns = n._s;
             n._s *= n._s;
             var ni = n.toNumber();
             var rx = ppNewMbn(a);
-            if (ns === -1 && rx.abs().cmp(mbn1) === -1) {
-                rx.invm(true);
+            if (ns === -1 && pfCmp(pfAbs(rx), mbn1, mbn0) === -1) {
+                rx = pfInvm(rx);
                 ns = -ns;
             }
             var dd = 0;
             var cdd = 0;
-            var r = ppNewInt(1);
-            while (!rx.isInt()) {
+            var r = mbn1;
+            while (!pfIsInt(rx)) {
                 rx._d.push(0);
                 mbnCarry(rx);
                 dd++;
             }
             while (true) {
                 if (ni % 2 === 1) {
-                    r.mul(rx, true);
+                    r = pfMul(r, rx)
                     cdd += dd;
                 }
                 ni = Math.floor(ni / 2);
                 if (ni === 0) {
                     break;
                 }
-                rx.mul(rx, true);
+                rx = pfMul(rx, rx);
                 dd *= 2;
             }
             if (cdd >= 1) {
@@ -1000,66 +1008,75 @@ var Mbn = (function () {
                 mbnRoundLast(r);
             }
             if (ns === -1) {
-                r.invm(true);
+                r = pfInvm(r)
             }
             return r;
         };
         /**@param {Mbn} a
          * @return {Mbn}*/
         var pfFact = function (a) {
-            if (!a.isInt() || a._s === -1) {
+            if (!pfIsInt(a) || a._s === -1) {
                 throw new MbnErr("fact.invalid_value", a);
             }
-            var n = a.sub(mbn1), r = a.max(mbn1);
+            var n = pfSub(a, mbn1), r = pfMax(a, mbn1);
             while (n._s === 1) {
-                r.mul(n, true);
-                n.sub(mbn1, true);
+                r = pfMul(r, n);
+                n = pfSub(n, mbn1)
             }
             return r;
-        }
+        };
 
-
-        /**
-         * Sets value from b
+        /**Sets value from b
          * @param {*} b
          * @return {Mbn}
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.set = function (b) {
-            if (!(b instanceof Mbn)) {
-                ppNewAny(b, this);
-            } else {
-                ppNewMbn(b, this)
-            }
-            return this;
+            return ppFun(pfSet, true, [this, b]);
         };
-
-        /**
-         * Returns if the number is integer
+        /**Compare value with b, a.cmp(b)<=0 means a<=b
+         * @param {*=} b
+         * @param {*=} d Maximum difference treated as equality, default 0
+         * @return {number} 1 if value > b, -1 if value < b, otherwise 0
+         * @throws {MbnErr} negative maximal difference
+         * @throws {MbnErr} invalid argument format
+         */
+        Mbn.prototype.cmp = function (b, d) {
+            return pfFun(pfCmp, [this, b, d]);
+        };
+        /**Returns if value equals b
+         * @param {*} b
+         * @param {boolean=} d Maximum difference treated as equality, default 0
+         * @return {boolean}
+         * @throws {MbnErr} negative maximal difference
+         * @throws {MbnErr} invalid argument format
+         */
+        Mbn.prototype.eq = function (b, d) {
+            return pfFun(pfEq, [this, b, d]);
+        };
+        /**Returns if the number is integer
          * @return {boolean}
          */
         Mbn.prototype.isInt = function () {
-            return pfFun(pfIsInt, this);
+            return pfFun(pfIsInt, [this]);
         };
-        /**
-         * Add b to value
+        /**Add b to value
          * @param {*} b
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.add = function (b, m) {
-            return ppFun(pfAdd, m, this, b);
+            return ppFun(pfAdd, m, [this, b]);
         };
-        /**
-         *  Subtract b from value
+        /**Subtract b from value
          * @param {*} b
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.sub = function (b, m) {
-            return ppFun(pfSub, m, this, b);
+            return ppFun(pfSub, m, [this, b]);
         };
         /**
          * Multiple value by b
@@ -1069,10 +1086,9 @@ var Mbn = (function () {
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.mul = function (b, m) {
-            return ppFun(pfMul, m, this, b);
+            return ppFun(pfMul, m, [this, b]);
         };
-        /**
-         * Divide value by b
+        /**Divide value by b
          * @param {*} b
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
@@ -1080,10 +1096,9 @@ var Mbn = (function () {
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.div = function (b, m) {
-            return ppFun(pfDiv, m, this, b);
+            return ppFun(pfDiv, m, [this, b]);
         };
-        /**
-         * Modulo, remainder of division value by b, keep sign of value
+        /**Modulo, remainder of division value by b, keep sign of value
          * @param {*} b
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
@@ -1091,7 +1106,7 @@ var Mbn = (function () {
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.mod = function (b, m) {
-            return ppFun(pfMod, m, this, b);
+            return ppFun(pfMod, m, [this, b]);
         };
         /**
          * Returns greatest integer value not greater than number
@@ -1099,95 +1114,84 @@ var Mbn = (function () {
          * @return {Mbn}
          */
         Mbn.prototype.floor = function (m) {
-            return ppFun(pfFloor, m, this);
+            return ppFun(pfFloor, m, [this]);
         };
-        /**
-         * Round number to closest integer value (half-up)
+        /**Round number to closest integer value (half-up)
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn} */
         Mbn.prototype.round = function (m) {
-            return ppFun(pfRound, m, this);
+            return ppFun(pfRound, m, [this]);
         };
-        /**
-         * Absolute value
+        /**Absolute value
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          */
         Mbn.prototype.abs = function (m) {
-            return ppFun(pfAbs, m, this);
+            return ppFun(pfAbs, m, [this]);
         };
-        /**
-         * Additive inverse of value
+        /**Additive inverse of value
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          */
         Mbn.prototype.inva = function (m) {
-            return ppFun(pfInva, m, this);
+            return ppFun(pfInva, m, [this]);
         };
-        /**
-         * Returns multiplicative inverse of value
+        /**Returns multiplicative inverse of value
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          * @throws {MbnErr} division by zero
          */
         Mbn.prototype.invm = function (m) {
-            return ppFun(pfInvm, m, this);
+            return ppFun(pfInvm, m, [this]);
         };
-        /**
-         * Returns lowest integer value not lower than value
+        /**Returns lowest integer value not lower than value
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          */
         Mbn.prototype.ceil = function (m) {
-            return ppFun(pfCeil, m, this);
+            return ppFun(pfCeil, m, [this]);
         };
-        /**
-         * Returns integer part of number
+        /**Returns integer part of number
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          */
         Mbn.prototype.intp = function (m) {
-            return ppFun(pfIntp, m, this);
+            return ppFun(pfIntp, m, [this]);
         };
-        /**
-         * Returns minimum from value and b
+        /**Returns minimum from value and b
          * @param {*} b
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.min = function (b, m) {
-            return ppFun(pfMin, m, this, b);
+            return ppFun(pfMin, m, [this, b]);
         };
-        /**
-         * Returns maximum from value and b
+        /**Returns maximum from value and b
          * @param {*} b
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.max = function (b, m) {
-            return ppFun(pfMax, m, this, b);
+            return ppFun(pfMax, m, [this, b]);
         };
-        /**
-         * Returns square root of value
+        /**Returns square root of value
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          * @throws {MbnErr} square root of negative number
          */
         Mbn.prototype.sqrt = function (m) {
-            return ppFun(pfSqrt, m, this);
+            return ppFun(pfSqrt, m, [this]);
         };
-        /**
-         * Returns sign from value, 1 - positive, -1 - negative, otherwise 0
+        /**Returns sign from value, 1 - positive, -1 - negative, otherwise 0
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          */
         Mbn.prototype.sgn = function (m) {
-            return ppFun(pfSgn, m, this);
+            return ppFun(pfSgn, m, [this]);
         };
-        /**
-         * Returns value to the power of b, b must be integer
+        /**Returns value to the power of b, b must be integer
          * @param {*} b
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
@@ -1195,16 +1199,15 @@ var Mbn = (function () {
          * @throws {MbnErr} invalid argument format
          */
         Mbn.prototype.pow = function (b, m) {
-            return ppFun(pfPow, m, this, b);
+            return ppFun(pfPow, m, [this, b]);
         };
-        /**
-         * Returns factorial, value must be non-negative integer
+        /**Returns factorial, value must be non-negative integer
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn}
          * @throws {MbnErr} value is not non-negative integer
          */
         Mbn.prototype.fact = function (m){
-            return ppFun(pfFact, m ,this);
+            return ppFun(pfFact, m ,[this]);
         }
 
         /**
@@ -1230,8 +1233,8 @@ var Mbn = (function () {
                     arr.push([i, mbn1]);
                 }
             } else {
-                var mulp = ppNewNumber(10).pow(MbnP);
-                asum = pfNew0();
+                var mulp = pfPow(ppNewNumber(10), ppNewNumber(MbnP));
+                asum = ppNew0();
                 n = ar.length;
                 var sgns = [false, false, false];
                 for (i = 0; i < n; i++) {
@@ -1242,7 +1245,7 @@ var Mbn = (function () {
                 }
                 if (sgns[0] && sgns[2]) {
                     arr.sort(function (a, b) {
-                        return asum._s * a[1].cmp(b[1]);
+                        return asum._s * pfCmp(a[1], b[1], mbn0);
                     });
                 }
             }
@@ -1262,18 +1265,20 @@ var Mbn = (function () {
                 if (v._s === 0) {
                     brr[idx] = v;
                 } else {
-                    var b = a.mul(v).div(asum);
-                    asum.sub(v, true);
-                    a.sub(b, true);
+                    var b = pfDiv(pfMul(a,v),asum);
+                    asum = pfSub(asum, v);
+                    a = pfSub(a, b);
                     brr[idx] = b;
                 }
             }
             return brr;
         };
 
+
         var fnReduce = {
-            set: 0, abs: 1, inva: 1, invm: 1, ceil: 1, floor: 1, sqrt: 1, round: 1, sgn: 1, intp: 1, fact: 1,
-            min: 2, max: 2, add: 2, sub: 2, mul: 2, div: 2, mod: 2, pow: 2
+            set: pfAdd, abs: pfAbs, inva: pfInva, invm: pfInvm, ceil: pfCeil, floor: pfFloor, sqrt: pfSqrt,
+            round: pfRound, sgn: pfSgn, intp: pfIntp, fact: pfFact, min: pfMin, max: pfMax, add: pfAdd,
+            sub: pfSub, mul: pfMul, div: pfDiv, mod: pfMod, pow: pfPow
         };
         /**
          * Runs function on each element, returns:
@@ -1289,10 +1294,11 @@ var Mbn = (function () {
          * @throws {MbnErr} invalid argument format
          */
         Mbn.reduce = function (fn, arr, b) {
-            var inv = false;
             if (!own(fnReduce, fn)) {
                 throw new MbnErr("reduce.invalid_function", fn);
             }
+            var inv = false;
+            var f = fnReduce[fn];
             if (!(arr instanceof Array)) {
                 if (!(b instanceof Array)) {
                     throw new MbnErr("reduce.no_array");
@@ -1303,29 +1309,26 @@ var Mbn = (function () {
             }
             var r, i;
             var arrl = arr.length;
-            var mode = fnReduce[fn];
+            var mode = (fn === "set") ? 0 : f.length;
             var bmode = (arguments.length === 3) ? ((b instanceof Array) ? 2 : 1) : 0;
             if (mode !== 2 && bmode !== 0) {
                 throw new MbnErr("reduce.invalid_argument_count");
             }
             if (mode === 2 && bmode === 0) {
-                r = new Mbn((arrl > 0) ? arr[0] : 0);
+                r = ppNewAny(arrl ? arr[0] : 0);
                 for (i = 1; i < arrl; i++) {
-                    r[fn](arr[i], true);
+                    r = f(r, ppNewAny(arr[i]))
                 }
             } else {
                 r = [];
                 if (bmode === 2 && arrl !== b.length) {
                     throw new MbnErr("reduce.different_lengths", {"v": arrl, "w": b.length}, true);
                 }
-                var bv = (bmode === 1) ? (new Mbn(b)) : null;
+                var bv = (mode && (bmode === 1)) ? ppNewAny(b) : mbn0;
                 for (i = 0; i < arrl; i++) {
-                    var e = new Mbn(arr[i]);
-                    if (bmode !== 0) {
-                        var bi = (bmode === 2) ? (new Mbn(b[i])) : bv;
-                        e.set((inv === false) ? e[fn](bi) : bi[fn](e));
-                    }
-                    r.push((mode === 1) ? e[fn](true) : e);
+                    var e = ppNewAny(arr[i]);
+                    var bi = (bmode === 2) ? (ppNewAny(b[i])) : bv;
+                    r.push(inv ? f(bi, e) : f(e, bi));
                 }
             }
             return r;
@@ -1347,28 +1350,27 @@ var Mbn = (function () {
          * @throws {MbnErr} invalid argument format
          */
         Mbn.def = function (n, v) {
-            var check = (n === null);
-            if (!cnRx.test(check ? v : n)) {
-                throw new MbnErr("def.invalid_name", check ? v : n);
+            var c = (n === null), o = own(MbnConst, c ? v : n);
+            if (!cnRx.test(c ? v : n)) {
+                throw new MbnErr("def.invalid_name", c ? v : n);
             }
-            if (check) {
-                return own(MbnConst, v);
+            if (c) {
+                return o;
             }
-            if (v === undefined) {
-                if (!own(MbnConst, n)) {
+            if (arguments.length === 1) {
+                if (!o) {
                     throw new MbnErr("def.undefined", n);
                 }
                 if (!(MbnConst[n] instanceof Mbn)) {
-                    MbnConst[n] = (n === "eps") ? ((new Mbn(10)).pow(-MbnP)) : (new Mbn(MbnConst[n]));
+                    MbnConst[n] = (n === "eps") ? pfPow(ppNewInt(10), ppNewNumber(-MbnP)) : (ppNewString(MbnConst[n]));
                 }
-                return new Mbn(MbnConst[n]);
+            } else {
+                if (o) {
+                    throw new MbnErr("def.already_set", {v: n, w: Mbn.def(n)}, true);
+                }
+                MbnConst[n] = ppNewAny(v);
             }
-            if (own(MbnConst, n)) {
-                throw new MbnErr("def.already_set", {v: n, w: new Mbn(MbnConst[n])}, true);
-            }
-            v = new Mbn(v);
-            MbnConst[n] = v;
-            return new Mbn(v);
+            return ppNewMbn(MbnConst[n]);
         };
 
         var fnEval = {
