@@ -32,6 +32,8 @@
         ["Mbn::reduce('pow', [2, 3], undefined)", "1.00,1.00"],
         ["new Mbn(wrapBigInt(4))", "4.00"],
         ["new Mbn(wrapBigInt(-4))", "-4.00"],
+        ["(new Mbn(1234567.12))->format(undefined)", "1 234 567.12"],
+        ["$m = new Mbn('4.32'); $m->sqrt(undefined); $m", "4.32"],
         ["0", "0"]
     ],
     "both": [
@@ -76,6 +78,8 @@
         ["new Mbn([5, 7])", "mbn.invalid_argument Niepoprawny argument [5,7] dla konstruktora [5,7]"],
         ["new Mbn(function(){})", "mbn.invalid_argument Niepoprawny*"],
         ["new Mbn([1,2,[3,4],5])", "mbn.invalid_argument Niepoprawny argument [1,2,[..],5]*"],
+        ["new Mbn([1,2,[3,4],5,6,7,8,9])", "mbn.invalid_argument Niepoprawny argument [1,2,[..],5,6,7,8,9]*"],
+        ["new Mbn([1,2,[3,4],5,6,7,8,9,0])", "mbn.invalid_argument Niepoprawny argument [1,2,[..],5,6,7,8,..*"],
         ["new Mbn20u()", "0"],
         ["new Mbn20u('0,000000000000000000005')", "0,00000000000000000001"],
         ["new Mbn20u('-0,000000000000000000005')", "-0,00000000000000000001"],
