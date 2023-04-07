@@ -1,4 +1,4 @@
-<?php /* Mbn v1.52.2 / 04.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+<?php /* Mbn v1.52.2 / 07.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
 namespace Mbn;
 class Mbn {
     //version of Mbn library
