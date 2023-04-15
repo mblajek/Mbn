@@ -73,7 +73,7 @@ window.addEventListener("load", function () {
                 MbnS: MbnST.charAt(1),
                 MbnT: MbnST.charAt(2) === "_",
                 MbnF: MbnST.charAt(0) === "_",
-                MbnL: 1e4
+                MbnL: 1e4, MbnO: 1e8
             });
         } catch (e) {
             out.error(e);

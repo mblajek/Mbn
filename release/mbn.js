@@ -23,6 +23,7 @@ var Mbn = (function () {
         invalid_argument: "invalid argument: %v%",
         invalid_format: "invalid format: %v%",
         limit_exceeded: "value exceeded %v% digits limit",
+        operations_limit: "calculation exceeded %v% operations limit",
         calc: {
             undefined: "undefined: %v%",
             unexpected: "unexpected: %v%"
@@ -44,7 +45,8 @@ var Mbn = (function () {
             invalid_truncation: "invalid truncation (bool): %v%",
             invalid_evaluating: "invalid evaluating (bool, null): %v%",
             invalid_formatting: "invalid formatting (bool): %v%",
-            invalid_limit: "invalid digit limit (positive int): %v%"
+            invalid_limit: "invalid digit limit (positive int): %v%",
+            invalid_operations: "invalid operations limit (positive int): %v%"
         },
         fact: {
             invalid_value: "factorial of invalid value (non-negative integer): %v%"
@@ -76,26 +78,30 @@ var Mbn = (function () {
     var wsRx2 = /^\s*(=)?[\s=]*([-+])?\s*((?:[\s\S]*\S)?)/;
     var wsRx3 = /^[\s=]+/;
     var cnRx = /^[A-Za-z_]\w*/;
+    var stateEval = {
+        endBop: ["bop", "pc", "fs"],
+        uopVal: ["num", "name", "uop", "po"],
+        fn: ["po"]
+    };
+    var rxEval = {
+        num: {rx: /^([0-9., ]+)\s*/, next: stateEval.endBop},
+        name: {rx: /^([A-Za-z_]\w*)\s*/},
+        fn: {next: stateEval.fn},
+        vr: {next: stateEval.endBop},
+        bop: {rx: /^([-+*\/#^&|])\s*/, next: stateEval.uopVal},
+        uop: {rx: /^([-+])\s*/, next: stateEval.uopVal},
+        po: {rx: /^(\()\s*/, next: stateEval.uopVal},
+        pc: {rx: /^(\))\s*/, next: stateEval.endBop},
+        fs: {rx: /^([%!])\s*/, next: stateEval.endBop}
+    };
     var own = function (val, key) {
         return errMessages.hasOwnProperty.call(val, key)
     }
     var ioArr = function (a) {
         return (a instanceof Array);
     };
-    var tof = function (a) {
-        return typeof a;
-    }
-    var tofStr = function (a) {
-        return tof(a) === "string";
-    }
-    var tofObj = function (a) {
-        return tof(a) === "object";
-    }
-    var tofNum = function (a) {
-        return tof(a) === "number";
-    }
-    var tofFun = function (a) {
-        return tof(a) === "function";
+    var ioObj = function (a) {
+        return (a instanceof Object);
     }
 
     /**Common error message object
@@ -111,7 +117,7 @@ var Mbn = (function () {
         this.message = message;
     };
     var valFlatToMsgString = function (val) {
-        return tofStr(val) ? ("\"" + val + "\"") : String(val);
+        return (typeof val === "string") ? ("\"" + val + "\"") : String(val);
     }
     var valToMsgString = function (val) {
         if (ioArr(val)) {
@@ -131,7 +137,7 @@ var Mbn = (function () {
         var errorValues = {}, errorKey = "mbn." + key;
         var i, val;
         if (arguments.length !== 1) {
-            if (!tofObj(values) || multi !== true) {
+            if (!ioObj(values) || multi !== true) {
                 values = {v: values};
             }
             for (i in values) {
@@ -142,13 +148,13 @@ var Mbn = (function () {
             }
         }
         var msg = null;
-        if (tofFun(errTranslation)) {
+        if (typeof errTranslation === "function") {
             try {
                 msg = errTranslation(errorKey, errorValues)
             } catch (e) {
             }
         }
-        if (!tofStr(msg)) {
+        if (typeof msg !== "string") {
             var keyArr = key.split(".");
             var keyArrLength = keyArr.length;
             msg = "Mbn";
@@ -159,7 +165,7 @@ var Mbn = (function () {
             for (i = 0; i < keyArrLength; i++) {
                 var word = keyArr[i];
                 var nextSubMessages = subMessages[word];
-                if (tofObj(nextSubMessages) && own(nextSubMessages, "_")) {
+                if (ioObj(nextSubMessages) && own(nextSubMessages, "_")) {
                     nextSubMessages = subMessages[nextSubMessages._];
                 }
                 subMessages = nextSubMessages;
@@ -191,15 +197,16 @@ var Mbn = (function () {
      * @param MbnDE {boolean|null} default evaluating
      * @param MbnDF {boolean} default formatting
      * @param MbnDL {number} default digit limit
+     * @param MbnDO {number} default operations limit
      * @param fname name of function for exception
      * @throws {MbnErr} invalid options
      * @return {Object} checked and filled class options
      */
-    var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, fname) {
-        var MbnP = MbnDP, MbnS = MbnDS, MbnT = MbnDT, MbnE = MbnDE, MbnF = MbnDF, MbnL = MbnDL;
+    var prepareOpt = function (opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, MbnDO, fname) {
+        var MbnP = MbnDP, MbnS = MbnDS, MbnT = MbnDT, MbnE = MbnDE, MbnF = MbnDF, MbnL = MbnDL, MbnO = MbnDO;
         if (own(opt, "MbnP")) {
             MbnP = opt.MbnP;
-            if (!tofNum(MbnP) || MbnP < 0 || !isFinite(MbnP) || Math.round(MbnP) !== MbnP) {
+            if ((typeof MbnP !== "number") || MbnP < 0 || !isFinite(MbnP) || Math.round(MbnP) !== MbnP) {
                 throwMbnErr(fname + "invalid_precision", MbnP);
             }
         }
@@ -229,37 +236,44 @@ var Mbn = (function () {
         }
         if (own(opt, "MbnL")) {
             MbnL = opt.MbnL;
-            if (!tofNum(MbnL) || MbnL <= 0 || !isFinite(MbnL) || Math.round(MbnL) !== MbnL) {
+            if ((typeof MbnL !== "number") || MbnL <= 0 || !isFinite(MbnL) || Math.round(MbnL) !== MbnL) {
                 throwMbnErr(fname + "invalid_limit", MbnL);
             }
         }
-        return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF, MbnL: MbnL};
+        if (own(opt, "MbnO")) {
+            MbnO = opt.MbnO;
+            if ((typeof MbnO !== "number") || MbnO <= 0 || !isFinite(MbnO) || Math.round(MbnO) !== MbnO) {
+                throwMbnErr(fname + "invalid_operations", MbnO);
+            }
+        }
+        return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF, MbnL: MbnL, MbnO: MbnO};
     };
 
     /**
      * Function returns constructor of Mbn objects
-     * MbnP - precision, number of digits in fractional part
-     * MbnS - output separator(".", ","), default "."
-     * MbnT - trim insignificant zeros in output string ("0.20" to "0.2"), default false (no trimming)
-     * MbnF - format thousands in output string ("1234" to "1 234"), default false
-     * MbnE - evaluate strings, true - always, null - starting with "=", false - never, default null
      * @export
      * @param {number|Object=} opt precision or object with params
      * @throws {MbnErr} invalid class options
      */
     var MbnCr = function (opt) {
-        if (!tofObj(opt)) {
+        if (!ioObj(opt)) {
             opt = (opt !== undefined) ? {MbnP: opt} : {};
         }
-        opt = prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, "extend.");
+        opt = prepareOpt(opt, MbnDP, MbnDS, MbnDT, MbnDE, MbnDF, MbnDL, MbnDO, "extend.");
         var MbnP = opt.MbnP, MbnS = opt.MbnS, MbnT = opt.MbnT, MbnE = opt.MbnE;
-        var MbnF = opt.MbnF, MbnL = opt.MbnL;
-        var nopt = {MbnP: MbnP, MbnS: ".", MbnT: MbnT, MbnE: MbnE, MbnF: false, MbnL: MbnL};
+        var MbnF = opt.MbnF, MbnL = opt.MbnL, MbnO = opt.MbnO;
+        var numOpt = {MbnP: MbnP, MbnS: ".", MbnT: MbnT, MbnE: MbnE, MbnF: false, MbnL: MbnL, MbnO: MbnO};
         var mbn0d = [0];
         while (mbn0d.length <= MbnP) {
             mbn0d.push(0);
         }
-
+        var oc = 0;
+        var oi = function (n) {
+            oc += (n || 1)
+            if (oc > MbnO) {
+                throwMbnErr('operations_limit', MbnO);
+            }
+        }
         /**Fix digits bigger than 9, remove leading zeros
          * @param {Mbn} a*/
         var ppCarry = function (a) {
@@ -267,6 +281,7 @@ var Mbn = (function () {
             var adlm1 = ad.length - 1;
             var i = adlm1;
             var adi, adid, adic;
+            oi(2 * i);
             while (i >= 0) {
                 adi = ad[i];
                 while (adi < 0) {
@@ -321,6 +336,7 @@ var Mbn = (function () {
          * @param {Object|boolean=} v
          * @return {Mbn}*/
         var ppNewReset = function (n, a, v) {
+            oi(MbnP);
             a._s = 0;
             a._d = mbn0d.slice();
             return a;
@@ -343,6 +359,7 @@ var Mbn = (function () {
             if (!ioMbn(this)) {
                 return new Mbn(n, v);
             }
+            oc = 0;
             ppNewAny(n, this, v);
         };
         var ioMbn = function (a) {
@@ -352,9 +369,9 @@ var Mbn = (function () {
         /**@param {Mbn=} a
          * @return {Mbn}*/
         var ppNew0 = own(Object, "setPrototypeOf") ? (function (a) {
-            return a ? ppNewReset(0, a) : Object.setPrototypeOf({_s: 0, _d: mbn0d.slice()}, mbn0);
+            return ppNewReset(0, a || Object.setPrototypeOf({}, mbn0));
         }) : function (a) {
-            return a ? ppNewReset(0, a) : {__proto__: mbn0, _s: 0, _d: mbn0._d.slice()};
+            return ppNewReset(0, a || {__proto__: mbn0});
         }
         /**@param {number} n
          * @param {Mbn=} a
@@ -370,6 +387,7 @@ var Mbn = (function () {
                     mbn._d.unshift(na % 10)
                 }
             }
+            oi(mbn._d.length);
             return mbn;
         };
         var mbn1 = ppNewInt(1);
@@ -417,6 +435,7 @@ var Mbn = (function () {
             var mbn = ppNew0(a);
             mbn._s = n._s;
             mbn._d = n._d.slice();
+            oi(mbn._d.length);
             return mbn;
         };
         /**@param {string} n
@@ -425,13 +444,6 @@ var Mbn = (function () {
          * @return {Mbn}*/
         var ppNewString = function (n, a, v) {
             var mbn = ppNew0(a);
-            if (n.length < -15) {
-                var nrs = n.replace(",", ".");
-                var nr = Number(nrs);
-                if (isFinite(nr) && nrs === String(n)) {
-                    return ppNewNumber(nr, mbn);
-                }
-            }
             var np = n.match(wsRx2), nn = np[3];
             var d = [], s = 1;
             if (np[2] === "-") {
@@ -454,8 +466,8 @@ var Mbn = (function () {
                         d.push(c);
                     }
                 } else if (!((i === ln && nl !== 1) || (c === -16 && i > cs && (i + 1) < ln))) {
-                    if (v === true || tofObj(v) || (v !== false && (MbnE === true || (MbnE === null && np[1] === "=")))) {
-                        ppNewMbn(mbnCalc(n, v, null), mbn);
+                    if (v === true || ioObj(v) || (v !== false && (MbnE === true || (MbnE === null && np[1] === "=")))) {
+                        ppNewMbn(ppCalcFull(n, v, null), mbn);
                         return mbn;
                     }
                     throwMbnErr("invalid_format", n);
@@ -483,7 +495,7 @@ var Mbn = (function () {
         };
         ppNewAny = function (n, a, v) {
             var mbn = ppNew0(a);
-            switch (tof(n)) {
+            switch (typeof n) {
                 case "undefined":
                 case "boolean":
                     return ppNewInt(Number(n || false), mbn);
@@ -497,13 +509,13 @@ var Mbn = (function () {
                 default:
                     throwMbnErr("invalid_argument", n);
             }
-        }
-
+        };
         /**@param {function} fun
          * @param {Array} argv
          * @param {boolean=} nc
          * @return {*}*/
         var pfFun = function (fun, argv, nc) {
+            oc = 0;
             var argvMbn = [argv[0]];
             for (var i = 1; i < argv.length; i++) {
                 var arg = argv[i];
@@ -522,10 +534,10 @@ var Mbn = (function () {
          * @param {Object|boolean=} o
          * @return {string}*/
         var pfFormat = function (a, o) {
-            if (!tofObj(o)) {
+            if (!ioObj(o)) {
                 o = {MbnF: o === undefined || o};
             }
-            o = (o === opt || o === nopt) ? o : prepareOpt(o, MbnP, MbnS, MbnT, MbnE, MbnF, MbnL, "format.");
+            o = (o === opt || o === numOpt) ? o : prepareOpt(o, MbnP, MbnS, MbnT, MbnE, MbnF, MbnL, MbnO, "format.");
             var p = o.MbnP, v = a, li = a._d.length - MbnP, i;
             if (p < MbnP) {
                 var b = ppNewMbn(a);
@@ -575,7 +587,7 @@ var Mbn = (function () {
         /**@param {Mbn} a
          * @return {number}*/
         var pfToNumber = function (a) {
-            return Number(pfFormat(a, nopt));
+            return Number(pfFormat(a, numOpt));
         };
         /**@param {Mbn} a
          * @param {Mbn} b
@@ -594,6 +606,7 @@ var Mbn = (function () {
                 if (ld !== 0) {
                     return (ld > 0) ? a._s : -a._s;
                 }
+                oi(bl);
                 for (var i = 0; i < bl; i++) {
                     if (a._d[i] !== b._d[i]) {
                         return (a._d[i] > b._d[i]) ? a._s : -a._s;
@@ -619,6 +632,7 @@ var Mbn = (function () {
         /**@param {Mbn} a
          * @return {boolean}*/
         var pfIsInt = function (a) {
+            oi(MbnP);
             for (var l = a._d.length - MbnP; l < a._d.length; l++) {
                 if (a._d[l] !== 0) {
                     return false;
@@ -703,6 +717,7 @@ var Mbn = (function () {
         var pfMul = function (a, b) {
             var r = ppNewMbn(b);
             r._d = [];
+            oi(a._d.length * b._d.length);
             for (var i = 0; i < a._d.length; i++) {
                 for (var j = 0; j < b._d.length; j++) {
                     r._d[i + j] = a._d[i] * b._d[j] + (r._d[i + j] || 0);
@@ -751,6 +766,7 @@ var Mbn = (function () {
                 }
                 var xge = (xl >= yl);
                 if (xl === yl) {
+                    oi(xl);
                     for (i = 0; i < xl; i++) {
                         if (x[i] !== y[i]) {
                             xge = x[i] > y[i];
@@ -761,6 +777,7 @@ var Mbn = (function () {
                 if (xge) {
                     ra[p]++;
                     var ld = xl - yl;
+                    oi(yl);
                     for (i = yl - 1; i >= 0; i--) {
                         if (x[i + ld] < y[i]) {
                             x[i + ld - 1]--;
@@ -883,7 +900,6 @@ var Mbn = (function () {
             if (r._s === 1) {
                 var mbn2 = ppNewInt(2), diff = mbn0, lastDiff, cnt = 0;
                 do {
-                    cnt += .01;
                     lastDiff = diff;
                     diff = pfSub(r, pfDiv(pfAdd(r, pfDiv(t, r)), mbn2));
                     r = pfSub(r, diff)
@@ -1017,27 +1033,77 @@ var Mbn = (function () {
             }
             return brr;
         };
-
-
+        /**@param {Mbn} a
+         * @return {Mbn}*/
+        var pfDiv100 = function (a) {
+            return pfDiv(a, ppNewInt(100));
+        };
+        /**@param {Mbn} a
+         * @return {Mbn}*/
+        var pfZero = function (a) {
+            return ppNewInt((a._s === 0) ? 1 : 0);
+        };
         var fnReduce = {
             set: pfAdd, abs: pfAbs, inva: pfInva, invm: pfInvm, ceil: pfCeil, floor: pfFloor, sqrt: pfSqrt,
             round: pfRound, sgn: pfSgn, intp: pfIntp, fact: pfFact, min: pfMin, max: pfMax, add: pfAdd,
             sub: pfSub, mul: pfMul, div: pfDiv, mod: pfMod, pow: pfPow
         };
-        /**
-         * Runs function on each element, returns:
-         * single value for 2 argument function (arr[0].fn(arr[1]).fn(arr[2]), ..)
-         * array of products for 1 argument function [arr[0].fn(), arr[1].fn(), ..]
-         * array of products for 2 argument function and when b is same size array or single value
-         * [arr[0].fn(b[0]), arr[1].fn(b[1]), ..] or [arr[0].fn(b), arr[1].fn(b), ..]
-         * @param {string} fn
+        var MbnConst = {
+            PI: "3.1415926535897932384626433832795028841972",
+            E: "2.7182818284590452353602874713526624977573",
+            eps: true
+        };
+        var fnEval = {
+            abs: pfAbs, ceil: pfCeil, floor: pfFloor, fact: pfFact, sqrt: pfSqrt,
+            round: pfRound, sgn: pfSgn, "int": pfIntp, "zero": pfZero
+        };
+        var opEval = {
+            "|": [1, true, pfMax],
+            "&": [2, true, pfMin],
+            "+": [3, true, pfAdd],
+            "-": [3, true, pfSub],
+            "*": [4, true, pfMul],
+            "#": [4, true, pfMod],
+            "/": [4, true, pfDiv],
+            "^": [5, false, pfPow],
+            "%": [7, true, pfDiv100],
+            "!": [7, true, pfFact],
+            "inva": [6, true, pfInva],
+            "fn": [7, true]
+        };
+        /**@param {string|null} n
+         * @param {*=} v
+         * @return {Mbn|boolean}
+         */
+        var ppDef = function (n, v) {
+            var c = (n === null), o = own(MbnConst, c ? v : n);
+            if (!cnRx.test(c ? v : n)) {
+                throwMbnErr("def.invalid_name", c ? v : n);
+            }
+            if (c) {
+                return o;
+            }
+            if (arguments.length === 1) {
+                if (!o) {
+                    throwMbnErr("def.undefined", n);
+                }
+                if (!ioMbn(MbnConst[n])) {
+                    MbnConst[n] = (n === "eps") ? pfPow(ppNewInt(10), ppNewNumber(-MbnP)) : (ppNewString(MbnConst[n]));
+                }
+            } else {
+                if (o) {
+                    throwMbnErr("def.already_set", {v: n, w: ppDef(n)}, true);
+                }
+                MbnConst[n] = ppNewAny(v);
+            }
+            return ppNewMbn(MbnConst[n]);
+        }
+        /**@param {string} fn
          * @param {*} arr
          * @param {*=} b
          * @return {Mbn|Array}
-         * @throws {MbnErr} invalid function name, wrong number of arguments, different array sizes
-         * @throws {MbnErr} invalid argument format
          */
-        Mbn.reduce = function (fn, arr, b) {
+        var pfReduce = function (fn, arr, b) {
             if (!own(fnReduce, fn)) {
                 throwMbnErr("reduce.invalid_function", fn);
             }
@@ -1076,122 +1142,17 @@ var Mbn = (function () {
                 }
             }
             return r;
-        };
-
-        var MbnConst = {
-            PI: "3.1415926535897932384626433832795028841972",
-            E: "2.7182818284590452353602874713526624977573",
-            eps: true
-        };
-
-        /**
-         * Sets and reads constant
-         * @param {string|null} n Constant name, must start with letter or _
-         * @param {*=} v Constant value to set
-         * @return {Mbn|boolean}
-         * @throws {MbnErr} undefined constant, constant already set, incorrect name
-         * @throws {MbnErr} invalid argument format
-         */
-        Mbn.def = function (n, v) {
-            var c = (n === null), o = own(MbnConst, c ? v : n);
-            if (!cnRx.test(c ? v : n)) {
-                throwMbnErr("def.invalid_name", c ? v : n);
-            }
-            if (c) {
-                return o;
-            }
-            if (arguments.length === 1) {
-                if (!o) {
-                    throwMbnErr("def.undefined", n);
-                }
-                if (!ioMbn(MbnConst[n])) {
-                    MbnConst[n] = (n === "eps") ? pfPow(ppNewInt(10), ppNewNumber(-MbnP)) : (ppNewString(MbnConst[n]));
-                }
-            } else {
-                if (o) {
-                    throwMbnErr("def.already_set", {v: n, w: Mbn.def(n)}, true);
-                }
-                MbnConst[n] = ppNewAny(v);
-            }
-            return ppNewMbn(MbnConst[n]);
-        };
-
-        var fnEval = {
-            abs: true, inva: false, ceil: true, floor: true, fact: true,
-            sqrt: true, round: true, sgn: true, "int": "intp", div_100: "div_100"
-        };
-        var states = {
-            endBop: ["bop", "pc", "fs"],
-            uopVal: ["num", "name", "uop", "po"],
-            fn: ["po"]
-        };
-        var ops = {
-            "|": [1, true, "max"],
-            "&": [2, true, "min"],
-            "+": [3, true, "add"],
-            "-": [3, true, "sub"],
-            "*": [4, true, "mul"],
-            "#": [4, true, "mod"],
-            "/": [4, true, "div"],
-            "^": [5, false, "pow"],
-            "%": [7, true, "div_100"],
-            "!": [7, true, "fact"],
-            "inva": [6, true, "inva"],
-            "fn": [7, true]
-        };
-        var rxs = {
-            num: {rx: /^([0-9., ]+)\s*/, next: states.endBop},
-            name: {rx: /^([A-Za-z_]\w*)\s*/},
-            fn: {next: states.fn},
-            vr: {next: states.endBop},
-            bop: {rx: /^([-+*\/#^&|])\s*/, next: states.uopVal},
-            uop: {rx: /^([-+])\s*/, next: states.uopVal},
-            po: {rx: /^(\()\s*/, next: states.uopVal},
-            pc: {rx: /^(\))\s*/, next: states.endBop},
-            fs: {rx: /^([%!])\s*/, next: states.endBop}
-        };
-
-        /**
-         * Evaluate expression
-         * @param {string} exp Expression
-         * @param {Object|boolean=} vars Object with vars for evaluation
-         * @return {Mbn}
-         * @throws {MbnErr} syntax error, operation error
-         */
-        Mbn.calc = function (exp, vars) {
-            return ppNewAny(exp, null, tofObj(vars) ? vars : true)
-        };
-
-        /**
-         * Check expression, get names of used vars
-         * @param {string} exp Expression
-         * @param {boolean=} omitOptional Omit vars available as constans or results
-         * @return {Array|boolean}
-         */
-        Mbn.check = function (exp, omitOptional) {
-            try {
-                var varName, vars = mbnCalc(exp, false, omitOptional === true), varNames = [];
-                for (varName in vars) {
-                    if (own(vars, varName)) {
-                        varNames[vars[varName]] = varName;
-                    }
-                }
-                return varNames;
-            } catch (e) {
-                return false;
-            }
-        };
-        /**
-         * Evaluate expression
+        }
+        /**Evaluate expression with comments and parts
          * @param {string} exp Expression
          * @param {Object|boolean|undefined} vars Object with vars for evaluation
          * @param {boolean|null} checkOmitOptional Omit vars available as constans or results
          * @return {Mbn|Object}
          * @throws {MbnErr} syntax error, operation error
          */
-        var mbnCalc = function (exp, vars, checkOmitOptional) {
+        var ppCalcFull = function (exp, vars, checkOmitOptional) {
             var expr = String(exp), varsUsed = {size: 0, vars: {}}
-            if (!tofObj(vars)) {
+            if (!ioObj(vars)) {
                 vars = {};
             }
             var mtch, comStart, comEnd, i, j, results = {r0: ppNew0()};
@@ -1205,15 +1166,14 @@ var Mbn = (function () {
             for (i = 0; i < exprArr.length; i++) {
                 expr = exprArr[i].replace(wsRx3, "");
                 results["r" + (i + 1)] = results.r0 = ((expr === "") ? results.r0
-                    : mbnCalcSingle(expr, vars, results, varsUsed, checkOmitOptional));
+                    : ppCalcSingle(expr, vars, results, varsUsed, checkOmitOptional));
                 for (j = 0; j <= i; j++) {
                     results["r0" + (j + 1)] = results["r" + (i - j + 1)];
                 }
             }
             return (checkOmitOptional === null) ? results.r0 : varsUsed.vars;
         };
-        /**
-         * Evaluate expression
+        /**Evaluate single expression
          * @param {string} expr Expression
          * @param {Object} vars Object with vars for evaluation
          * @param {Object} results Object with used vars
@@ -1222,19 +1182,20 @@ var Mbn = (function () {
          * @return {Mbn|null}
          * @throws {MbnErr} syntax error, operation error
          */
-        var mbnCalcSingle = function (expr, vars, results, varsUsed, checkOmitOptional) {
-            var state = states.uopVal, rpns = [], rpno = [];
+        var ppCalcSingle = function (expr, vars, results, varsUsed, checkOmitOptional) {
+            var state = stateEval.uopVal, rpns = [], rpno = [];
             var t, tok, mtch, i, rolp;
             while (expr !== "") {
                 mtch = null;
+                oi(state.length);
                 for (i = 0; i < state.length && mtch === null; i++) {
                     t = state[i];
-                    mtch = expr.match(rxs[t].rx);
+                    mtch = expr.match(rxEval[t].rx);
                 }
                 if (mtch !== null) {
                     tok = mtch[1];
                     expr = expr.slice(mtch[0].length);
-                } else if (state === states.endBop && !expr.match(rxs.num.rx)) {
+                } else if (state === stateEval.endBop && !expr.match(rxEval.num.rx)) {
                     tok = "*";
                     t = "bop";
                 } else {
@@ -1246,11 +1207,11 @@ var Mbn = (function () {
                         break;
                     case "name":
                         t = "vr";
-                        if (own(fnEval, tok) && fnEval[tok] !== false) {
+                        if (own(fnEval, tok)/* && fnEval[tok] !== false*/) {
                             t = "fn";
-                            rpno.push(ops.fn.concat([tok]));
+                            rpno.push(opEval.fn.concat(fnEval[tok]));
                         } else if (checkOmitOptional !== null) {
-                            if (!own(varsUsed.vars, tok) && (!checkOmitOptional || (!own(results, tok) && !Mbn.def(null, tok)))) {
+                            if (!own(varsUsed.vars, tok) && (!checkOmitOptional || (!own(results, tok) && !ppDef(null, tok)))) {
                                 varsUsed.vars[tok] = varsUsed.size++;
                             }
                         } else if (own(vars, tok)) {
@@ -1260,15 +1221,15 @@ var Mbn = (function () {
                             rpns.push(new Mbn(varsUsed.vars[tok]));
                         } else if (own(results, tok)) {
                             rpns.push(new Mbn(results[tok]));
-                        } else if (Mbn.def(null, tok)) {
-                            rpns.push(Mbn.def(tok));
+                        } else if (ppDef(null, tok)) {
+                            rpns.push(ppDef(tok));
                         } else {
                             throwMbnErr("calc.undefined", tok);
                         }
                         break;
                     case "fs":
                     case "bop":
-                        var op = ops[tok];
+                        var op = opEval[tok];
                         while ((rolp = rpno.pop()) !== undefined) {
                             if (rolp === "(" || (rolp[0] <= op[0] - (op[1] ? 1 : 0))) {
                                 rpno.push(rolp);
@@ -1280,7 +1241,7 @@ var Mbn = (function () {
                         break;
                     case "uop":
                         if (tok === "-") {
-                            rpno.push(ops.inva);
+                            rpno.push(opEval.inva);
                         }
                         break;
                     case "po":
@@ -1297,7 +1258,7 @@ var Mbn = (function () {
                     default:
                 }
 
-                state = rxs[t].next;
+                state = rxEval[t].next;
             }
             while ((rolp = rpno.pop()) !== undefined) {
                 if (rolp === "(") {
@@ -1305,7 +1266,7 @@ var Mbn = (function () {
                 }
                 rpns.push(rolp[2]);
             }
-            if (state !== states.endBop) {
+            if (state !== stateEval.endBop) {
                 throwMbnErr("calc.unexpected", "END");
             }
 
@@ -1313,30 +1274,45 @@ var Mbn = (function () {
                 return null;
             }
 
-            var rpn = [], tn;
+            var rpn = [], tn, b;
             for (i = 0; i < rpns.length; i++) {
                 tn = rpns[i];
                 if (ioMbn(tn)) {
                     rpn.push(tn);
-                } else if (own(fnEval, tn)) {
-                    if (tofStr(fnEval[tn])) {
-                        tn = fnEval[tn];
-                        if (tn.indexOf("_") !== -1) {
-                            tn = tn.split("_");
-                            rpn[rpn.length - 1][tn[0]](tn[1], true);
-                            continue;
-                        }
-                    }
-                    rpn[rpn.length - 1][tn](true);
                 } else {
-                    rpn[rpn.length - 2][tn](rpn.pop(), true);
+                    b = (tn.length === 2) ? rpn.pop() : null;
+                    rpn[rpn.length - 1] = tn(rpn[rpn.length - 1], b);
                 }
             }
             return rpn[0];
         };
+        /**@param {string} exp
+         * @param {Object=} vars
+         * @return {Mbn}
+         */
+        var pfCalcEval = function (exp, vars) {
+            return ppNewAny(exp, null, ioObj(vars) ? vars : true)
+        }
+        /**@param {string} exp
+         * @param {boolean=} omitOptional Omit vars available as constans or results
+         * @return {Array|boolean}
+         */
+        var pfCalcCheck = function (exp, omitOptional) {
+            try {
+                var varName, vars = ppCalcFull(exp, false, omitOptional === true), varNames = [];
+                for (varName in vars) {
+                    if (own(vars, varName)) {
+                        varNames[vars[varName]] = varName;
+                    }
+                }
+                return varNames;
+            } catch (e) {
+                return false;
+            }
+        }
 
-        /**
-         * Returns string value
+
+        /**Returns string value
          * @return string
          */
         Mbn.prototype.toString = function () {
@@ -1447,7 +1423,7 @@ var Mbn = (function () {
         Mbn.prototype.floor = function (m) {
             return ppFun(pfFloor, [this], m);
         };
-        /**Round number to closest integer value (half-up/away-from-zero)
+        /**Round number to the closest integer value (half-up/away-from-zero)
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn} */
         Mbn.prototype.round = function (m) {
@@ -1553,8 +1529,50 @@ var Mbn = (function () {
          * @return {Object} properties
          */
         Mbn.prop = function () {
-            return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF, MbnL: MbnL};
+            return {MbnV: MbnV, MbnP: MbnP, MbnS: MbnS, MbnT: MbnT, MbnE: MbnE, MbnF: MbnF, MbnL: MbnL, MbnO: MbnO};
         };
+        /**Sets and reads constant
+         * @param {string|null} n Constant name, must start with letter or _
+         * @param {*=} v Constant value to set
+         * @return {Mbn|boolean}
+         * @throws {MbnErr} undefined constant, constant already set, incorrect name
+         * @throws {MbnErr} invalid argument format
+         */
+        Mbn.def = function (n, v) {
+            return pfFun(ppDef, [n, v].slice(0, arguments.length), true);
+        };
+        /**Runs function on each element, returns:
+         * single value for 2 argument function (arr[0].fn(arr[1]).fn(arr[2]), ..)
+         * array of products for 1 argument function [arr[0].fn(), arr[1].fn(), ..]
+         * array of products for 2 argument function and when b is same size array or single value
+         * [arr[0].fn(b[0]), arr[1].fn(b[1]), ..] or [arr[0].fn(b), arr[1].fn(b), ..]
+         * @param {string} fn
+         * @param {*} arr
+         * @param {*=} b
+         * @return {Mbn|Array}
+         * @throws {MbnErr} invalid function name, wrong number of arguments, different array sizes
+         * @throws {MbnErr} invalid argument format
+         */
+        Mbn.reduce = function (fn, arr, b) {
+            return pfFun(pfReduce, [fn, arr, b].slice(0, arguments.length), true);
+        };
+        /**Evaluate expression
+         * @param {string} exp Expression
+         * @param {Object|boolean=} vars Object with vars for evaluation
+         * @return {Mbn}
+         * @throws {MbnErr} syntax error, operation error
+         */
+        Mbn.calc = function (exp, vars) {
+            return pfFun(pfCalcEval, [exp, vars], true);
+        };
+        /**Check expression, get names of used vars
+         * @param {string} exp Expression
+         * @param {boolean=} omitOptional Omit vars available as constans or results
+         * @return {Array|boolean}
+         */
+        Mbn.check = function (exp, omitOptional) {
+            return pfFun(pfCalcCheck, [exp, omitOptional], true);
+        }
         return Mbn;
     };
     var Mbn = MbnCr();

@@ -95,7 +95,8 @@ class MbnTest {
         $cachedResult = FileHelper::getFile($phpCheckFile);
         if ($cachedResult !== null) {
             $cachedResultArr = json_decode($cachedResult, true);
-            if (isset($cachedResultArr['cache']) && $time - $cachedResultArr['cache'] <= self::CACHE_TIME) {
+            if (isset($cachedResultArr['cache']) && $time - $cachedResultArr['cache'] <= self::CACHE_TIME
+                && FileHelper::getCurrentHash() === FileHelper::getCachedHash()) {
                 $cachedResultArr['cache'] = true;
                 return json_encode($cachedResultArr);
             }
