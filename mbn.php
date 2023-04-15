@@ -884,7 +884,7 @@ class Mbn {
     }
 
     /**
-     * Rounds number to closest integer value (half-up)
+     * Rounds number to the closest integer value (half-up/away-from-zero)
      * @param boolean $m Modify original variable, default false
      * @return Mbn
      */

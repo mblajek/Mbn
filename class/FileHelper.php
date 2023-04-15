@@ -4,8 +4,8 @@ class FileHelper {
     private static $relFiles = [
        'mbn.js' => ['desc' => 'Library in JS'],
        'mbn.php' => ['desc' => 'Library in PHP'],
-       'mbn.min.js' => ['desc' => 'Minified library in JS'],
-       'mbn.min.php' => ['desc' => 'Minified library in PHP'],
+       'mbn.min.js' => ['desc' => 'Minified library in JS, created with <a href="https://github.com/mishoo/UglifyJS">UglifyJS</a> on <a href="https://bellard.org/quickjs/">QuickJS</a>'],
+       'mbn.min.php' => ['desc' => 'Minified library in PHP, created with custom text replacements, for sandboxes like <a href="https://3v4l.org/">3v4l.org</a>'],
        'mbn.d.ts' => ['desc' => 'TypeScript declaration file'],
        'Mbn.php' => ['desc' => 'Mbn class in PHP (with namespace, without MbnErr class)'],
        'MbnErr.php' => ['desc' => 'MbnErr class in PHP (with namespace)'],

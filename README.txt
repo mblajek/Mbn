@@ -1,6 +1,6 @@
 Mbn (Multi-byte number) Library
 
-Library for PHP and JS to do calculations with any precision and correct (half-up) rounding
+Library for PHP and JS to do calculations with any precision and correct (half-up/away-from-zero) rounding
 
 Project page: https://mbn.li
 
@@ -24,8 +24,6 @@ interface env {
     const docker = true; // docker environment for testing all versions from docker-compose
     // url to GitHub repository zip download
     const githubZip = 'https://github.com/mblajek/Mbn/archive/refs/heads/master.zip';
-    // Closure Compiler
-    const githubCcJar = 'https://github.com/mblajek/RequiredFiles/raw/master/closure-compiler-v20201207.jar';
 }
 
 Code is optimized for speed and size; not for readability

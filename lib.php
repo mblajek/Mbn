@@ -8,13 +8,14 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
     <title>Mbn Library</title>
     <meta charset="UTF-8">
     <meta name="description"
-          content="Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.">
+          content="Library for PHP and JS to do calculations with any precision and correct (half-up/away-from-zero) rounding.">
     <link rel="icon" href="favicon.ico" type="image/png"/>
     <link rel="stylesheet" href="lib_style.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 </head>
 <body>
 <script src="lib_script.js"></script>
+<!--suppress HtmlUnknownTarget -->
 <script src="mbn_current?<?= $hashCurrent ?>"></script>
 <script>
     var releaseStatus = {
@@ -41,7 +42,7 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
 </div>
 <div id="scroller">
     <div class="title1">Mbn (Multi-byte number) Library</div>
-    <div>Library for PHP and JS to do calculations with any precision and correct (half-up) rounding.</div>
+    <div>Library for PHP and JS to do calculations with any precision and correct (half-up/away-from-zero) rounding.</div>
 
     <div class="anchor" id="about"></div>
     <div class="title2">About</div>
@@ -65,6 +66,7 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
                 functions for some useful array operations
             </li>
             <li>custom formatting: dot/comma separator, thousands separator, truncating trailing zeros</li>
+            <li>strings in all these formats, e.g. "1 234.56" and "12,34" are properly parsed as non-integer numbers</li>
             <li>exception messages can be easily translated</li>
             <li>compatibility: PHP 5.4+ (5.4-8.2 tested), JS ES3+ (IE6+)</li>
         </ul>
@@ -89,13 +91,10 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
 
     <div class="anchor" id="downloads"></div>
     <div class="title2">Downloads</div>
-    <div>Minified JS is created with <a href="https://closure-compiler.appspot.com">Google Closure api</a></div>
-    <div>Minified PHP is created with custom text replacements, intended to be used in online PHP sandboxes like <a
-                href="https://3v4l.org/">3v4l.org</a>
-    </div>
-    <div>Generally code is optimized for speed and size; not for readability</div>
+    <div>Generally code is optimized for speed and size, not for readability; current version:
+        <!--suppress HtmlUnknownTarget --><a href="v">v</a></a></div>
     <?php try {
-        foreach (FileHelper::getFileList() as $n => &$relFile) {
+        foreach (FileHelper::getFileList() as $n => $relFile) {
             if (!isset($relFile['desc'])) continue; ?>
             <pre><span class="lb"></span><strong><?= $n ?></strong> [ <a href="<?= $n ?>?show">show</a> | <a
                         href="<?= $n ?>">download</a> ] (<?= (new Mbn($relFile['size']))->div(1024) ?> kB)<!--

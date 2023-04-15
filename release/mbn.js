@@ -1,4 +1,4 @@
-/* Mbn v1.53.0 / 07.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+/* Mbn v1.53.0 / 15.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
 "use strict";
 
 var Mbn = (function () {
@@ -1447,7 +1447,7 @@ var Mbn = (function () {
         Mbn.prototype.floor = function (m) {
             return ppFun(pfFloor, [this], m);
         };
-        /**Round number to closest integer value (half-up)
+        /**Round number to closest integer value (half-up/away-from-zero)
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn} */
         Mbn.prototype.round = function (m) {

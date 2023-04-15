@@ -49,7 +49,7 @@ services:
     networks: [ "mbn-network" ]
   mbn-php8-0:
     container_name: mbn-php8-0
-    deploy: { resources: { limits: { memory: "160M" } } }
+    deploy: { resources: { limits: { memory: "64M" } } }
     build: { context: ., dockerfile: php8-0.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
     networks: [ "mbn-network" ]

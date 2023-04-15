@@ -1,4 +1,4 @@
-/* Mbn v1.53.0 / 07.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+/* Mbn v1.53.0 / 15.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
 type MbnArg = number | boolean | null | undefined | string | Mbn;
 
 type MbnOneArgFn = "set" | "abs" | "inva" | "invm" | "ceil" | "floor" | "sqrt" | "round" | "sgn" | "intp";

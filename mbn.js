@@ -317,9 +317,8 @@ var Mbn = (function () {
         };
         /**@param {*} n
          * @param {Mbn=} a
-         * @param {Object|boolean=} v
          * @return {Mbn}*/
-        var ppNewReset = function (n, a, v) {
+        var ppNewReset = function (n, a) {
             a._s = 0;
             a._d = mbn0d.slice();
             return a;
@@ -1446,7 +1445,7 @@ var Mbn = (function () {
         Mbn.prototype.floor = function (m) {
             return ppFun(pfFloor, [this], m);
         };
-        /**Round number to closest integer value (half-up)
+        /**Round number to closest integer value (half-up/away-from-zero)
          * @param {boolean=} m Modify original variable, default false
          * @return {Mbn} */
         Mbn.prototype.round = function (m) {

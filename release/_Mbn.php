@@ -1,4 +1,4 @@
-<?php /* Mbn v1.52.2 / 07.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+<?php /* Mbn v1.52.2 / 15.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
 namespace Mbn;
 class Mbn {
     //version of Mbn library
@@ -744,7 +744,7 @@ class Mbn {
     }
 
     /**
-     * Rounds number to closest integer value (half-up)
+     * Rounds number to the closest integer value (half-up/away-from-zero)
      * @param boolean $m Modify original variable, default false
      * @return Mbn
      */
