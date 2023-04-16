@@ -34,9 +34,9 @@
         ["new Mbn(wrapBigInt(-4))", "-4.00"],
         ["(new Mbn(1234567.12))->format(undefined)", "1 234 567.12"],
         ["$m = new Mbn('4.32'); $m->sqrt(undefined); $m", "4.32"],
-        ["Mbn::calc('sqrt(40!)')", "mbn.operations_limit Mbn error*"],
+        ["new Mbn('sqrt(70!)/a', {a: \"=sqrt(68!)\"})", "mbn.operations_limit Mbn error*"],
+        ["new Mbn('sqrt(70!)/a', {a: new Mbn('=sqrt(68!)')})", "69.50"],
         ["Mbn::calc('1000^1000')", "mbn.limit_exceeded Mbn error*"],
-        ["Mbn::calc('sqrt(38!)')", "22869687743093501007951.18"],
         ["Mbn::calc('zero(eps/2.01)')", "1.00"],
         ["Mbn::calc('zero(-eps)')", "0.00"],
         ["0", "0"]

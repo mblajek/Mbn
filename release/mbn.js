@@ -1,4 +1,4 @@
-/* Mbn v1.53.0 / 15.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+/* Mbn v1.53.0 / 16.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
 "use strict";
 
 var Mbn = (function () {
@@ -17,7 +17,7 @@ var Mbn = (function () {
     //default digit limit
     var MbnDL = 1000;
     //default operations limit
-    var MbnDO = 1e6;
+    var MbnDO = 1e7;
 
     var errMessages = {
         invalid_argument: "invalid argument: %v%",
@@ -924,7 +924,7 @@ var Mbn = (function () {
             }
             var ns = n._s;
             n._s *= n._s;
-            var ni = n.toNumber();
+            var ni = pfToNumber(n);
             var rx = ppNewMbn(a);
             if (ns === -1 && pfCmp(pfAbs(rx), mbn1, mbn0) === -1) {
                 rx = pfInvm(rx);
@@ -988,7 +988,7 @@ var Mbn = (function () {
                 if (!asum.isInt()) {
                     throwMbnErr("split.invalid_part_count", ar);
                 }
-                n = asum.toNumber();
+                n = pfToNumber(asum);
                 for (i = 0; i < n; i++) {
                     arr.push([i, mbn1]);
                 }
@@ -1203,7 +1203,7 @@ var Mbn = (function () {
                 }
                 switch (t) {
                     case "num":
-                        rpns.push(new Mbn(tok, false));
+                        rpns.push(ppNewString(tok, null, false));
                         break;
                     case "name":
                         t = "vr";
@@ -1218,9 +1218,9 @@ var Mbn = (function () {
                             if (!own(varsUsed.vars, tok)) {
                                 varsUsed.vars[tok] = ppNewAny(vars[tok]);
                             }
-                            rpns.push(new Mbn(varsUsed.vars[tok]));
+                            rpns.push(ppNewMbn(varsUsed.vars[tok]));
                         } else if (own(results, tok)) {
-                            rpns.push(new Mbn(results[tok]));
+                            rpns.push(ppNewMbn(results[tok]));
                         } else if (ppDef(null, tok)) {
                             rpns.push(ppDef(tok));
                         } else {

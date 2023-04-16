@@ -340,11 +340,11 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
                 <td>a.cmp(b) &lt; 0<br>a.cmp(b) &lt;= 0<br>a.cmp(b) &gt;= 0<br>a.cmp(b) &gt; 0</td>
                 <td></td>
                 <td></td>
-                <th>boolean</th>
+                <th></th>
             </tr>
             <tr>
                 <th>compare<br>with max diff</th>
-                <td>Math.abs(a - b) &lt;= 0.1</td>
+                <td>(Math.abs(a - b) &gt; 0.1) ? Math.sign(a - b) : 0</td>
                 <td>a.cmp(b, 0.1)</td>
                 <td></td>
                 <td></td>
@@ -398,7 +398,7 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
             </tr>
             <tr class="hidden"></tr>
             <tr>
-                <td colspan="6">gets string representation with changed Mbn* class params<br>params: boolean - enable
+                <td colspan="6">gets string representation with changed Mbn* class params<br>params: boolean - add
                     thousands separator, default true<br>
                     object - Mbn* params, truncation, formatting,
                     precision, separator; missing parameters are taken from class
@@ -471,14 +471,27 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
         </li>
         <li>
             <strong>MbnL</strong> - limit - number of digits that will cause limit_exceeded exception
-            <br>some short expressions like "=9!!" or "=9^9^9" can have really big results and take much time to
+            <br>some short expressions like "=9!!" or "=9^9^9" can have large results and take much memory to
             evaluate
-            <br>MbnL can avoid interface freeze or server overload
+            <br>MbnL can avoid high memory usage
             <br>hint: some operations, like power, may exceed the limit even when the final result doesn't, because of
-            storing exact
-            partial results
+            storing exact partial results
             <ul>
-                <li>Default: 1000</li>
+                <li>Default: 1000 (1k)</li>
+            </ul>
+        </li>
+        <li>
+            <strong>MbnO</strong> - operations limit - some operations are counted during calculations as approximation
+            of time spent
+            <br>some short expressions like "=sqrt(444!)" can have large results and take much time to
+            evaluate
+            <br>MbnO can avoid interface freeze or server overload
+            <br>hint: internal operation counter is reset every time any function/constructor is called
+            <br><span class="monoInline">new Mbn("sqrt(70!)+a", {a: "=sqrt(70!)"})</span> - done at once, exception
+            <br><span class="monoInline">new Mbn("sqrt(70!)+a", {a: new Mbn("=sqrt(70!)")})</span> - 2 constructor calls
+            <br><span class="monoInline">(new Mbn("=sqrt(70!)")).div("=sqrt(68!)")</span> - constructor and function
+            <ul>
+                <li>Default: 10000000 (10M) - few milliseconds on modern hardware</li>
             </ul>
         </li>
     </ul>
@@ -680,6 +693,12 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
                 <li><span class="monoInline">new Mbn("=9^9^9")</span>, <span class="monoInline">(new Mbn(1000)).fact()</span></li>
             </ul>
         </li>
+        <li><span class="monoInline">mbn.operations_limit</span> - calculations reached operations limit from MbnO
+            <ul>
+                <li>errorValues.v is MbnO, exact value which caused exception is unknown</li>
+                <li><span class="monoInline">new Mbn("=sqrt(99!)")</span>, <span class="monoInline">new Mbn("=((445!/444!)!/444!)!")</span></li>
+            </ul>
+        </li>
         <li><span class="monoInline">mbn.div.zero_divisor</span> - division by zero
             <ul>
                 <li>errorValues is empty</li>
@@ -817,7 +836,7 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
         <li><span class="monoInline">mbn.extend.invalid_limit</span> - invalid value digit limit (MbnL)
             <ul>
                 <li>errorValues.v is the given limit</li>
-                <li><span class="monoInline">Mbn.extend({MbnE: Infinity})</span>, <span class="monoInline">Mbn.extend({MbnE: -1})</span>
+                <li><span class="monoInline">Mbn.extend({MbnL: Infinity})</span>, <span class="monoInline">Mbn.extend({MbnL: -1})</span>
                 </li>
                 <li><span
                             class="monoInline">class MbnLm1 extends Mbn {protected static $MbnL = -1;} MbnLm1::prop();</span>
@@ -829,6 +848,25 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
                 <li>hint: MbnL doesn't affect format(), but is validated; this behavior may be changed</li>
                 <li>errorValues.v is the given limit</li>
                 <li><span class="monoInline">a.format({MbnL: -1})</span> [js], <span class="monoInline">$a->format(['MbnL' => -1])</span>
+                    [php]
+                </li>
+            </ul>
+        </li>
+        <li><span class="monoInline">mbn.extend.invalid_operations</span> - invalid operations limit (MbnO)
+            <ul>
+                <li>errorValues.v is the given limit</li>
+                <li><span class="monoInline">Mbn.extend({MbnO: Infinity})</span>, <span class="monoInline">Mbn.extend({MbnO: -1})</span>
+                </li>
+                <li><span
+                            class="monoInline">class MbnOm1 extends Mbn {protected static $MbnO = -1;} MbnOm1::prop();</span>
+                </li>
+            </ul>
+        </li>
+        <li><span class="monoInline">mbn.format.invalid_operations</span> - invalid operations limit (MbnO)
+            <ul>
+                <li>hint: MbnO doesn't affect format(), but is validated; this behavior may be changed</li>
+                <li>errorValues.v is the given limit</li>
+                <li><span class="monoInline">a.format({MbnO: -1})</span> [js], <span class="monoInline">$a->format(['MbnO' => -1])</span>
                     [php]
                 </li>
             </ul>
@@ -927,6 +965,8 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
     <div class="anchor" id="changelog"></div>
     <div class="title2">Changelog</div>
     <ul>
+        <li>??.??.???? - added zero() (isZero) to calc <strong>(1.53.0)</strong></li>
+        <li>??.??.???? - added MbnO - operations limit <strong>(1.53.0)</strong></li>
         <li>09.02.2023 - added r0X references, JS: allow creating from bigint <strong>(1.52.1)</strong></li>
         <li>05.07.2022 - added multipart expressions <strong>(1.52.0)</strong></li>
         <li>05.07.2022 - JS: fixed ES3 compatibility, quoted access to properties with reserved names </li>
@@ -944,7 +984,7 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
         <li>11.12.2019 - changed MbnErr.errorValue (string|null) to errorValues (array[php], object[js])
             <strong>(1.49)</strong></li>
         <li>20.11.2019 - fixed PHP 5.4 compatibility <strong>(1.48)</strong></li>
-        <li>20.11.2019 - fixed PHP bug when creating basic Mbn object from object of derived class (since 28.09.2017)
+        <li>20.11.2019 - fixed PHP bug when creating basic Mbn object from object of derived class (since 02.03.2018)
         </li>
         <li>21.10.2019 - fixed PHP wrong errorValue for reduce.different_keys</li>
         <li>21.10.2019 - validating constant name also for checking of existence e.g. Mbn::def(null, "2")</li>
@@ -994,6 +1034,11 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
         </li>
         <li>07.03.2018 - allow Mbn.calc("=4") <strong>(1.37)</strong></li>
         <li>07.03.2018 - fixed errors for MbnE=false <strong>(1.36)</strong></li>
+        <li>05.03.2018 - fixed errors for not array/object passed as vars to calc()  <strong>(1.35)</strong></li>
+        <li>04.03.2018 - removed 'MbnP' constant, added 'eps' <strong>(1.34)</strong></li>
+        <li>02.03.2018 - introduced invalid optimizations [php] <strong>(1.33)</strong></li>
+        <li>02.03.2018 - reduce working also with (number, array) <strong>(1.32)</strong></li>
+        <li>27.02.2018 - added MIT license <strong>(1.30)</strong></li>
     </ul>
 
     <div class="title2">Other methods</div>
