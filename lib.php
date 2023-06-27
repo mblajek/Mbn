@@ -470,9 +470,8 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
             </ul>
         </li>
         <li>
-            <strong>MbnL</strong> - limit - number of digits that will cause limit_exceeded exception
-            <br>some short expressions like "=9!!" or "=9^9^9" can have large results and take much memory to
-            evaluate
+            <strong>MbnL</strong> - digit limit - number of digits that will cause limit_exceeded exception
+            <br>some short expressions like "=9!!" or "=9^9^9" can have large results
             <br>MbnL can avoid high memory usage
             <br>hint: some operations, like power, may exceed the limit even when the final result doesn't, because of
             storing exact partial results
@@ -481,12 +480,11 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
             </ul>
         </li>
         <li>
-            <strong>MbnO</strong> - operations limit - some operations are counted during calculations as approximation
-            of time spent
+            <strong>MbnO</strong> - operations limit - approximation of time which will cause operations_limit exception
             <br>some short expressions like "=sqrt(444!)" can have large results and take much time to
             evaluate
             <br>MbnO can avoid interface freeze or server overload
-            <br>hint: internal operation counter is reset every time any function/constructor is called
+            <br>hint: internal operation counter is reset every time any public function/constructor is called
             <br><span class="monoInline">new Mbn("sqrt(70!)+a", {a: "=sqrt(70!)"})</span> - done at once, exception
             <br><span class="monoInline">new Mbn("sqrt(70!)+a", {a: new Mbn("=sqrt(70!)")})</span> - 2 constructor calls
             <br><span class="monoInline">(new Mbn("=sqrt(70!)")).div("=sqrt(68!)")</span> - constructor and function
