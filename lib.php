@@ -66,7 +66,7 @@ $hashChanged = ($hashCurrent !== FileHelper::getCachedHash());
             </li>
             <li>custom formatting: dot/comma separator, thousands separator, truncating trailing zeros</li>
             <li>exception messages can be easily translated</li>
-            <li>compatibility: PHP 5.4+ (5.4-8.2 tested), JS ES3+ (IE6+)</li>
+            <li>compatibility: PHP 5.4+ (5.4-8.3 tested), JS ES3+ (IE6+)</li>
         </ul>
     </div>
     <div>Mbn is distributed under the <a href="https://github.com/mblajek/Mbn/blob/master/LICENSE.txt">MIT License</a>,

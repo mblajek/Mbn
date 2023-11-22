@@ -66,5 +66,11 @@ services:
     build: { context: .,  dockerfile: php8-2.dockerfile }
     volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
     networks: [ "mbn-network" ]
+  mbn-php8-3:
+    container_name: mbn-php8-3
+    deploy: { resources: { limits: { memory: "32M" } } }
+    build: { context: .,  dockerfile: php8-3.dockerfile }
+    volumes: [ "..:/var/www", "./php.ini:/usr/local/etc/php/php.ini" ]
+    networks: [ "mbn-network" ]
 networks:
   mbn-network: { }
