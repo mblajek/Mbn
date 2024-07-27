@@ -1,4 +1,4 @@
-/* Mbn v1.53.0 / 16.04.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+/* Mbn v1.53.0 / 27.07.2024 | https://mbn.li | Copyright (c) 2016-2024 Mikołaj Błajek | https://mbn.li/LICENSE */
 "use strict";
 
 var Mbn = (function () {
@@ -17,7 +17,7 @@ var Mbn = (function () {
     //default digit limit
     var MbnDL = 1000;
     //default operations limit
-    var MbnDO = 1e7;
+    var MbnDO = 1e6;
 
     var errMessages = {
         invalid_argument: "invalid argument: %v%",
@@ -75,9 +75,6 @@ var Mbn = (function () {
      * @param {*} key
      * @returns {boolean}
      */
-    var wsRx2 = /^\s*(=)?[\s=]*([-+])?\s*((?:[\s\S]*\S)?)/;
-    var wsRx3 = /^[\s=]+/;
-    var cnRx = /^[A-Za-z_]\w*/;
     var stateEval = {
         endBop: ["bop", "pc", "fs"],
         uopVal: ["num", "name", "uop", "po"],
@@ -117,13 +114,14 @@ var Mbn = (function () {
         this.message = message;
     };
     var valFlatToMsgString = function (val) {
-        return (typeof val === "string") ? ("\"" + val + "\"") : String(val);
+        return ioArr(val) ? "[..]" :
+            ((typeof val === "string") ? ("\"" + val + "\"") : String(val));
     }
     var valToMsgString = function (val) {
         if (ioArr(val)) {
             var valArr = [], i;
             for (i = 0; i < val.length && i < 20; i++) {
-                valArr.push(ioArr(val[i]) ? "[..]" : valFlatToMsgString(val[i]));
+                valArr.push(valFlatToMsgString(val[i]));
             }
             return "[" + valArr.join() + "]";
         }
@@ -311,7 +309,9 @@ var Mbn = (function () {
                 adlm1++;
             }
             if (adlm1 === MbnP) {
-                for (i = 0; i <= adlm1 && ad[i] === 0; i++) {
+                i = 0;
+                while (i <= adlm1 && ad[i] === 0) {
+                    i++;
                 }
                 a._s *= (i <= adlm1) ? 1 : 0;
             } else if (adlm1 - MbnP > MbnL) {
@@ -444,7 +444,7 @@ var Mbn = (function () {
          * @return {Mbn}*/
         var ppNewString = function (n, a, v) {
             var mbn = ppNew0(a);
-            var np = n.match(wsRx2), nn = np[3];
+            var np = n.match(/^\s*(=)?[\s=]*([-+])?\s*((?:[\s\S]*\S)?)/), nn = np[3];
             var d = [], s = 1;
             if (np[2] === "-") {
                 s = -1;
@@ -1077,7 +1077,7 @@ var Mbn = (function () {
          */
         var ppDef = function (n, v) {
             var c = (n === null), o = own(MbnConst, c ? v : n);
-            if (!cnRx.test(c ? v : n)) {
+            if (!(c ? v : n).match(/^[A-Za-z_]\w*/)) {
                 throwMbnErr("def.invalid_name", c ? v : n);
             }
             if (c) {
@@ -1164,7 +1164,7 @@ var Mbn = (function () {
             }
             var exprArr = expr.split(";");
             for (i = 0; i < exprArr.length; i++) {
-                expr = exprArr[i].replace(wsRx3, "");
+                expr = exprArr[i].replace(/^[\s=]+/, "");
                 results["r" + (i + 1)] = results.r0 = ((expr === "") ? results.r0
                     : ppCalcSingle(expr, vars, results, varsUsed, checkOmitOptional));
                 for (j = 0; j <= i; j++) {

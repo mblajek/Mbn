@@ -163,8 +163,14 @@ class MbnTest {
                 if (env::docker) {
                     (new SimpleHtml())->addPre(array_merge(array_map(function ($v) {
                         return file_get_contents("http://mbn-php$v/mbn_test?php");
-                    }, ['5-4', '5-5', '5-6', '7-0', '7-1', '7-2', '7-3', '7-4', '8-0', '8-1', '8-2', '8-3']),
-                       ["---", self::$phpTestResult]))->render();
+                    }, [
+                        /* @formatter:off */
+                        '5-4', '5-5', '5-6',
+                        '7-0', '7-1', '7-2', '7-3', '7-4',
+                        '8-0', '8-1', '8-2', '8-3', '8-4',
+                        /* @formatter:on */
+                    ]),
+                        ["---", self::$phpTestResult]))->render();
                 } else {
                     (new SimpleHtml())->addErrorDiv('docker disabled')->render();
                 }
