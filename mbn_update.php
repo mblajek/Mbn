@@ -13,8 +13,10 @@ function updateMbn($githubZip, $query) {
         $baseDirLength = strlen($zip->getNameIndex(0));
         for ($i = 1; $i < $zip->numFiles; $i++) {
             $fileName = substr($zip->getNameIndex($i), $baseDirLength);
-            if ($fileName[strlen($fileName) - 1] === '/' || strpos($fileName, 'var/') === 0) {
-                continue;
+            foreach (['/^\.|\/$/', '/^docker(?:\/|-)/', '/^(?:var|ext)\//', '/mbn_release\.php/'] as $exclude){
+                if(preg_match($exclude, $fileName)){
+                    continue 2;
+                }
             }
             $fileContentsZip = $zip->getFromIndex($i);
             $allFilesZip [$fileName] = strlen($fileContentsZip) . '-' . hash('sha256', $fileContentsZip);
