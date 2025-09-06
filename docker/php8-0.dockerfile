@@ -7,5 +7,3 @@ RUN apt update
 
 RUN apt install -y libzip-dev
 RUN docker-php-ext-install zip
-
-RUN apt install -y default-jre-headless

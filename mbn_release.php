@@ -32,51 +32,28 @@ function releaseMbn() {
         if (!env::docker) {
             throw new Exception('Release possible only in docker environment');
         }
-        if (!FileHelper::fileExists('var/cc.jar')) {
-            FileHelper::putFile('var/cc.jar', file_get_contents(env::githubCcJar), false, true);
+        system(implode(' ', ['../ext/qjs --std',
+            '../ext/uglifym.js',
+            '../mbn.js',
+            '1>../var/qg_std',
+            '2>../var/qg_err']));
+
+        $qgStd = trim(FileHelper::getFile('var/qg_std')) ?: null;
+        $qgErr = trim(FileHelper::getFile('var/qg_err')) ?: null;
+        FileHelper::deleteFile('var/qg_std');
+        FileHelper::deleteFile('var/qg_err');
+        if ($qgErr) {
+            throw new Exception('Uglify error: ' . $qgErr);
         }
-        //system('java -jar ../var/cc.jar --help 2>&1');\
-        system(implode(' ', ['java -jar ../var/cc.jar',
-            '--js ../mbn.js',
-            '--language_in ECMASCRIPT3',
-            '--language_out ECMASCRIPT3',
-            '--warning_level VERBOSE',
-            '--error_format JSON',
-            '1>../var/cc_std',
-            '2>../var/cc_err']));
-        $ccStd = trim(FileHelper::getFile('var/cc_std')) ?: null;
-        $ccErr = trim(FileHelper::getFile('var/cc_err')) ?: null;
-        FileHelper::deleteFile('var/cc_std');
-        FileHelper::deleteFile('var/cc_err');
-        if (!$ccStd) {
-            if (!$ccErr) {
-                throw new Exception('Empty closure-compiler response');
-            }
-            $ccErrors = json_decode($ccErr, true);
-            if (!$ccErrors) {
-                throw new Exception('JSON: ' . json_last_error_msg());
-            }
-            foreach ($ccErrors as $err) {
-                $line = arrayGetStr($err, 'line');
-                $column = arrayGetStr($err, 'column');
-                $context = arrayGetStr($err, 'context');
-                $error = ['type' => $err['level'], 'message' => $err['description']];
-                if ($context !== '') {
-                    $error['line'] = trim(current(explode(PHP_EOL, $context)));
-                }
-                if ($line !== '' && $column !== '') {
-                    $error['place'] = 'mbn.js:' . $line . ':' . $column;
-                }
-                $errors[] = $error;
-            }
+        if (!$qgStd) {
+            throw new Exception('Uglify empty response');
         }
-        return $ccStd ?: '';
+        //todo: run tests with qjs
+        return $qgStd;
     }
 
     function minifyCheckPHP(&$errors) {
         $mbn_min_php = php_strip_whitespace('mbn.php');
-        $ll = 500;
-        $lineLen = 0;
         $mbn_min_php_out = '';
         $len = strlen($mbn_min_php);
         $stString = false;
@@ -96,26 +73,15 @@ function releaseMbn() {
             if ($c === ' ') {
                 if ($stString) {
                     $mbn_min_php_out .= $c;
-                    $lineLen++;
-                } else if ($lineLen > $ll) {
-                    $mbn_min_php_out .= PHP_EOL;
-                    $lineLen = 0;
                 } else {
                     $stSpace = true;
                 }
                 continue;
             }
             if ($stSpace && preg_match('/\\w\\w/', $c0 . $c)) {
-                if ($lineLen > $ll) {
-                    $mbn_min_php_out .= PHP_EOL;
-                    $lineLen = 0;
-                } else {
-                    $mbn_min_php_out .= ' ';
-                    $lineLen++;
-                }
+                $mbn_min_php_out .= ' ';
             }
             $mbn_min_php_out .= $c;
-            $lineLen++;
             $c0 = $c;
             $stSpace = false;
         }
@@ -136,7 +102,7 @@ function releaseMbn() {
     $errors = [];
 
     try {
-        $mbn_min_js = checkMinifyJS($errors, $mbn_js);
+        $mbn_min_js = checkMinifyJS($errors);
         $mbn_min_php = minifyCheckPHP($errors);
     } catch (Exception $e) {
         return $e->getMessage();

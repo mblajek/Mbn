@@ -1,4 +1,4 @@
-<?php /* Mbn v1.52.1 / 09.02.2023 | https://mbn.li | Copyright (c) 2016-2023 Mikołaj Błajek | https://mbn.li/LICENSE */
+<?php /* Mbn v1.52.1 / 06.09.2025 | https://mbn.li | Copyright (c) 2016-2025 Mikołaj Błajek | https://mbn.li/LICENSE */
 namespace Mbn;
 class MbnErr extends \Exception {
     /* Common error message object */
