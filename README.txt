@@ -24,8 +24,6 @@ interface env {
     const docker = true; // docker environment for testing all versions from docker-compose
     // url to GitHub repository zip download
     const githubZip = 'https://github.com/mblajek/Mbn/archive/refs/heads/master.zip';
-    // Closure Compiler
-    const githubCcJar = 'https://github.com/mblajek/RequiredFiles/raw/master/closure-compiler-v20201207.jar';
 }
 
 Code is optimized for speed and size; not for readability
